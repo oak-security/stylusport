@@ -11,4 +11,5 @@ ratatui = "0.29.0"
 serde = { version = "1.0.219", features = ["derive"] }
 thiserror = "2.0.12"
 throbber-widgets-tui = "0.8.0"
+tui-markdown = "0.3.5"
 ureq = { version = "3.0.12", features = ["json"] }

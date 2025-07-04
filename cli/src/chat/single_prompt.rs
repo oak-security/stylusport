@@ -67,8 +67,12 @@ fn display_answer(answer: &str) -> Result<()> {
     let mut terminal = ratatui::init_with_options(TerminalOptions {
         viewport: Viewport::Inline(answer.lines().count() as u16),
     });
-    terminal
-        .draw(|f| f.render_widget(Paragraph::new(answer).wrap(Wrap { trim: true }), f.area()))?;
+    terminal.draw(|f| {
+        f.render_widget(
+            Paragraph::new(tui_markdown::from_str(answer)).wrap(Wrap { trim: true }),
+            f.area(),
+        )
+    })?;
     Ok(())
 }
 
