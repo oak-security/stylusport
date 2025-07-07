@@ -13,7 +13,7 @@ use throbber_widgets_tui::{Throbber, ThrobberState, BRAILLE_EIGHT_DOUBLE};
 
 use crate::llm;
 
-pub type LlmResult<T> = Result<T, llm::Error>;
+type LlmResult<T> = Result<T, llm::Error>;
 
 /// Period between UI refreshes.
 const TICK: Duration = Duration::from_millis(100);

@@ -8,8 +8,11 @@ clap = { version = "4.5.40", features = ["derive"] }
 color-eyre = "0.6.5"
 dotenv = "0.15.0"
 ratatui = "0.29.0"
+rayon = "1.10.0"
 serde = { version = "1.0.219", features = ["derive"] }
 thiserror = "2.0.12"
 throbber-widgets-tui = "0.8.0"
 tui-markdown = "0.3.5"
+tui-textarea = "0.7.0"
+tui-widget-list = "0.13.2"
 ureq = { version = "3.0.12", features = ["json"] }

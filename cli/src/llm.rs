@@ -51,6 +51,10 @@ struct Response<'a> {
     choices: Vec<Choice<'a>>,
 }
 
+pub fn model() -> Result<String, Error> {
+    env::var(LLM_MODEL_ENV_VAR).map_err(|_| Error::EnvVarNotSet(LLM_MODEL_ENV_VAR))
+}
+
 pub fn execute(system: &str, user: &str) -> Result<String, Error> {
     let url = env::var(LLM_URL_ENV_VAR).map_err(|_| Error::EnvVarNotSet(LLM_URL_ENV_VAR))?;
 
