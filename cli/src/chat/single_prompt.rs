@@ -3,11 +3,10 @@ use std::{sync::mpsc, thread, time::Duration};
 use color_eyre::Result;
 use ratatui::{
     crossterm::event,
-    layout::{Constraint, Layout},
     style::{Color, Style, Stylize},
-    text::Text,
-    widgets::{Block, Paragraph, Wrap},
-    TerminalOptions, Viewport,
+    text::Line,
+    widgets::{Block, Padding, Paragraph, Widget, Wrap},
+    DefaultTerminal, TerminalOptions, Viewport,
 };
 use throbber_widgets_tui::{Throbber, ThrobberState, BRAILLE_EIGHT_DOUBLE};
 
@@ -40,39 +39,51 @@ impl PromptWorker {
 }
 
 fn draw_prompt_and_spinner(f: &mut ratatui::Frame, prompt: &str, throbber_state: &ThrobberState) {
-    let [prompt_area, throbber_area] = Layout::default()
-        .constraints([
-            Constraint::Length(prompt.lines().count() as u16 + BORDER),
-            Constraint::Length(SPINNER_HEIGHT),
-        ])
-        .areas(f.area());
+    let mut lines: Vec<_> = prompt
+        .lines()
+        .map(|line| Line::from(line).fg(Color::Yellow))
+        .collect();
 
-    let prompt_widget = Paragraph::new(prompt)
-        .block(Block::bordered().title("You").blue())
+    lines.push(Line::from(
+        '-'.to_string().repeat((f.area().width - BORDER) as usize),
+    ));
+
+    lines.push(
+        Throbber::default()
+            .throbber_style(Style::default().fg(Color::Blue))
+            .throbber_set(BRAILLE_EIGHT_DOUBLE)
+            .to_line(throbber_state),
+    );
+
+    let widget = Paragraph::new(lines)
+        .block(Block::new().padding(Padding::horizontal(1)))
         .wrap(Wrap { trim: true });
 
-    // convert throbber to a span and prefix with a space to align with prompt text
-    let throbber_span = Throbber::default()
-        .throbber_style(Style::default().fg(Color::Blue))
-        .throbber_set(BRAILLE_EIGHT_DOUBLE)
-        .to_symbol_span(throbber_state);
-    let mut throbber_text = Text::raw(" ");
-    throbber_text.push_span(throbber_span);
-
-    f.render_widget(prompt_widget, prompt_area);
-    f.render_widget(throbber_text, throbber_area);
+    f.render_widget(widget, f.area());
 }
 
-fn display_answer(answer: &str) -> Result<()> {
-    let mut terminal = ratatui::init_with_options(TerminalOptions {
-        viewport: Viewport::Inline(answer.lines().count() as u16),
-    });
-    terminal.draw(|f| {
-        f.render_widget(
-            Paragraph::new(tui_markdown::from_str(answer)).wrap(Wrap { trim: true }),
-            f.area(),
-        )
+fn display_answer(mut terminal: DefaultTerminal, prompt: &str, answer: &str) -> Result<()> {
+    let required_height = prompt.lines().count() as u16 + answer.lines().count() as u16 + BORDER;
+
+    terminal.insert_before(required_height, |buf| {
+        let mut lines: Vec<_> = prompt
+            .lines()
+            .map(|line| Line::from(line).fg(Color::Yellow))
+            .collect();
+
+        lines.push(Line::from(
+            '-'.to_string().repeat((buf.area.width - BORDER) as usize),
+        ));
+
+        lines.extend(tui_markdown::from_str(answer).lines);
+
+        let widget = Paragraph::new(lines)
+            .block(Block::new().padding(Padding::horizontal(1)))
+            .wrap(Wrap { trim: true });
+
+        widget.render(buf.area, buf);
     })?;
+
     Ok(())
 }
 
@@ -108,7 +119,7 @@ pub fn single_prompt(prompt: &str, plain_output: bool) -> Result<()> {
         terminal.draw(|f| draw_prompt_and_spinner(f, prompt, &throbber_state))?;
 
         if let Some(answer) = worker.try_recv().transpose()? {
-            display_answer(&answer)?;
+            display_answer(terminal, prompt, &answer)?;
             break;
         }
 
