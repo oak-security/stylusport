@@ -42,10 +42,12 @@
 
           devShells.default = pkgs.mkShell {
             packages = [
+              pkgs.bashInteractive # for correct prompt display in VHS
               pkgs.mdbook
               pkgs.ollama
               pkgs.rust-analyzer-unwrapped
               pkgs.vale
+              pkgs.vhs
               rust-toolchain
             ];
 
