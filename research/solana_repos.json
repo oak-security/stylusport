@@ -1,59 +1,10 @@
 [
   {
-    "url": "https://github.com/wormhole-foundation/wormhole",
-    "stars": 1786,
-    "last_commit": "2025-07-07T18:06:01Z",
-    "name": "wormhole-foundation/wormhole",
-    "description": "A reference implementation for the Wormhole blockchain interoperability protocol."
-  },
-  {
-    "url": "https://github.com/solana-developers/program-examples",
-    "stars": 1194,
-    "last_commit": "2025-06-10T03:35:07Z",
-    "name": "solana-developers/program-examples",
-    "description": "A repository of Solana program examples"
-  },
-  {
-    "url": "https://github.com/sajjadium/ctf-archives",
-    "stars": 1104,
-    "last_commit": "2025-07-07T07:02:54Z",
-    "name": "sajjadium/ctf-archives",
-    "description": " CTF Archives: Collection of CTF Challenges."
-  },
-  {
     "url": "https://github.com/metaplex-foundation/metaplex-program-library",
     "stars": 627,
     "last_commit": "2025-03-15T20:22:20Z",
     "name": "metaplex-foundation/metaplex-program-library",
     "description": "Smart contracts maintained by the Metaplex team"
-  },
-  {
-    "url": "https://github.com/jito-foundation/jito-solana",
-    "stars": 568,
-    "last_commit": "2025-07-08T09:24:03Z",
-    "name": "jito-foundation/jito-solana",
-    "description": "Jito Foundation MEV Solana Client"
-  },
-  {
-    "url": "https://github.com/paradigmxyz/paradigm-ctf-2022",
-    "stars": 389,
-    "last_commit": "2022-09-16T01:34:01Z",
-    "name": "paradigmxyz/paradigm-ctf-2022",
-    "description": "Puzzles used in the 2022 Paradigm CTF"
-  },
-  {
-    "url": "https://github.com/LiteSVM/litesvm",
-    "stars": 340,
-    "last_commit": "2025-07-04T10:27:01Z",
-    "name": "LiteSVM/litesvm",
-    "description": null
-  },
-  {
-    "url": "https://github.com/solana-developers/pirate-bootcamp",
-    "stars": 310,
-    "last_commit": "2024-04-24T04:28:55Z",
-    "name": "solana-developers/pirate-bootcamp",
-    "description": "A pirate-theme bootcamp for getting up to speed on Solana programming!"
   },
   {
     "url": "https://github.com/Lightprotocol/light-protocol",
@@ -70,46 +21,11 @@
     "description": "Dex aggregator on Solana"
   },
   {
-    "url": "https://github.com/neodyme-labs/solana-ctf",
-    "stars": 167,
-    "last_commit": "2022-08-26T19:44:02Z",
-    "name": "neodyme-labs/solana-ctf",
-    "description": "A collection of Solana CTF challenges"
-  },
-  {
     "url": "https://github.com/blockworks-foundation/mango-v3",
     "stars": 155,
     "last_commit": "2023-02-15T12:54:12Z",
     "name": "blockworks-foundation/mango-v3",
     "description": "Mango Markets V3 Smart Contract"
-  },
-  {
-    "url": "https://github.com/uclaacm/lactf-archive",
-    "stars": 138,
-    "last_commit": "2025-02-12T21:09:13Z",
-    "name": "uclaacm/lactf-archive",
-    "description": "An archive of past challenges from LA CTF hosted by ACM Cyber at UCLA and Psi Beta Rho."
-  },
-  {
-    "url": "https://github.com/ChorusOne/solana-mev",
-    "stars": 135,
-    "last_commit": "2024-01-23T01:20:37Z",
-    "name": "ChorusOne/solana-mev",
-    "description": "Decentralized MEV extraction from inside the validator"
-  },
-  {
-    "url": "https://github.com/Ackee-Blockchain/Solana-Auditors-Bootcamp",
-    "stars": 131,
-    "last_commit": "2024-09-23T11:31:05Z",
-    "name": "Ackee-Blockchain/Solana-Auditors-Bootcamp",
-    "description": "Learn to audit Solana programs and help secure the ecosystem. Take your security practices to the next level and get certified by Ackee Blockchain Security. It's free, too."
-  },
-  {
-    "url": "https://github.com/solana-program/create-solana-program",
-    "stars": 113,
-    "last_commit": "2025-06-30T13:26:16Z",
-    "name": "solana-program/create-solana-program",
-    "description": "pnpm create solana-program"
   },
   {
     "url": "https://github.com/regolith-labs/drillx",
@@ -133,25 +49,11 @@
     "description": "Pyth SDK in Rust"
   },
   {
-    "url": "https://github.com/anza-xyz/solana-sdk",
-    "stars": 94,
-    "last_commit": "2025-07-07T04:40:33Z",
-    "name": "anza-xyz/solana-sdk",
-    "description": "Rust SDK for the Solana blockchain, used by on-chain program developers and the Agave validator"
-  },
-  {
     "url": "https://github.com/Ellipsis-Labs/plasma",
     "stars": 90,
     "last_commit": "2025-05-22T18:09:29Z",
     "name": "Ellipsis-Labs/plasma",
     "description": "Reference implementation of a sandwich-resistant AMM for the Solana blockchain"
-  },
-  {
-    "url": "https://github.com/solana-program/token-2022",
-    "stars": 80,
-    "last_commit": "2025-07-08T09:55:32Z",
-    "name": "solana-program/token-2022",
-    "description": "The SPL Token 2022 program and its clients"
   },
   {
     "url": "https://github.com/CKS-Systems/manifest",
@@ -161,32 +63,11 @@
     "description": "The Unlimited Orderbook"
   },
   {
-    "url": "https://github.com/velas/velas-chain",
-    "stars": 74,
-    "last_commit": "2025-06-15T16:31:36Z",
-    "name": "velas/velas-chain",
-    "description": null
-  },
-  {
-    "url": "https://github.com/otter-sec/sol-ctf-framework",
-    "stars": 64,
-    "last_commit": "2025-05-24T18:22:53Z",
-    "name": "otter-sec/sol-ctf-framework",
-    "description": "Framework for Solana CTF challenges"
-  },
-  {
     "url": "https://github.com/arcium-hq/elusiv",
     "stars": 63,
     "last_commit": "2023-12-09T12:32:57Z",
     "name": "arcium-hq/elusiv",
     "description": "Elusiv Solana program library"
-  },
-  {
-    "url": "https://github.com/paladin-bladesmith/paladin-solana",
-    "stars": 59,
-    "last_commit": "2025-07-07T19:07:34Z",
-    "name": "paladin-bladesmith/paladin-solana",
-    "description": null
   },
   {
     "url": "https://github.com/everlastingsong/solsandbox",
@@ -210,32 +91,11 @@
     "description": "A real-world treasure hunt game where the treasures are represented as QR codes in the physical world, and NFTs in the virtual."
   },
   {
-    "url": "https://github.com/hashblock/solana-cli-program-template",
-    "stars": 51,
-    "last_commit": "2022-12-31T20:03:31Z",
-    "name": "hashblock/solana-cli-program-template",
-    "description": "A template with cookie cutter CLI, Program and Integration tests for Solana blockchain"
-  },
-  {
     "url": "https://github.com/Squads-Protocol/program",
     "stars": 50,
     "last_commit": "2022-08-06T15:42:23Z",
     "name": "Squads-Protocol/program",
     "description": "Squads V2 Program"
-  },
-  {
-    "url": "https://github.com/cutupdev/Solana-Chess-Casino-Game",
-    "stars": 41,
-    "last_commit": "2025-06-27T12:11:36Z",
-    "name": "cutupdev/Solana-Chess-Casino-Game",
-    "description": "Solana chess casino game, chess p2e(play-to-earn, play2earn) game site and program(smart contract)"
-  },
-  {
-    "url": "https://github.com/smartcontractkit/chainlink-solana-demo",
-    "stars": 38,
-    "last_commit": "2022-02-02T02:50:25Z",
-    "name": "smartcontractkit/chainlink-solana-demo",
-    "description": "Showing how to deploy a Solana program using Chainlink Price Feeds"
   },
   {
     "url": "https://github.com/igneous-labs/S",
@@ -252,39 +112,11 @@
     "description": null
   },
   {
-    "url": "https://github.com/succinctlabs/sp1-solana",
-    "stars": 28,
-    "last_commit": "2025-06-09T12:41:17Z",
-    "name": "succinctlabs/sp1-solana",
-    "description": null
-  },
-  {
-    "url": "https://github.com/parasol-aser/vrust-open-source",
-    "stars": 28,
-    "last_commit": "2024-05-21T16:29:25Z",
-    "name": "parasol-aser/vrust-open-source",
-    "description": "Automated Vulnerability Detection for Solana Smart Contracts"
-  },
-  {
     "url": "https://github.com/AudacesFoundation/audaces-perps",
     "stars": 28,
     "last_commit": "2022-03-15T16:26:29Z",
     "name": "AudacesFoundation/audaces-perps",
     "description": null
-  },
-  {
-    "url": "https://github.com/2501babe/solana-skeleton-program",
-    "stars": 27,
-    "last_commit": "2024-10-21T01:36:17Z",
-    "name": "2501babe/solana-skeleton-program",
-    "description": "idiomatic vanilla solana program template"
-  },
-  {
-    "url": "https://github.com/ilmoi/solana_fomo3d",
-    "stars": 27,
-    "last_commit": "2021-08-26T18:06:29Z",
-    "name": "ilmoi/solana_fomo3d",
-    "description": "rebuilding the popular game on solana"
   },
   {
     "url": "https://github.com/ComposableFi/emulated-light-client",
@@ -301,34 +133,6 @@
     "description": null
   },
   {
-    "url": "https://github.com/thetardigrades/SolanaGameServer",
-    "stars": 22,
-    "last_commit": "2022-01-26T23:06:10Z",
-    "name": "thetardigrades/SolanaGameServer",
-    "description": "Solana Game Server is a decentralized game server running on Solana, designed for game developers. #web2to3"
-  },
-  {
-    "url": "https://github.com/tomoima525/solana-sandbox",
-    "stars": 22,
-    "last_commit": "2021-10-26T23:25:16Z",
-    "name": "tomoima525/solana-sandbox",
-    "description": "sandbox to play around numerous functionalities on Solana"
-  },
-  {
-    "url": "https://github.com/ZpokenWeb3/solana-zkvm",
-    "stars": 19,
-    "last_commit": "2024-09-19T10:48:23Z",
-    "name": "ZpokenWeb3/solana-zkvm",
-    "description": null
-  },
-  {
-    "url": "https://github.com/blairsec/challenges",
-    "stars": 19,
-    "last_commit": "2024-05-31T04:03:37Z",
-    "name": "blairsec/challenges",
-    "description": "Challenge archive"
-  },
-  {
     "url": "https://github.com/foonetic/solarium",
     "stars": 19,
     "last_commit": "2022-04-27T17:31:51Z",
@@ -341,13 +145,6 @@
     "last_commit": "2025-07-02T16:52:03Z",
     "name": "pyth-network/pyth-examples",
     "description": "Pyth Examples"
-  },
-  {
-    "url": "https://github.com/kox/native-solana-programs",
-    "stars": 16,
-    "last_commit": "2024-12-04T11:51:13Z",
-    "name": "kox/native-solana-programs",
-    "description": "Repository for building optimized Solana native program thinking in low CU is the best"
   },
   {
     "url": "https://github.com/port-finance/variable-rate-lending",
@@ -371,39 +168,11 @@
     "description": "Abstraction Layer over Heterogeneous Protocols"
   },
   {
-    "url": "https://github.com/Rezzecup/solana-shitcoin-sniper-bot",
-    "stars": 15,
-    "last_commit": "2024-10-01T06:47:05Z",
-    "name": "Rezzecup/solana-shitcoin-sniper-bot",
-    "description": "This sniper bot operating on the Solana network excels at quickly purchasing 'shitcoins' and identifying tokens with potential for growth.  "
-  },
-  {
     "url": "https://github.com/swim-io/pool",
     "stars": 14,
     "last_commit": "2023-03-06T03:04:33Z",
     "name": "swim-io/pool",
     "description": "Rust smart contract for Solana liquidity pools with variable token number."
-  },
-  {
-    "url": "https://github.com/boragonul/solana-bootcamp",
-    "stars": 14,
-    "last_commit": "2022-12-24T08:58:40Z",
-    "name": "boragonul/solana-bootcamp",
-    "description": "Solana Bootcamp"
-  },
-  {
-    "url": "https://github.com/CoreFlux0x00/solana-program-samples",
-    "stars": 13,
-    "last_commit": "2025-03-31T00:36:40Z",
-    "name": "CoreFlux0x00/solana-program-samples",
-    "description": "A collection of practical on-chain program examples for the Solana blockchain, showcasing implementations in Rust, TypeScript, and Python. Ideal for developers to learn and build decentralized applications."
-  },
-  {
-    "url": "https://github.com/daoplays/solana_examples",
-    "stars": 13,
-    "last_commit": "2024-06-10T07:55:02Z",
-    "name": "daoplays/solana_examples",
-    "description": "A collection of example programs and clients written for the Solana blockchain"
   },
   {
     "url": "https://github.com/wb-ts/chess-contract",
@@ -413,39 +182,11 @@
     "description": "Escrow Contract to wager Sol Token for P2P Web3 Game on Solana Blockchain"
   },
   {
-    "url": "https://github.com/KindaSloth/solana-smart-contract",
-    "stars": 12,
-    "last_commit": "2021-07-27T02:23:33Z",
-    "name": "KindaSloth/solana-smart-contract",
-    "description": "simple smart contract for transfer spl-tokens in solana, written in Rust."
-  },
-  {
-    "url": "https://github.com/dephy-io/dephy-id-solana",
-    "stars": 11,
-    "last_commit": "2025-06-06T16:32:00Z",
-    "name": "dephy-io/dephy-id-solana",
-    "description": "DePHY ID Solana monorepo"
-  },
-  {
     "url": "https://github.com/tinydancer-io/diet-rpc-validator",
     "stars": 11,
     "last_commit": "2024-06-14T20:20:15Z",
     "name": "tinydancer-io/diet-rpc-validator",
     "description": "A Modified Validator for the Diet Client"
-  },
-  {
-    "url": "https://github.com/0xbejaxer/SolanaToken",
-    "stars": 11,
-    "last_commit": "2021-10-12T17:36:58Z",
-    "name": "0xbejaxer/SolanaToken",
-    "description": "Governance, Swap, Lending, Staking"
-  },
-  {
-    "url": "https://github.com/OliverNChalk/svm-test",
-    "stars": 10,
-    "last_commit": "2024-12-05T15:16:53Z",
-    "name": "OliverNChalk/svm-test",
-    "description": "Testing framework for SVM programs & integrations"
   },
   {
     "url": "https://github.com/anagrambuild/flatlana",
@@ -476,39 +217,11 @@
     "description": null
   },
   {
-    "url": "https://github.com/alephium/wormhole-fork",
-    "stars": 8,
-    "last_commit": "2025-06-03T09:48:42Z",
-    "name": "alephium/wormhole-fork",
-    "description": "A fork of Wormhole bridge to connect to other blockchains"
-  },
-  {
     "url": "https://github.com/mirrorworld-universe/hypergrid-grid",
     "stars": 8,
     "last_commit": "2025-03-07T08:14:19Z",
     "name": "mirrorworld-universe/hypergrid-grid",
     "description": null
-  },
-  {
-    "url": "https://github.com/bangk-org/bangk-onchain",
-    "stars": 8,
-    "last_commit": "2025-01-15T18:53:09Z",
-    "name": "bangk-org/bangk-onchain",
-    "description": "Bangk\u2019s on-chain programs & utilities"
-  },
-  {
-    "url": "https://github.com/rpcpool/solana-public",
-    "stars": 7,
-    "last_commit": "2025-07-04T23:11:16Z",
-    "name": "rpcpool/solana-public",
-    "description": null
-  },
-  {
-    "url": "https://github.com/eigerco/solana-axelar",
-    "stars": 7,
-    "last_commit": "2025-06-26T09:09:27Z",
-    "name": "eigerco/solana-axelar",
-    "description": "Solana / Axelar Interoperability "
   },
   {
     "url": "https://github.com/dinosols/GameContracts",
@@ -525,46 +238,11 @@
     "description": "About A simple native Rust Escrow program."
   },
   {
-    "url": "https://github.com/rarimo/solana-bridge-program",
-    "stars": 6,
-    "last_commit": "2023-11-23T13:18:04Z",
-    "name": "rarimo/solana-bridge-program",
-    "description": "Rarimo bridge program on Solana"
-  },
-  {
-    "url": "https://github.com/0xdev99/solana-escrow",
-    "stars": 6,
-    "last_commit": "2023-03-03T01:22:39Z",
-    "name": "0xdev99/solana-escrow",
-    "description": null
-  },
-  {
-    "url": "https://github.com/humanprotocol/solana-human-protocol",
-    "stars": 6,
-    "last_commit": "2021-04-21T10:54:45Z",
-    "name": "humanprotocol/solana-human-protocol",
-    "description": null
-  },
-  {
     "url": "https://github.com/haven-fi/solauto",
     "stars": 5,
     "last_commit": "2025-07-07T19:01:53Z",
     "name": "haven-fi/solauto",
     "description": null
-  },
-  {
-    "url": "https://github.com/HongThaiPham/solana-pinocchio-examples",
-    "stars": 5,
-    "last_commit": "2025-07-01T01:44:57Z",
-    "name": "HongThaiPham/solana-pinocchio-examples",
-    "description": "A repository of Solana program examples using Pinocchio"
-  },
-  {
-    "url": "https://github.com/AmbitionsXXXV/Solana-use",
-    "stars": 5,
-    "last_commit": "2025-03-16T09:13:22Z",
-    "name": "AmbitionsXXXV/Solana-use",
-    "description": "\u4e00\u4e9b solana \u7684\u5b9e\u7528\u4ea4\u4e92\u811a\u672c\u3001PDA"
   },
   {
     "url": "https://github.com/hyperlane-xyz/hyperlane-monorepo-zksync",
@@ -581,46 +259,11 @@
     "description": "A Civic Pass transfer hook for Solana Token2022"
   },
   {
-    "url": "https://github.com/filippbudko/solana-program-library",
-    "stars": 5,
-    "last_commit": "2023-04-11T10:11:27Z",
-    "name": "filippbudko/solana-program-library",
-    "description": null
-  },
-  {
-    "url": "https://github.com/neodyme-labs/solana-explorer",
-    "stars": 5,
-    "last_commit": "2023-01-17T09:26:58Z",
-    "name": "neodyme-labs/solana-explorer",
-    "description": null
-  },
-  {
-    "url": "https://github.com/Mythic-Project/solana-program-library",
-    "stars": 4,
-    "last_commit": "2025-07-07T18:25:14Z",
-    "name": "Mythic-Project/solana-program-library",
-    "description": null
-  },
-  {
-    "url": "https://github.com/vittrxupwork/solana-smart-contract",
-    "stars": 4,
-    "last_commit": "2025-06-12T01:57:42Z",
-    "name": "vittrxupwork/solana-smart-contract",
-    "description": null
-  },
-  {
     "url": "https://github.com/wkennedy/trollup",
     "stars": 4,
     "last_commit": "2024-10-09T12:46:07Z",
     "name": "wkennedy/trollup",
     "description": "A Hybrid ZK-Optimistic Network Extension with Flexible Verification for Solana"
-  },
-  {
-    "url": "https://github.com/p69/solana_sniper",
-    "stars": 4,
-    "last_commit": "2024-03-22T16:55:21Z",
-    "name": "p69/solana_sniper",
-    "description": "Sniper bot for solana shitcoins"
   },
   {
     "url": "https://github.com/jarry-xiao/ouroboros",
@@ -672,39 +315,11 @@
     "description": "Nexis Network is an open-source layer-1 blockchain infrastructure built upon a Delegated Proof-of-Stake (DPoS) consensus model leveraging EVM, SVM, and zKEVM compilers for modular code deployment and Artificial Intelligence (AI) decentralization"
   },
   {
-    "url": "https://github.com/renec-chain/renec",
-    "stars": 3,
-    "last_commit": "2025-01-04T05:20:37Z",
-    "name": "renec-chain/renec",
-    "description": null
-  },
-  {
-    "url": "https://github.com/hogyzen12/anchor-docker",
-    "stars": 3,
-    "last_commit": "2024-12-11T00:43:10Z",
-    "name": "hogyzen12/anchor-docker",
-    "description": null
-  },
-  {
-    "url": "https://github.com/th3-5had0w/CTF-contests",
-    "stars": 3,
-    "last_commit": "2024-04-15T19:49:16Z",
-    "name": "th3-5had0w/CTF-contests",
-    "description": "a place for my ctf solves"
-  },
-  {
     "url": "https://github.com/ChuiNetwork/Chui",
     "stars": 3,
     "last_commit": "2024-01-16T08:50:11Z",
     "name": "ChuiNetwork/Chui",
     "description": "Core Blockchain - consensus and algorithms to run the network. Chui is a hard fork of solana. "
-  },
-  {
-    "url": "https://github.com/geneticsequencing/Exzo-Network-Blockchain",
-    "stars": 3,
-    "last_commit": "2023-05-30T22:18:13Z",
-    "name": "geneticsequencing/Exzo-Network-Blockchain",
-    "description": null
   },
   {
     "url": "https://github.com/superposition-finance/saber-integration",
@@ -714,34 +329,6 @@
     "description": "Saber integration based off of stable-swap repo fork "
   },
   {
-    "url": "https://github.com/ifabrisarabellapark/sc-solana-examples",
-    "stars": 3,
-    "last_commit": "2023-01-31T19:57:19Z",
-    "name": "ifabrisarabellapark/sc-solana-examples",
-    "description": "A Solana Rust smart contract (or program) that emits log events, listens to emitted events, and performs an action whenever events got intercepted"
-  },
-  {
-    "url": "https://github.com/siexp/solana-staking-app",
-    "stars": 3,
-    "last_commit": "2022-10-23T23:17:51Z",
-    "name": "siexp/solana-staking-app",
-    "description": null
-  },
-  {
-    "url": "https://github.com/jod35/solana-escrow-program-bult-with-Rust",
-    "stars": 3,
-    "last_commit": "2022-08-21T07:15:23Z",
-    "name": "jod35/solana-escrow-program-bult-with-Rust",
-    "description": "This is a Rust project buiilt to learn Rust. "
-  },
-  {
-    "url": "https://github.com/sheriff-rango/wormhole-practice",
-    "stars": 3,
-    "last_commit": "2022-05-23T02:47:47Z",
-    "name": "sheriff-rango/wormhole-practice",
-    "description": null
-  },
-  {
     "url": "https://github.com/tomjpandolfi/NFT-farm",
     "stars": 3,
     "last_commit": "2021-10-01T12:05:58Z",
@@ -749,39 +336,11 @@
     "description": "Stake NFTs to receive yield"
   },
   {
-    "url": "https://github.com/manustays/solana-escrow-contract-example",
-    "stars": 3,
-    "last_commit": "2021-08-23T16:50:07Z",
-    "name": "manustays/solana-escrow-contract-example",
-    "description": null
-  },
-  {
-    "url": "https://github.com/levicook/silver-chainsaw",
-    "stars": 3,
-    "last_commit": "2021-08-21T06:27:28Z",
-    "name": "levicook/silver-chainsaw",
-    "description": "Solana mini projects and experiments (personal learning and exploring)"
-  },
-  {
-    "url": "https://github.com/gabrielhicks/jito-solana-public",
-    "stars": 2,
-    "last_commit": "2025-06-25T16:27:21Z",
-    "name": "gabrielhicks/jito-solana-public",
-    "description": "Jito Foundation MEV Solana Client"
-  },
-  {
     "url": "https://github.com/Perelyn-sama/building-with-steel",
     "stars": 2,
     "last_commit": "2025-04-12T16:35:10Z",
     "name": "Perelyn-sama/building-with-steel",
     "description": null
-  },
-  {
-    "url": "https://github.com/aniketfuryrocks/solana-program-template",
-    "stars": 2,
-    "last_commit": "2025-04-10T14:36:36Z",
-    "name": "aniketfuryrocks/solana-program-template",
-    "description": "Template for creating a solana program in rust with Maklefile and sdk"
   },
   {
     "url": "https://github.com/mirrorworld-universe/hypergrid-integrated-demo",
@@ -798,52 +357,10 @@
     "description": null
   },
   {
-    "url": "https://github.com/pankajrathore9599/Solana_Projects",
-    "stars": 2,
-    "last_commit": "2023-06-27T02:59:51Z",
-    "name": "pankajrathore9599/Solana_Projects",
-    "description": "Here we will work on different solana projects."
-  },
-  {
-    "url": "https://github.com/GBC-AI/solana",
-    "stars": 2,
-    "last_commit": "2023-01-25T09:19:39Z",
-    "name": "GBC-AI/solana",
-    "description": null
-  },
-  {
-    "url": "https://github.com/pr0cf5/solana-security-study",
-    "stars": 2,
-    "last_commit": "2023-01-10T15:25:09Z",
-    "name": "pr0cf5/solana-security-study",
-    "description": null
-  },
-  {
     "url": "https://github.com/Lifinity-Labs/custom-oracle",
     "stars": 2,
     "last_commit": "2022-07-28T14:05:53Z",
     "name": "Lifinity-Labs/custom-oracle",
-    "description": null
-  },
-  {
-    "url": "https://github.com/samsvin/SolanaNFT",
-    "stars": 2,
-    "last_commit": "2022-06-23T13:54:04Z",
-    "name": "samsvin/SolanaNFT",
-    "description": null
-  },
-  {
-    "url": "https://github.com/iulianbarbu/solana-social-dapp",
-    "stars": 2,
-    "last_commit": "2022-01-10T16:31:49Z",
-    "name": "iulianbarbu/solana-social-dapp",
-    "description": null
-  },
-  {
-    "url": "https://github.com/0xbejaxer/SolanaFomo3DGame",
-    "stars": 2,
-    "last_commit": "2021-10-12T17:44:48Z",
-    "name": "0xbejaxer/SolanaFomo3DGame",
     "description": null
   },
   {
@@ -854,32 +371,11 @@
     "description": null
   },
   {
-    "url": "https://github.com/Hxro-Network/solana",
-    "stars": 1,
-    "last_commit": "2025-07-07T10:54:47Z",
-    "name": "Hxro-Network/solana",
-    "description": null
-  },
-  {
     "url": "https://github.com/0x7EAB07/gepetto",
     "stars": 1,
     "last_commit": "2025-07-04T07:27:23Z",
     "name": "0x7EAB07/gepetto",
     "description": "Cli to scaffold Solana's pinocchio projects, similar to create-solana-program."
-  },
-  {
-    "url": "https://github.com/lakshayvaishnav/solana-bootcamp",
-    "stars": 1,
-    "last_commit": "2025-06-29T11:52:40Z",
-    "name": "lakshayvaishnav/solana-bootcamp",
-    "description": null
-  },
-  {
-    "url": "https://github.com/gabrielhicks/agave-public",
-    "stars": 1,
-    "last_commit": "2025-06-25T16:22:10Z",
-    "name": "gabrielhicks/agave-public",
-    "description": "Web-Scale Blockchain for fast, secure, scalable, decentralized apps and marketplaces."
   },
   {
     "url": "https://github.com/eugenix-io/hyperlane-logx",
@@ -924,20 +420,6 @@
     "description": null
   },
   {
-    "url": "https://github.com/gabrielhicks/paladin-solana-public",
-    "stars": 1,
-    "last_commit": "2025-05-07T13:25:33Z",
-    "name": "gabrielhicks/paladin-solana-public",
-    "description": null
-  },
-  {
-    "url": "https://github.com/iamadityaanjana/solana-smart-contract-sdk",
-    "stars": 1,
-    "last_commit": "2025-04-30T05:54:35Z",
-    "name": "iamadityaanjana/solana-smart-contract-sdk",
-    "description": null
-  },
-  {
     "url": "https://github.com/normalfinance/normal-v1",
     "stars": 1,
     "last_commit": "2025-04-24T20:39:24Z",
@@ -950,13 +432,6 @@
     "last_commit": "2025-03-01T15:22:54Z",
     "name": "thewuhxyz/svm32",
     "description": "Can I run the SVM on a 32-bit target?"
-  },
-  {
-    "url": "https://github.com/mina86/solana-sigverify",
-    "stars": 1,
-    "last_commit": "2025-02-16T01:30:08Z",
-    "name": "mina86/solana-sigverify",
-    "description": null
   },
   {
     "url": "https://github.com/Jinanalyst/solmint",
@@ -973,13 +448,6 @@
     "description": null
   },
   {
-    "url": "https://github.com/Domino-Blockchain/domichain-program-library",
-    "stars": 1,
-    "last_commit": "2024-10-18T14:01:10Z",
-    "name": "Domino-Blockchain/domichain-program-library",
-    "description": "domichain-program-library"
-  },
-  {
     "url": "https://github.com/staccDOTsol/zutalors",
     "stars": 1,
     "last_commit": "2024-10-12T04:28:09Z",
@@ -994,24 +462,10 @@
     "description": "The code for a random contract is designed for game users to upgrade their goldfish using tokens. The upgrade process is completed by executing the contract once, with a 50% chance of a successful upgrade and a 50% chance of a downgrade. This result will be transparent on the blockchain."
   },
   {
-    "url": "https://github.com/jicodes/solana-fellowship-2024",
-    "stars": 1,
-    "last_commit": "2024-09-15T01:25:55Z",
-    "name": "jicodes/solana-fellowship-2024",
-    "description": "Code for Solana Summer Fellowship 2024 "
-  },
-  {
     "url": "https://github.com/MountainGold/spl-samm",
     "stars": 1,
     "last_commit": "2024-08-11T15:59:34Z",
     "name": "MountainGold/spl-samm",
-    "description": null
-  },
-  {
-    "url": "https://github.com/janrockdev/solana-sandpit",
-    "stars": 1,
-    "last_commit": "2024-07-29T23:06:42Z",
-    "name": "janrockdev/solana-sandpit",
     "description": null
   },
   {
@@ -1029,13 +483,6 @@
     "description": "Smart contract for Solana Curriculum"
   },
   {
-    "url": "https://github.com/lucaliebenberg/solana-builds",
-    "stars": 1,
-    "last_commit": "2024-05-29T09:27:56Z",
-    "name": "lucaliebenberg/solana-builds",
-    "description": "Projects that are built on the Solana blockchain (Rust)"
-  },
-  {
     "url": "https://github.com/Chirag-creator17/Lawtech",
     "stars": 1,
     "last_commit": "2024-05-16T02:20:21Z",
@@ -1047,20 +494,6 @@
     "stars": 1,
     "last_commit": "2024-05-15T17:07:31Z",
     "name": "dirrrtyjesus/Xolana",
-    "description": null
-  },
-  {
-    "url": "https://github.com/ChiefWoods/learn-how-to-interact-with-on-chain-programs",
-    "stars": 1,
-    "last_commit": "2024-05-14T09:49:51Z",
-    "name": "ChiefWoods/learn-how-to-interact-with-on-chain-programs",
-    "description": null
-  },
-  {
-    "url": "https://github.com/ChiefWoods/learn-how-to-set-up-solana-by-building-a-hello-world-smart-contract",
-    "stars": 1,
-    "last_commit": "2024-05-14T09:45:30Z",
-    "name": "ChiefWoods/learn-how-to-set-up-solana-by-building-a-hello-world-smart-contract",
     "description": null
   },
   {
@@ -1078,20 +511,6 @@
     "description": null
   },
   {
-    "url": "https://github.com/protecc-labs/smol-solana-program-library",
-    "stars": 1,
-    "last_commit": "2024-01-24T14:42:42Z",
-    "name": "protecc-labs/smol-solana-program-library",
-    "description": null
-  },
-  {
-    "url": "https://github.com/ronaldkohhh/solana-spl-token-nft",
-    "stars": 1,
-    "last_commit": "2024-01-03T09:52:36Z",
-    "name": "ronaldkohhh/solana-spl-token-nft",
-    "description": "Building SPL tokens and NFTs on Solana"
-  },
-  {
     "url": "https://github.com/YakivMart/GameContract",
     "stars": 1,
     "last_commit": "2023-12-27T15:06:45Z",
@@ -1103,7 +522,7 @@
     "stars": 1,
     "last_commit": "2023-11-06T22:33:28Z",
     "name": "beingofexistence13/multiversal-lang",
-    "description": "Welcome to Multiversal-Lang \ud83d\ude80: Your gateway to universal coding! This open-source project is a game-changer, bridging all programming languages \ud83c\udf09. With DX-Lang, every language is interconnected, unlocking limitless coding potential. Let\u2019s code the future, together! \ud83d\udcbb\ud83c\udf10\ud83c\udf89"
+    "description": "Welcome to Multiversal-Lang 🚀: Your gateway to universal coding! This open-source project is a game-changer, bridging all programming languages 🌉. With DX-Lang, every language is interconnected, unlocking limitless coding potential. Let’s code the future, together! 💻🌐🎉"
   },
   {
     "url": "https://github.com/neonevm/neon-spl-governance",
@@ -1120,27 +539,6 @@
     "description": "Asset migration validator program, to be used in conjuction with Token Metadata to enable asset class migrations."
   },
   {
-    "url": "https://github.com/GoldenEagle1035/Solana_tokens",
-    "stars": 1,
-    "last_commit": "2023-01-29T05:01:50Z",
-    "name": "GoldenEagle1035/Solana_tokens",
-    "description": null
-  },
-  {
-    "url": "https://github.com/yuong1979/anchor-tutorial",
-    "stars": 1,
-    "last_commit": "2022-07-05T02:20:46Z",
-    "name": "yuong1979/anchor-tutorial",
-    "description": "solana anchor tutorial"
-  },
-  {
-    "url": "https://github.com/rotcan/SolanaVotingApplication",
-    "stars": 1,
-    "last_commit": "2022-03-23T13:55:39Z",
-    "name": "rotcan/SolanaVotingApplication",
-    "description": null
-  },
-  {
     "url": "https://github.com/cyberpwnn/vault_dispatch",
     "stars": 1,
     "last_commit": "2021-11-16T10:57:35Z",
@@ -1148,25 +546,11 @@
     "description": "A very basic E2E communication api on solana"
   },
   {
-    "url": "https://github.com/ngundotra/solana-szn-program",
-    "stars": 1,
-    "last_commit": "2021-08-02T02:10:39Z",
-    "name": "ngundotra/solana-szn-program",
-    "description": "Solana to drive the project"
-  },
-  {
     "url": "https://github.com/simster7/sol-hackathon",
     "stars": 1,
     "last_commit": "2021-06-09T15:13:42Z",
     "name": "simster7/sol-hackathon",
     "description": null
-  },
-  {
-    "url": "https://github.com/PaddyMc/did-solana",
-    "stars": 1,
-    "last_commit": "2021-02-27T19:56:40Z",
-    "name": "PaddyMc/did-solana",
-    "description": "Web UI and programs for using decentralised identifiers on Solana"
   },
   {
     "url": "https://github.com/Aheesh/swap",
@@ -1183,39 +567,11 @@
     "description": "Stuff on SVM and Pinocchio"
   },
   {
-    "url": "https://github.com/bbachain/program-executor",
-    "stars": 0,
-    "last_commit": "2025-07-07T17:18:21Z",
-    "name": "bbachain/program-executor",
-    "description": null
-  },
-  {
     "url": "https://github.com/magicblock-labs/redline",
     "stars": 0,
     "last_commit": "2025-07-07T11:15:55Z",
     "name": "magicblock-labs/redline",
     "description": "REDLINE is a powerful benchmarking tool designed for load testing MagicBlock validators"
-  },
-  {
-    "url": "https://github.com/neftworld/solana",
-    "stars": 0,
-    "last_commit": "2025-07-07T10:59:41Z",
-    "name": "neftworld/solana",
-    "description": null
-  },
-  {
-    "url": "https://github.com/Pessina/testrepo",
-    "stars": 0,
-    "last_commit": "2025-07-07T09:40:44Z",
-    "name": "Pessina/testrepo",
-    "description": null
-  },
-  {
-    "url": "https://github.com/Kamino-Finance/solana-program-library",
-    "stars": 0,
-    "last_commit": "2025-07-07T09:26:24Z",
-    "name": "Kamino-Finance/solana-program-library",
-    "description": null
   },
   {
     "url": "https://github.com/aoikurokawa/operator-ledger",
@@ -1225,25 +581,11 @@
     "description": null
   },
   {
-    "url": "https://github.com/sfyr111/solana-workshop",
-    "stars": 0,
-    "last_commit": "2025-07-04T11:58:52Z",
-    "name": "sfyr111/solana-workshop",
-    "description": "Learning and building Solana smart contracts with examples and practice projects."
-  },
-  {
     "url": "https://github.com/rohansingh4/gorgabana-spl-token-ecosystem",
     "stars": 0,
     "last_commit": "2025-07-04T10:34:55Z",
     "name": "rohansingh4/gorgabana-spl-token-ecosystem",
     "description": null
-  },
-  {
-    "url": "https://github.com/CanardMandarin/solana2",
-    "stars": 0,
-    "last_commit": "2025-07-02T08:40:24Z",
-    "name": "CanardMandarin/solana2",
-    "description": "fork"
   },
   {
     "url": "https://github.com/PeridotFinance/peridot-ccip",
@@ -1253,45 +595,10 @@
     "description": null
   },
   {
-    "url": "https://github.com/neotheprogramist/solana-verifier",
-    "stars": 0,
-    "last_commit": "2025-06-30T09:29:42Z",
-    "name": "neotheprogramist/solana-verifier",
-    "description": null
-  },
-  {
-    "url": "https://github.com/nabob-labs/solana-spe",
-    "stars": 0,
-    "last_commit": "2025-06-30T09:15:14Z",
-    "name": "nabob-labs/solana-spe",
-    "description": "Solana Enterprise Solution: Permissioned Chain"
-  },
-  {
-    "url": "https://github.com/nmrshll-contrib/agave",
-    "stars": 0,
-    "last_commit": "2025-06-27T17:46:12Z",
-    "name": "nmrshll-contrib/agave",
-    "description": null
-  },
-  {
-    "url": "https://github.com/gpteth/staking-app-solana",
-    "stars": 0,
-    "last_commit": "2025-06-27T13:43:28Z",
-    "name": "gpteth/staking-app-solana",
-    "description": "staking-app-solana"
-  },
-  {
     "url": "https://github.com/carllin/alpenglow",
     "stars": 0,
     "last_commit": "2025-06-27T02:39:09Z",
     "name": "carllin/alpenglow",
-    "description": null
-  },
-  {
-    "url": "https://github.com/totdking/riseinweb3_solana_native_token_transfer",
-    "stars": 0,
-    "last_commit": "2025-06-26T15:35:28Z",
-    "name": "totdking/riseinweb3_solana_native_token_transfer",
     "description": null
   },
   {
@@ -1316,52 +623,10 @@
     "description": null
   },
   {
-    "url": "https://github.com/web3engineering/forking-validator",
-    "stars": 0,
-    "last_commit": "2025-06-23T10:18:14Z",
-    "name": "web3engineering/forking-validator",
-    "description": null
-  },
-  {
-    "url": "https://github.com/PeterWrighten/agave",
-    "stars": 0,
-    "last_commit": "2025-06-23T10:02:47Z",
-    "name": "PeterWrighten/agave",
-    "description": "Peter's Copy for Original Agave."
-  },
-  {
     "url": "https://github.com/EvilGenius1010/web3_week31",
     "stars": 0,
     "last_commit": "2025-06-23T05:39:47Z",
     "name": "EvilGenius1010/web3_week31",
-    "description": null
-  },
-  {
-    "url": "https://github.com/Zahid3640/RUST",
-    "stars": 0,
-    "last_commit": "2025-06-20T16:29:20Z",
-    "name": "Zahid3640/RUST",
-    "description": null
-  },
-  {
-    "url": "https://github.com/ibg101/solana-escrow-program",
-    "stars": 0,
-    "last_commit": "2025-06-19T18:54:55Z",
-    "name": "ibg101/solana-escrow-program",
-    "description": "Primitive escrow contract, written on native Rust"
-  },
-  {
-    "url": "https://github.com/audiofilter/solana-sc-example",
-    "stars": 0,
-    "last_commit": "2025-06-17T17:07:59Z",
-    "name": "audiofilter/solana-sc-example",
-    "description": null
-  },
-  {
-    "url": "https://github.com/lebahye/solana-rps-game1",
-    "stars": 0,
-    "last_commit": "2025-06-15T20:51:07Z",
-    "name": "lebahye/solana-rps-game1",
     "description": null
   },
   {
@@ -1372,52 +637,10 @@
     "description": "Pino is a development framework for building solana programs using pinocchio."
   },
   {
-    "url": "https://github.com/mohitejaikumar/rust-learning",
-    "stars": 0,
-    "last_commit": "2025-06-13T22:28:22Z",
-    "name": "mohitejaikumar/rust-learning",
-    "description": null
-  },
-  {
-    "url": "https://github.com/ahmad-khatib0/blockchain",
-    "stars": 0,
-    "last_commit": "2025-06-12T15:39:22Z",
-    "name": "ahmad-khatib0/blockchain",
-    "description": null
-  },
-  {
     "url": "https://github.com/sealdevnut/sdk",
     "stars": 0,
     "last_commit": "2025-06-11T19:32:05Z",
     "name": "sealdevnut/sdk",
-    "description": null
-  },
-  {
-    "url": "https://github.com/Bonsai515/SolanaTraderNexus",
-    "stars": 0,
-    "last_commit": "2025-06-11T11:59:41Z",
-    "name": "Bonsai515/SolanaTraderNexus",
-    "description": null
-  },
-  {
-    "url": "https://github.com/rishav76dev/counter-rust",
-    "stars": 0,
-    "last_commit": "2025-06-11T04:58:28Z",
-    "name": "rishav76dev/counter-rust",
-    "description": null
-  },
-  {
-    "url": "https://github.com/SolusRGB/jito-solana-modded",
-    "stars": 0,
-    "last_commit": "2025-06-09T09:36:39Z",
-    "name": "SolusRGB/jito-solana-modded",
-    "description": null
-  },
-  {
-    "url": "https://github.com/0xjeffro/agave-2.1.21",
-    "stars": 0,
-    "last_commit": "2025-06-07T22:14:48Z",
-    "name": "0xjeffro/agave-2.1.21",
     "description": null
   },
   {
@@ -1442,52 +665,10 @@
     "description": null
   },
   {
-    "url": "https://github.com/lu3eSkywalker/Solana-Native-Programs",
-    "stars": 0,
-    "last_commit": "2025-05-26T17:44:31Z",
-    "name": "lu3eSkywalker/Solana-Native-Programs",
-    "description": null
-  },
-  {
-    "url": "https://github.com/maurodelazeri/agave2-21",
-    "stars": 0,
-    "last_commit": "2025-05-23T17:44:07Z",
-    "name": "maurodelazeri/agave2-21",
-    "description": null
-  },
-  {
-    "url": "https://github.com/maurodelazeri/agave-2.1",
-    "stars": 0,
-    "last_commit": "2025-05-23T17:07:48Z",
-    "name": "maurodelazeri/agave-2.1",
-    "description": null
-  },
-  {
     "url": "https://github.com/lu3eSkywalker/CPIs",
     "stars": 0,
     "last_commit": "2025-05-20T08:00:12Z",
     "name": "lu3eSkywalker/CPIs",
-    "description": null
-  },
-  {
-    "url": "https://github.com/solana-devs/staking-app-solana-rust",
-    "stars": 0,
-    "last_commit": "2025-05-19T19:53:40Z",
-    "name": "solana-devs/staking-app-solana-rust",
-    "description": null
-  },
-  {
-    "url": "https://github.com/HBrightUp/chain",
-    "stars": 0,
-    "last_commit": "2025-05-17T04:08:35Z",
-    "name": "HBrightUp/chain",
-    "description": null
-  },
-  {
-    "url": "https://github.com/god-mod-arch/test",
-    "stars": 0,
-    "last_commit": "2025-05-16T13:13:47Z",
-    "name": "god-mod-arch/test",
     "description": null
   },
   {
@@ -1540,20 +721,6 @@
     "description": "Everyone can use all solana programs even tho use another chain"
   },
   {
-    "url": "https://github.com/ssisaa/TokenSwapSolana",
-    "stars": 0,
-    "last_commit": "2025-05-06T18:22:47Z",
-    "name": "ssisaa/TokenSwapSolana",
-    "description": null
-  },
-  {
-    "url": "https://github.com/toncverifier/betterskills-test",
-    "stars": 0,
-    "last_commit": "2025-05-06T10:18:47Z",
-    "name": "toncverifier/betterskills-test",
-    "description": null
-  },
-  {
     "url": "https://github.com/ssisaa/Tswapapp",
     "stars": 0,
     "last_commit": "2025-05-04T15:30:28Z",
@@ -1561,24 +728,10 @@
     "description": null
   },
   {
-    "url": "https://github.com/nufi-official/solana-sdk",
-    "stars": 0,
-    "last_commit": "2025-04-24T11:20:15Z",
-    "name": "nufi-official/solana-sdk",
-    "description": null
-  },
-  {
     "url": "https://github.com/vivekascoder/unipump-contracts",
     "stars": 0,
     "last_commit": "2025-04-22T06:17:01Z",
     "name": "vivekascoder/unipump-contracts",
-    "description": null
-  },
-  {
-    "url": "https://github.com/k-kinzal/solana-escrow",
-    "stars": 0,
-    "last_commit": "2025-04-21T11:52:38Z",
-    "name": "k-kinzal/solana-escrow",
     "description": null
   },
   {
@@ -1596,24 +749,10 @@
     "description": null
   },
   {
-    "url": "https://github.com/impruthvi/solana-counter",
-    "stars": 0,
-    "last_commit": "2025-04-08T09:14:36Z",
-    "name": "impruthvi/solana-counter",
-    "description": null
-  },
-  {
     "url": "https://github.com/ankitjha-code/subsidy-program",
     "stars": 0,
     "last_commit": "2025-03-31T04:25:54Z",
     "name": "ankitjha-code/subsidy-program",
-    "description": null
-  },
-  {
-    "url": "https://github.com/vanshavenger/rust-pub-repo",
-    "stars": 0,
-    "last_commit": "2025-03-21T16:11:10Z",
-    "name": "vanshavenger/rust-pub-repo",
     "description": null
   },
   {
@@ -1624,46 +763,11 @@
     "description": null
   },
   {
-    "url": "https://github.com/NoirHQ/solana-sdk",
-    "stars": 0,
-    "last_commit": "2025-03-07T09:18:50Z",
-    "name": "NoirHQ/solana-sdk",
-    "description": "Adapted Solana SDK for no_std environment"
-  },
-  {
-    "url": "https://github.com/victor-perkins226/solana-bridge",
-    "stars": 0,
-    "last_commit": "2025-03-04T09:47:23Z",
-    "name": "victor-perkins226/solana-bridge",
-    "description": null
-  },
-  {
-    "url": "https://github.com/VelvetHaven744/solana-hello-world-17th",
-    "stars": 0,
-    "last_commit": "2025-03-03T01:15:03Z",
-    "name": "VelvetHaven744/solana-hello-world-17th",
-    "description": "my 17th program of solana hello world"
-  },
-  {
     "url": "https://github.com/yielddev/FixedFinance",
     "stars": 0,
     "last_commit": "2025-02-28T23:22:38Z",
     "name": "yielddev/FixedFinance",
     "description": "Fixed Term Fix cost loans with Silo Vaults"
-  },
-  {
-    "url": "https://github.com/VelvetHaven744/15th-Solana-hello-world",
-    "stars": 0,
-    "last_commit": "2025-02-27T15:15:14Z",
-    "name": "VelvetHaven744/15th-Solana-hello-world",
-    "description": "my 15th Solana prog "
-  },
-  {
-    "url": "https://github.com/VelvetHaven744/14th-hello-world-solana",
-    "stars": 0,
-    "last_commit": "2025-02-27T15:07:26Z",
-    "name": "VelvetHaven744/14th-hello-world-solana",
-    "description": "my 14th hello world Solana program"
   },
   {
     "url": "https://github.com/BUK-protocol/kaiquest-treasury",
@@ -1673,53 +777,11 @@
     "description": null
   },
   {
-    "url": "https://github.com/VelvetHaven744/12-solana_hello_world",
-    "stars": 0,
-    "last_commit": "2025-02-23T19:11:16Z",
-    "name": "VelvetHaven744/12-solana_hello_world",
-    "description": null
-  },
-  {
-    "url": "https://github.com/EtienneM9/Rust_for_Solana",
-    "stars": 0,
-    "last_commit": "2025-02-19T13:17:36Z",
-    "name": "EtienneM9/Rust_for_Solana",
-    "description": "First project with Rust for Solana and blockchain application"
-  },
-  {
-    "url": "https://github.com/Pamenarti/wormhole-fork",
-    "stars": 0,
-    "last_commit": "2025-02-10T09:05:17Z",
-    "name": "Pamenarti/wormhole-fork",
-    "description": "This repository contains Certus One's reference node implementation for the Wormhole project."
-  },
-  {
-    "url": "https://github.com/VelvetHaven744/hello_world_solana",
-    "stars": 0,
-    "last_commit": "2025-01-26T11:44:45Z",
-    "name": "VelvetHaven744/hello_world_solana",
-    "description": "hello world solana program on rust"
-  },
-  {
-    "url": "https://github.com/DanielGeek/blockchain_projects",
-    "stars": 0,
-    "last_commit": "2025-01-23T01:25:28Z",
-    "name": "DanielGeek/blockchain_projects",
-    "description": "study projects with solidity language and smart contracts"
-  },
-  {
     "url": "https://github.com/Nexis-Network/spl-memo",
     "stars": 0,
     "last_commit": "2025-01-02T20:03:09Z",
     "name": "Nexis-Network/spl-memo",
     "description": null
-  },
-  {
-    "url": "https://github.com/jac18281828/solana-counter",
-    "stars": 0,
-    "last_commit": "2024-12-16T23:02:38Z",
-    "name": "jac18281828/solana-counter",
-    "description": "simple solana program - counter"
   },
   {
     "url": "https://github.com/Hedgehog-Markets/hpl-parimutuel-eclipse",
@@ -1736,45 +798,10 @@
     "description": null
   },
   {
-    "url": "https://github.com/KesterJosh/Solana-example-test-project",
-    "stars": 0,
-    "last_commit": "2024-12-10T00:40:44Z",
-    "name": "KesterJosh/Solana-example-test-project",
-    "description": "This is a solana test example work "
-  },
-  {
-    "url": "https://github.com/Shinarthas/solana-staking",
-    "stars": 0,
-    "last_commit": "2024-12-07T20:24:22Z",
-    "name": "Shinarthas/solana-staking",
-    "description": null
-  },
-  {
-    "url": "https://github.com/SolanaData/solana",
-    "stars": 0,
-    "last_commit": "2024-11-25T02:32:14Z",
-    "name": "SolanaData/solana",
-    "description": null
-  },
-  {
     "url": "https://github.com/yusufyian/Solightning",
     "stars": 0,
     "last_commit": "2024-11-18T10:04:48Z",
     "name": "yusufyian/Solightning",
-    "description": null
-  },
-  {
-    "url": "https://github.com/Dvorhack/ctf-WU",
-    "stars": 0,
-    "last_commit": "2024-11-10T10:28:13Z",
-    "name": "Dvorhack/ctf-WU",
-    "description": null
-  },
-  {
-    "url": "https://github.com/staaason/agave",
-    "stars": 0,
-    "last_commit": "2024-10-23T09:07:34Z",
-    "name": "staaason/agave",
     "description": null
   },
   {
@@ -1785,20 +812,6 @@
     "description": null
   },
   {
-    "url": "https://github.com/drjvtlkr/solana",
-    "stars": 0,
-    "last_commit": "2024-10-05T18:14:15Z",
-    "name": "drjvtlkr/solana",
-    "description": null
-  },
-  {
-    "url": "https://github.com/tarunjais28/solana-lottery",
-    "stars": 0,
-    "last_commit": "2024-10-03T16:23:08Z",
-    "name": "tarunjais28/solana-lottery",
-    "description": "Solana Lottery Game"
-  },
-  {
     "url": "https://github.com/0xdavinchee/sol-baby-steps",
     "stars": 0,
     "last_commit": "2024-10-03T15:57:16Z",
@@ -1806,59 +819,10 @@
     "description": null
   },
   {
-    "url": "https://github.com/0xNilesh/wormhole-specialized-relayer",
-    "stars": 0,
-    "last_commit": "2024-09-27T07:41:14Z",
-    "name": "0xNilesh/wormhole-specialized-relayer",
-    "description": null
-  },
-  {
-    "url": "https://github.com/YYBer/rust-stuff",
-    "stars": 0,
-    "last_commit": "2024-09-23T08:28:52Z",
-    "name": "YYBer/rust-stuff",
-    "description": null
-  },
-  {
-    "url": "https://github.com/gareth0712/solana-learning-journey",
-    "stars": 0,
-    "last_commit": "2024-09-23T02:18:11Z",
-    "name": "gareth0712/solana-learning-journey",
-    "description": null
-  },
-  {
-    "url": "https://github.com/0xramrapolu/solana_projects",
-    "stars": 0,
-    "last_commit": "2024-09-12T13:44:06Z",
-    "name": "0xramrapolu/solana_projects",
-    "description": "This is my Solana Projects i teach online."
-  },
-  {
-    "url": "https://github.com/sebastiandanconia/Encode_Solana_Bootcamp-Final_Project",
-    "stars": 0,
-    "last_commit": "2024-09-12T05:47:48Z",
-    "name": "sebastiandanconia/Encode_Solana_Bootcamp-Final_Project",
-    "description": null
-  },
-  {
-    "url": "https://github.com/augustin-cheron/solana-contract",
-    "stars": 0,
-    "last_commit": "2024-09-11T18:38:46Z",
-    "name": "augustin-cheron/solana-contract",
-    "description": null
-  },
-  {
     "url": "https://github.com/bobosii/counter",
     "stars": 0,
     "last_commit": "2024-09-05T12:22:08Z",
     "name": "bobosii/counter",
-    "description": null
-  },
-  {
-    "url": "https://github.com/MendyAndres/solana-counter",
-    "stars": 0,
-    "last_commit": "2024-09-02T16:09:32Z",
-    "name": "MendyAndres/solana-counter",
     "description": null
   },
   {
@@ -1876,45 +840,10 @@
     "description": null
   },
   {
-    "url": "https://github.com/debjit-bw/iot-solana",
-    "stars": 0,
-    "last_commit": "2024-07-21T16:31:40Z",
-    "name": "debjit-bw/iot-solana",
-    "description": null
-  },
-  {
-    "url": "https://github.com/lucic42/agave",
-    "stars": 0,
-    "last_commit": "2024-07-12T17:37:37Z",
-    "name": "lucic42/agave",
-    "description": null
-  },
-  {
-    "url": "https://github.com/Domino-Blockchain/token-metadata",
-    "stars": 0,
-    "last_commit": "2024-06-27T16:44:15Z",
-    "name": "Domino-Blockchain/token-metadata",
-    "description": null
-  },
-  {
-    "url": "https://github.com/crossdev24/solana",
-    "stars": 0,
-    "last_commit": "2024-06-25T21:44:06Z",
-    "name": "crossdev24/solana",
-    "description": null
-  },
-  {
     "url": "https://github.com/beanb1123/autorca",
     "stars": 0,
     "last_commit": "2024-05-22T11:02:28Z",
     "name": "beanb1123/autorca",
-    "description": null
-  },
-  {
-    "url": "https://github.com/JeffG05/SolanaVerifier",
-    "stars": 0,
-    "last_commit": "2024-04-29T22:54:34Z",
-    "name": "JeffG05/SolanaVerifier",
     "description": null
   },
   {
@@ -1925,73 +854,10 @@
     "description": null
   },
   {
-    "url": "https://github.com/superical/solana-bootcamp",
-    "stars": 0,
-    "last_commit": "2024-04-26T18:59:07Z",
-    "name": "superical/solana-bootcamp",
-    "description": null
-  },
-  {
-    "url": "https://github.com/chochinlu/SolanaBootcamp",
-    "stars": 0,
-    "last_commit": "2024-04-26T03:55:30Z",
-    "name": "chochinlu/SolanaBootcamp",
-    "description": "exercises"
-  },
-  {
-    "url": "https://github.com/omacox/SolanaBootcamp",
-    "stars": 0,
-    "last_commit": "2024-04-19T03:14:50Z",
-    "name": "omacox/SolanaBootcamp",
-    "description": null
-  },
-  {
-    "url": "https://github.com/0xreentrant/halborn-ctf",
-    "stars": 0,
-    "last_commit": "2024-04-16T17:45:25Z",
-    "name": "0xreentrant/halborn-ctf",
-    "description": null
-  },
-  {
-    "url": "https://github.com/ngn999/solana-1.7.28",
-    "stars": 0,
-    "last_commit": "2024-04-06T13:13:43Z",
-    "name": "ngn999/solana-1.7.28",
-    "description": null
-  },
-  {
     "url": "https://github.com/deltaswapio/deltaswap",
     "stars": 0,
     "last_commit": "2024-03-21T08:47:11Z",
     "name": "deltaswapio/deltaswap",
-    "description": null
-  },
-  {
-    "url": "https://github.com/laowen002/solana",
-    "stars": 0,
-    "last_commit": "2024-03-14T15:21:29Z",
-    "name": "laowen002/solana",
-    "description": null
-  },
-  {
-    "url": "https://github.com/staccDOTsol/jito-solana",
-    "stars": 0,
-    "last_commit": "2024-03-08T04:14:52Z",
-    "name": "staccDOTsol/jito-solana",
-    "description": null
-  },
-  {
-    "url": "https://github.com/Sn0wF1re/solana-escrow-program",
-    "stars": 0,
-    "last_commit": "2024-03-04T09:43:57Z",
-    "name": "Sn0wF1re/solana-escrow-program",
-    "description": null
-  },
-  {
-    "url": "https://github.com/partylikeits1983/halbornCTF",
-    "stars": 0,
-    "last_commit": "2024-03-01T20:26:26Z",
-    "name": "partylikeits1983/halbornCTF",
     "description": null
   },
   {
@@ -2016,48 +882,6 @@
     "description": null
   },
   {
-    "url": "https://github.com/berkayaktunc/Solana-Bootcamp-Final-Project",
-    "stars": 0,
-    "last_commit": "2024-02-11T00:15:14Z",
-    "name": "berkayaktunc/Solana-Bootcamp-Final-Project",
-    "description": "Rise-in Solana Bootcamp"
-  },
-  {
-    "url": "https://github.com/masred/rust-solana-for-beginners",
-    "stars": 0,
-    "last_commit": "2024-02-09T14:40:09Z",
-    "name": "masred/rust-solana-for-beginners",
-    "description": null
-  },
-  {
-    "url": "https://github.com/fatcorn/solana",
-    "stars": 0,
-    "last_commit": "2024-02-06T08:20:40Z",
-    "name": "fatcorn/solana",
-    "description": "the gaia poh solana"
-  },
-  {
-    "url": "https://github.com/lazerfocused/solana_markets",
-    "stars": 0,
-    "last_commit": "2024-02-05T15:43:31Z",
-    "name": "lazerfocused/solana_markets",
-    "description": null
-  },
-  {
-    "url": "https://github.com/fxpy/solana-forge",
-    "stars": 0,
-    "last_commit": "2024-01-26T10:27:13Z",
-    "name": "fxpy/solana-forge",
-    "description": null
-  },
-  {
-    "url": "https://github.com/Shalom2212/token-transfer-solana-bootcamp",
-    "stars": 0,
-    "last_commit": "2024-01-20T16:46:29Z",
-    "name": "Shalom2212/token-transfer-solana-bootcamp",
-    "description": null
-  },
-  {
     "url": "https://github.com/0xded093/neodyme-breakpoint-workshop",
     "stars": 0,
     "last_commit": "2024-01-15T15:33:14Z",
@@ -2065,24 +889,10 @@
     "description": "Solving Neodyme Breakpoint Workshop"
   },
   {
-    "url": "https://github.com/hlgltvnnk/solana-program-library",
-    "stars": 0,
-    "last_commit": "2024-01-10T19:41:38Z",
-    "name": "hlgltvnnk/solana-program-library",
-    "description": "Solana program library token 2022 v0.6.1. Updated with latest solana version (v1.17.0)"
-  },
-  {
     "url": "https://github.com/GarvitSinghal47/project-m",
     "stars": 0,
     "last_commit": "2024-01-07T05:51:26Z",
     "name": "GarvitSinghal47/project-m",
-    "description": null
-  },
-  {
-    "url": "https://github.com/nikhil075/Final-Project-Solana-Bootcamp",
-    "stars": 0,
-    "last_commit": "2024-01-02T15:08:47Z",
-    "name": "nikhil075/Final-Project-Solana-Bootcamp",
     "description": null
   },
   {
@@ -2100,25 +910,11 @@
     "description": null
   },
   {
-    "url": "https://github.com/esteriella/solana-intermediate",
-    "stars": 0,
-    "last_commit": "2023-11-12T19:25:06Z",
-    "name": "esteriella/solana-intermediate",
-    "description": "Solana intermediate project"
-  },
-  {
     "url": "https://github.com/sonoma-foundation/sonoma",
     "stars": 0,
     "last_commit": "2023-11-02T08:59:14Z",
     "name": "sonoma-foundation/sonoma",
     "description": "Sonoma blockchain fork of original Solana"
-  },
-  {
-    "url": "https://github.com/biccsdev/solana-bootcamp",
-    "stars": 0,
-    "last_commit": "2023-10-27T03:37:50Z",
-    "name": "biccsdev/solana-bootcamp",
-    "description": null
   },
   {
     "url": "https://github.com/HollandPleskac/Neptune-Dapp",
@@ -2128,13 +924,6 @@
     "description": "Decentralized Lending and Borrowing Platform on the Solana Blockchain.  Built for the Solana Riptide Hackathon and winner of 3 sponsor prizes worth 60k."
   },
   {
-    "url": "https://github.com/calam1/solana-example-helloworld-helm-chart-nok8",
-    "stars": 0,
-    "last_commit": "2023-10-04T22:23:56Z",
-    "name": "calam1/solana-example-helloworld-helm-chart-nok8",
-    "description": null
-  },
-  {
     "url": "https://github.com/ngocbv/renec",
     "stars": 0,
     "last_commit": "2023-10-02T08:04:42Z",
@@ -2142,31 +931,10 @@
     "description": null
   },
   {
-    "url": "https://github.com/zardokofficial2023/solana-labs-solana",
-    "stars": 0,
-    "last_commit": "2023-09-07T22:22:44Z",
-    "name": "zardokofficial2023/solana-labs-solana",
-    "description": null
-  },
-  {
-    "url": "https://github.com/marcjerome/solana_sbc02_theblokc_proj",
-    "stars": 0,
-    "last_commit": "2023-08-11T13:57:43Z",
-    "name": "marcjerome/solana_sbc02_theblokc_proj",
-    "description": null
-  },
-  {
     "url": "https://github.com/Eclipse-Laboratories-Inc/eclipse-program-library",
     "stars": 0,
     "last_commit": "2023-07-26T09:15:45Z",
     "name": "Eclipse-Laboratories-Inc/eclipse-program-library",
-    "description": null
-  },
-  {
-    "url": "https://github.com/haponesa/theblokc-solana-bootcamp",
-    "stars": 0,
-    "last_commit": "2023-07-25T11:45:31Z",
-    "name": "haponesa/theblokc-solana-bootcamp",
     "description": null
   },
   {
@@ -2184,69 +952,6 @@
     "description": "Solana Program for Staking NFT's."
   },
   {
-    "url": "https://github.com/KillaDrex/theblokc-solana-bootcamp",
-    "stars": 0,
-    "last_commit": "2023-07-20T02:35:59Z",
-    "name": "KillaDrex/theblokc-solana-bootcamp",
-    "description": "A repository for the Solana Developers Bootcamp July 2023."
-  },
-  {
-    "url": "https://github.com/NinoLacambra/theblokc-solana-bootcamp",
-    "stars": 0,
-    "last_commit": "2023-07-19T16:41:31Z",
-    "name": "NinoLacambra/theblokc-solana-bootcamp",
-    "description": null
-  },
-  {
-    "url": "https://github.com/ALGOREX-PH/theblokc-solana-bootcamp",
-    "stars": 0,
-    "last_commit": "2023-07-15T08:52:51Z",
-    "name": "ALGOREX-PH/theblokc-solana-bootcamp",
-    "description": null
-  },
-  {
-    "url": "https://github.com/Farber98/solana-soldev",
-    "stars": 0,
-    "last_commit": "2023-07-15T02:44:17Z",
-    "name": "Farber98/solana-soldev",
-    "description": "Learning Solana through SolDev."
-  },
-  {
-    "url": "https://github.com/Web3-Builders-Alliance/Victortk-Solana-Q1-2023",
-    "stars": 0,
-    "last_commit": "2023-07-13T11:07:32Z",
-    "name": "Web3-Builders-Alliance/Victortk-Solana-Q1-2023",
-    "description": "WBA course work repo"
-  },
-  {
-    "url": "https://github.com/bracketloader/wormhole",
-    "stars": 0,
-    "last_commit": "2023-06-30T14:16:45Z",
-    "name": "bracketloader/wormhole",
-    "description": "A reference implementation for the Wormhole blockchain interoperability protocol."
-  },
-  {
-    "url": "https://github.com/d4v1d03/solana-bpf-program-template",
-    "stars": 0,
-    "last_commit": "2023-06-13T01:02:36Z",
-    "name": "d4v1d03/solana-bpf-program-template",
-    "description": null
-  },
-  {
-    "url": "https://github.com/cattermelon-xyz/pos_solana",
-    "stars": 0,
-    "last_commit": "2023-06-08T09:06:22Z",
-    "name": "cattermelon-xyz/pos_solana",
-    "description": null
-  },
-  {
-    "url": "https://github.com/Huzaifa696/solana_scheduler",
-    "stars": 0,
-    "last_commit": "2023-05-26T05:56:34Z",
-    "name": "Huzaifa696/solana_scheduler",
-    "description": null
-  },
-  {
     "url": "https://github.com/fluturecode/counter",
     "stars": 0,
     "last_commit": "2023-05-24T01:21:26Z",
@@ -2261,59 +966,10 @@
     "description": null
   },
   {
-    "url": "https://github.com/brolab-io/metagallery-solana",
-    "stars": 0,
-    "last_commit": "2023-04-03T07:33:39Z",
-    "name": "brolab-io/metagallery-solana",
-    "description": null
-  },
-  {
-    "url": "https://github.com/calam1/solana-example-helloworld-helm-monorepo",
-    "stars": 0,
-    "last_commit": "2023-03-29T00:44:44Z",
-    "name": "calam1/solana-example-helloworld-helm-monorepo",
-    "description": null
-  },
-  {
-    "url": "https://github.com/seanyoung/anchor2",
-    "stars": 0,
-    "last_commit": "2023-03-24T12:43:17Z",
-    "name": "seanyoung/anchor2",
-    "description": "anchor test repo"
-  },
-  {
-    "url": "https://github.com/ranko746/SolanaToken",
-    "stars": 0,
-    "last_commit": "2023-03-19T11:52:09Z",
-    "name": "ranko746/SolanaToken",
-    "description": null
-  },
-  {
-    "url": "https://github.com/GenesysGo/solana-das",
-    "stars": 0,
-    "last_commit": "2023-03-15T22:27:05Z",
-    "name": "GenesysGo/solana-das",
-    "description": null
-  },
-  {
     "url": "https://github.com/solvia-labs/solvia",
     "stars": 0,
     "last_commit": "2023-03-15T12:14:41Z",
     "name": "solvia-labs/solvia",
-    "description": null
-  },
-  {
-    "url": "https://github.com/staccDOTsol/solana-mev",
-    "stars": 0,
-    "last_commit": "2023-03-08T10:40:25Z",
-    "name": "staccDOTsol/solana-mev",
-    "description": null
-  },
-  {
-    "url": "https://github.com/ha2709/solana",
-    "stars": 0,
-    "last_commit": "2023-03-07T10:15:39Z",
-    "name": "ha2709/solana",
     "description": null
   },
   {
@@ -2324,25 +980,11 @@
     "description": null
   },
   {
-    "url": "https://github.com/PaulFidika/spl-token-test",
-    "stars": 0,
-    "last_commit": "2023-03-06T11:11:07Z",
-    "name": "PaulFidika/spl-token-test",
-    "description": "just playing around"
-  },
-  {
     "url": "https://github.com/lightningbank/iCoin",
     "stars": 0,
     "last_commit": "2023-03-06T10:44:40Z",
     "name": "lightningbank/iCoin",
     "description": "iCoin Blockchain Platform"
-  },
-  {
-    "url": "https://github.com/staccDOTsol/solanaowesme2m",
-    "stars": 0,
-    "last_commit": "2023-03-02T10:33:58Z",
-    "name": "staccDOTsol/solanaowesme2m",
-    "description": null
   },
   {
     "url": "https://github.com/everlend/solend-program",
@@ -2359,52 +1001,10 @@
     "description": "Alien Loop"
   },
   {
-    "url": "https://github.com/legion2002/SolanaSmartContract",
-    "stars": 0,
-    "last_commit": "2023-02-24T10:01:42Z",
-    "name": "legion2002/SolanaSmartContract",
-    "description": "Learning about creating and deploying solana smart contracts here"
-  },
-  {
-    "url": "https://github.com/ananas-block/bls381-solana",
-    "stars": 0,
-    "last_commit": "2023-02-20T10:34:59Z",
-    "name": "ananas-block/bls381-solana",
-    "description": null
-  },
-  {
-    "url": "https://github.com/calam1/solana-example-helloworld",
-    "stars": 0,
-    "last_commit": "2023-02-15T10:00:34Z",
-    "name": "calam1/solana-example-helloworld",
-    "description": "basically a slight modification of the hello world from solana with some small changes from https://www.youtube.com/watch?v=gA7hFdq2h9Q&list=PL41Cw3fN3CfdbmhgxADwyDyIoDrxc22v2&index=1"
-  },
-  {
     "url": "https://github.com/febo/metaplex-program-library",
     "stars": 0,
     "last_commit": "2023-02-06T22:27:42Z",
     "name": "febo/metaplex-program-library",
-    "description": null
-  },
-  {
-    "url": "https://github.com/eyusufatik/learning-rust-and-solana",
-    "stars": 0,
-    "last_commit": "2023-01-31T13:34:25Z",
-    "name": "eyusufatik/learning-rust-and-solana",
-    "description": "Stuff I wrote while following the rust book and solana/anchor tutorials"
-  },
-  {
-    "url": "https://github.com/VictorKwasara/victortk-solana-Q1-2023",
-    "stars": 0,
-    "last_commit": "2023-01-28T08:32:53Z",
-    "name": "VictorKwasara/victortk-solana-Q1-2023",
-    "description": "WBA course work"
-  },
-  {
-    "url": "https://github.com/philoniare/solana-rust-calc",
-    "stars": 0,
-    "last_commit": "2023-01-21T13:21:47Z",
-    "name": "philoniare/solana-rust-calc",
     "description": null
   },
   {
@@ -2415,38 +1015,10 @@
     "description": null
   },
   {
-    "url": "https://github.com/neojou/solana-nj",
-    "stars": 0,
-    "last_commit": "2022-12-27T18:53:46Z",
-    "name": "neojou/solana-nj",
-    "description": "Based on solana Mainnet - v1.13.5"
-  },
-  {
     "url": "https://github.com/yanghang8612/metaplex",
     "stars": 0,
     "last_commit": "2022-12-15T06:34:23Z",
     "name": "yanghang8612/metaplex",
-    "description": null
-  },
-  {
-    "url": "https://github.com/denispalab/solana-main",
-    "stars": 0,
-    "last_commit": "2022-12-08T09:33:36Z",
-    "name": "denispalab/solana-main",
-    "description": null
-  },
-  {
-    "url": "https://github.com/Ackee-Blockchain/nie-blo-solana-counter",
-    "stars": 0,
-    "last_commit": "2022-12-02T08:37:54Z",
-    "name": "Ackee-Blockchain/nie-blo-solana-counter",
-    "description": null
-  },
-  {
-    "url": "https://github.com/HongThaiPham/solana-movies-review",
-    "stars": 0,
-    "last_commit": "2022-11-30T09:17:59Z",
-    "name": "HongThaiPham/solana-movies-review",
     "description": null
   },
   {
@@ -2471,83 +1043,6 @@
     "description": null
   },
   {
-    "url": "https://github.com/hoangnhxda/Solana_Swap_Test",
-    "stars": 0,
-    "last_commit": "2022-10-25T15:53:26Z",
-    "name": "hoangnhxda/Solana_Swap_Test",
-    "description": "Test program for swap SOL to MOVE token"
-  },
-  {
-    "url": "https://github.com/kazinarka/solana-staking-platform",
-    "stars": 0,
-    "last_commit": "2022-10-24T07:33:50Z",
-    "name": "kazinarka/solana-staking-platform",
-    "description": null
-  },
-  {
-    "url": "https://github.com/nattimmis/Solanaplayground",
-    "stars": 0,
-    "last_commit": "2022-10-07T17:20:19Z",
-    "name": "nattimmis/Solanaplayground",
-    "description": "playground"
-  },
-  {
-    "url": "https://github.com/theworldadl/solana-program-library-master",
-    "stars": 0,
-    "last_commit": "2022-10-02T09:23:23Z",
-    "name": "theworldadl/solana-program-library-master",
-    "description": "solana-program-library-master"
-  },
-  {
-    "url": "https://github.com/LukeAnnison/solana-escrow-contract",
-    "stars": 0,
-    "last_commit": "2022-09-24T14:56:32Z",
-    "name": "LukeAnnison/solana-escrow-contract",
-    "description": null
-  },
-  {
-    "url": "https://github.com/joedenis01/solana-new",
-    "stars": 0,
-    "last_commit": "2022-09-22T09:02:40Z",
-    "name": "joedenis01/solana-new",
-    "description": null
-  },
-  {
-    "url": "https://github.com/omertxyz/solana-nft-metadata",
-    "stars": 0,
-    "last_commit": "2022-08-26T19:34:37Z",
-    "name": "omertxyz/solana-nft-metadata",
-    "description": null
-  },
-  {
-    "url": "https://github.com/jesusmeme/SolanaToken",
-    "stars": 0,
-    "last_commit": "2022-08-10T13:28:09Z",
-    "name": "jesusmeme/SolanaToken",
-    "description": null
-  },
-  {
-    "url": "https://github.com/rohankumardubey/solana-core",
-    "stars": 0,
-    "last_commit": "2022-08-06T21:00:18Z",
-    "name": "rohankumardubey/solana-core",
-    "description": null
-  },
-  {
-    "url": "https://github.com/rust-chainblock/blockchaincore",
-    "stars": 0,
-    "last_commit": "2022-07-27T09:02:06Z",
-    "name": "rust-chainblock/blockchaincore",
-    "description": null
-  },
-  {
-    "url": "https://github.com/MBenz12/solana-escrow",
-    "stars": 0,
-    "last_commit": "2022-07-25T00:11:39Z",
-    "name": "MBenz12/solana-escrow",
-    "description": null
-  },
-  {
     "url": "https://github.com/lhendre/metaplexDemo",
     "stars": 0,
     "last_commit": "2022-06-27T04:01:04Z",
@@ -2559,13 +1054,6 @@
     "stars": 0,
     "last_commit": "2022-06-27T00:10:01Z",
     "name": "dreamcatcher000101/tryshoot-game-contracts",
-    "description": null
-  },
-  {
-    "url": "https://github.com/StrawHatDAO/solana",
-    "stars": 0,
-    "last_commit": "2022-06-20T08:19:03Z",
-    "name": "StrawHatDAO/solana",
     "description": null
   },
   {
@@ -2590,94 +1078,10 @@
     "description": null
   },
   {
-    "url": "https://github.com/viral-sangani/solana-hello-world",
-    "stars": 0,
-    "last_commit": "2022-04-27T18:14:43Z",
-    "name": "viral-sangani/solana-hello-world",
-    "description": "Solana Hello World Program example with Blockpulsar Deployment instructions"
-  },
-  {
-    "url": "https://github.com/celiakwan/solana-escrow",
-    "stars": 0,
-    "last_commit": "2022-04-24T10:12:25Z",
-    "name": "celiakwan/solana-escrow",
-    "description": "An escrow program written in Rust for asset exchange between two parties on Solana."
-  },
-  {
-    "url": "https://github.com/rohankumardubey/solana",
-    "stars": 0,
-    "last_commit": "2022-04-20T13:25:40Z",
-    "name": "rohankumardubey/solana",
-    "description": null
-  },
-  {
-    "url": "https://github.com/venustar1228/solana-smart-contract",
-    "stars": 0,
-    "last_commit": "2022-04-17T14:21:40Z",
-    "name": "venustar1228/solana-smart-contract",
-    "description": null
-  },
-  {
-    "url": "https://github.com/bhavesh20-mb/_Solana_bhav",
-    "stars": 0,
-    "last_commit": "2022-04-01T15:48:51Z",
-    "name": "bhavesh20-mb/_Solana_bhav",
-    "description": null
-  },
-  {
-    "url": "https://github.com/rsb/solana-escrow",
-    "stars": 0,
-    "last_commit": "2022-03-30T22:56:38Z",
-    "name": "rsb/solana-escrow",
-    "description": "Code based on article https://paulx.dev/blog/2021/01/14/programming-on-solana-an-introduction/"
-  },
-  {
-    "url": "https://github.com/ignassew/solana-hello-world",
-    "stars": 0,
-    "last_commit": "2022-03-26T16:19:11Z",
-    "name": "ignassew/solana-hello-world",
-    "description": "Minimal solana smart contract + frontend example."
-  },
-  {
-    "url": "https://github.com/h0n9/solana-program-escrow",
-    "stars": 0,
-    "last_commit": "2022-03-10T12:26:46Z",
-    "name": "h0n9/solana-program-escrow",
-    "description": null
-  },
-  {
-    "url": "https://github.com/smith525525/wormhole",
-    "stars": 0,
-    "last_commit": "2022-03-04T03:17:00Z",
-    "name": "smith525525/wormhole",
-    "description": null
-  },
-  {
-    "url": "https://github.com/bcerecer/solana-escrow-program",
-    "stars": 0,
-    "last_commit": "2022-02-21T07:14:56Z",
-    "name": "bcerecer/solana-escrow-program",
-    "description": null
-  },
-  {
     "url": "https://github.com/howl111/imentus_data",
     "stars": 0,
     "last_commit": "2022-01-31T13:38:23Z",
     "name": "howl111/imentus_data",
-    "description": null
-  },
-  {
-    "url": "https://github.com/streamingfast/solana-priv",
-    "stars": 0,
-    "last_commit": "2022-01-19T13:21:49Z",
-    "name": "streamingfast/solana-priv",
-    "description": "DEPRECATED: see https://github.com/streamingfast/solana instead"
-  },
-  {
-    "url": "https://github.com/bhavesh20-mb/bhavesh_solana",
-    "stars": 0,
-    "last_commit": "2022-01-12T10:45:23Z",
-    "name": "bhavesh20-mb/bhavesh_solana",
     "description": null
   },
   {
@@ -2695,13 +1099,6 @@
     "description": null
   },
   {
-    "url": "https://github.com/cnaut/solana-escrow-example",
-    "stars": 0,
-    "last_commit": "2021-12-17T05:22:05Z",
-    "name": "cnaut/solana-escrow-example",
-    "description": null
-  },
-  {
     "url": "https://github.com/eriknson/metaplex-nft-storefront",
     "stars": 0,
     "last_commit": "2021-12-16T16:48:32Z",
@@ -2709,32 +1106,11 @@
     "description": "Storefront for NFTs on Solana"
   },
   {
-    "url": "https://github.com/redxzeta/solana-candy-machine",
-    "stars": 0,
-    "last_commit": "2021-12-14T04:29:59Z",
-    "name": "redxzeta/solana-candy-machine",
-    "description": null
-  },
-  {
     "url": "https://github.com/0xalexbai/serum-dex-patch",
     "stars": 0,
     "last_commit": "2021-11-26T13:06:23Z",
     "name": "0xalexbai/serum-dex-patch",
     "description": null
-  },
-  {
-    "url": "https://github.com/sbnair/Solana_Token",
-    "stars": 0,
-    "last_commit": "2021-09-02T11:17:37Z",
-    "name": "sbnair/Solana_Token",
-    "description": "Solana Token"
-  },
-  {
-    "url": "https://github.com/ilmoi/rebuild-balancer-solana",
-    "stars": 0,
-    "last_commit": "2021-08-06T17:06:35Z",
-    "name": "ilmoi/rebuild-balancer-solana",
-    "description": "learning by building. code from here - https://github.com/solana-labs/solana-program-library/tree/master/token-swap"
   },
   {
     "url": "https://github.com/markoinether/marinade-tenderize-from-hackaton",
