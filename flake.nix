@@ -46,6 +46,7 @@
               pkgs.mdbook
               pkgs.ollama
               pkgs.rust-analyzer-unwrapped
+              pkgs.uv
               pkgs.vale
               pkgs.vhs
               rust-toolchain
@@ -56,6 +57,7 @@
               echo 1>&2 "Welcome to the StylusPort development shell!"
             '';
 
+            UV_PROJECT = "scripts";
             RUST_SRC_PATH = "${rust-toolchain}/lib/rustlib/src/rust/library";
           };
 

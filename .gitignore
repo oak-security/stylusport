@@ -2,3 +2,4 @@
 target
 .ignore
 .env
+__pycache__
