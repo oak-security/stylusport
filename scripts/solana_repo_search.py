@@ -7,6 +7,8 @@ def main():
         print("Usage: python solana_repo_search.py <output_file>")
         sys.exit(1)
 
+    # TODO: filter repo names containing: 
+    # ["ctf", "solana", "fork", "agave", "wormhole", "rust", "hello", "test", "anchor", "learn", "challenge", "chain"]
     find_program_repos(
         dep_query='solana-program filename:Cargo.toml',
         code_snippet='entrypoint!',

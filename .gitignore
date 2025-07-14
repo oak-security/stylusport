@@ -1,5 +1,7 @@
 .pre-commit-config.yaml
 target
+.helix
 .ignore
 .env
 __pycache__
+research/solana-repos
