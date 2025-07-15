@@ -7,6 +7,8 @@ def main():
         print("Usage: python anchor_repo_search.py <output_file>")
         sys.exit(1)
 
+    # TODO: filter repo names containing: 
+    # ["ctf", "anchor", "example", "bootcamp", "solana", "sealevel"]
     find_program_repos(
         dep_query='anchor-lang filename:Cargo.toml',
         code_snippet='#[program]',
