@@ -4,12 +4,16 @@ import os
 import sys
 import json
 import argparse
+import asyncio
+import time
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, NamedTuple
+from collections import deque
 import toml
 from openai import OpenAI
 from dotenv import load_dotenv
 from tqdm import tqdm
+import tiktoken
 
 
 class ProgramInfo(NamedTuple):
@@ -18,6 +22,88 @@ class ProgramInfo(NamedTuple):
     dependencies: Dict
     package_name: str
     repo_name: str
+
+
+class TokenRateLimiter:
+    """Token-based rate limiter that tracks tokens per minute."""
+    
+    def __init__(self, tokens_per_minute: int, model: str = "gpt-3.5-turbo"):
+        self.tokens_per_minute = tokens_per_minute
+        self.token_timestamps = deque()  # (timestamp, token_count) pairs
+        self.lock = asyncio.Lock()
+        
+        # Initialize tokenizer for the model
+        try:
+            self.encoding = tiktoken.encoding_for_model(model)
+        except KeyError:
+            # Fallback to cl100k_base encoding for unknown models
+            self.encoding = tiktoken.get_encoding("cl100k_base")
+    
+    def estimate_tokens(self, messages: List[Dict[str, str]]) -> int:
+        """Estimate token count for a list of messages."""
+        total_tokens = 0
+        
+        for message in messages:
+            # Add tokens for role and content
+            total_tokens += len(self.encoding.encode(message.get("role", "")))
+            total_tokens += len(self.encoding.encode(message.get("content", "")))
+            # Add some overhead for message formatting
+            total_tokens += 4
+        
+        # Add overhead for the API call structure
+        total_tokens += 10
+        
+        return total_tokens
+    
+    def _cleanup_old_tokens(self, current_time: float):
+        """Remove token records older than 1 minute."""
+        while self.token_timestamps and current_time - self.token_timestamps[0][0] > 60:
+            self.token_timestamps.popleft()
+    
+    def _current_tokens_in_window(self, current_time: float) -> int:
+        """Calculate current token usage in the last minute."""
+        self._cleanup_old_tokens(current_time)
+        return sum(tokens for _, tokens in self.token_timestamps)
+    
+    async def wait_for_capacity(self, estimated_tokens: int) -> float:
+        """Wait until there's capacity for the estimated tokens, return wait time."""
+        async with self.lock:
+            current_time = time.time()
+            current_usage = self._current_tokens_in_window(current_time)
+            
+            if current_usage + estimated_tokens <= self.tokens_per_minute:
+                # We have capacity, record the usage
+                self.token_timestamps.append((current_time, estimated_tokens))
+                return 0.0
+            
+            # We need to wait - find when the oldest tokens will expire
+            if not self.token_timestamps:
+                # No previous usage, we can proceed
+                self.token_timestamps.append((current_time, estimated_tokens))
+                return 0.0
+            
+            # Calculate how long to wait for enough capacity
+            needed_capacity = estimated_tokens
+            temp_usage = current_usage
+            wait_until = current_time
+            
+            # Find when we'll have enough capacity by removing old tokens
+            temp_timestamps = list(self.token_timestamps)
+            while temp_usage + needed_capacity > self.tokens_per_minute and temp_timestamps:
+                oldest_time, oldest_tokens = temp_timestamps.pop(0)
+                wait_until = max(wait_until, oldest_time + 60)
+                temp_usage -= oldest_tokens
+            
+            wait_time = max(0, wait_until - current_time)
+            
+            if wait_time > 0:
+                await asyncio.sleep(wait_time)
+                # Record the usage after waiting
+                self.token_timestamps.append((time.time(), estimated_tokens))
+            else:
+                self.token_timestamps.append((current_time, estimated_tokens))
+            
+            return wait_time
 
 
 def find_cargo_toml_files(directory: Path) -> List[Path]:
@@ -125,8 +211,9 @@ def read_rust_file(file_path: Path) -> Optional[str]:
         return None
 
 
-def summarize_file_with_llm(client: OpenAI, system_prompt: str, model: str, file_path: Path, file_content: str) -> Optional[str]:
-    """Summarize a single file using the LLM."""
+async def summarize_file_with_llm(client: OpenAI, system_prompt: str, model: str, file_path: Path, 
+                                file_content: str, rate_limiter: TokenRateLimiter) -> Optional[str]:
+    """Summarize a single file using the LLM with rate limiting."""
     try:
         user_prompt = f"""File path: {file_path}
 
@@ -137,12 +224,23 @@ File contents:
 
 Please provide a concise summary of this Rust file's purpose and functionality."""
 
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ]
+        
+        # Estimate tokens and wait for capacity
+        estimated_tokens = rate_limiter.estimate_tokens(messages)
+        # Add estimated response tokens (500 max_tokens)
+        estimated_tokens += 500
+        
+        wait_time = await rate_limiter.wait_for_capacity(estimated_tokens)
+        # if wait_time > 0:
+        #     print(f"  Waited {wait_time:.1f}s for rate limit (estimated {estimated_tokens} tokens)")
+
         response = client.chat.completions.create(
             model=model,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
+            messages=messages,
             max_tokens=500,
             temperature=0.1
         )
@@ -154,9 +252,10 @@ Please provide a concise summary of this Rust file's purpose and functionality."
         return None
 
 
-def generate_program_report(client: OpenAI, system_prompt: str, model: str, cargo_toml_path: Path, package_name: str, 
-                          dependencies: Dict, file_summaries: List[Tuple[str, str]]) -> Optional[str]:
-    """Generate a comprehensive report for a single program."""
+async def generate_program_report(client: OpenAI, system_prompt: str, model: str, cargo_toml_path: Path, 
+                                package_name: str, dependencies: Dict, file_summaries: List[Tuple[str, str]],
+                                rate_limiter: TokenRateLimiter) -> Optional[str]:
+    """Generate a comprehensive report for a single program with rate limiting."""
     try:
         dependencies_str = json.dumps(dependencies, indent=2)
         
@@ -182,12 +281,23 @@ Please provide a concise report about this Solana program package called {packag
 4. Concise summary of the package and what it does.
 5. Any notable features or implementation details"""
 
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ]
+        
+        # Estimate tokens and wait for capacity
+        estimated_tokens = rate_limiter.estimate_tokens(messages)
+        # Add estimated response tokens (1500 max_tokens)
+        estimated_tokens += 1500
+        
+        wait_time = await rate_limiter.wait_for_capacity(estimated_tokens)
+        if wait_time > 0:
+            print(f"  Waited {wait_time:.1f}s for rate limit (estimated {estimated_tokens} tokens)")
+
         response = client.chat.completions.create(
             model=model,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
+            messages=messages,
             max_tokens=1500,
             temperature=0.1
         )
@@ -199,8 +309,8 @@ Please provide a concise report about this Solana program package called {packag
         return None
 
 
-def process_single_program(client: OpenAI, system_prompt: str, model: str, program_info: ProgramInfo, 
-                          root_path: Path, pbar: tqdm) -> Optional[Dict]:
+async def process_single_program(client: OpenAI, system_prompt: str, model: str, program_info: ProgramInfo, 
+                               root_path: Path, pbar: tqdm, rate_limiter: TokenRateLimiter) -> Optional[Dict]:
     """Process a single program and return its report."""
     cargo_file = program_info.cargo_file
     dependencies = program_info.dependencies
@@ -240,7 +350,7 @@ def process_single_program(client: OpenAI, system_prompt: str, model: str, progr
         
         # Generate summary if not cached or cache read failed
         if summary is None:
-            summary = summarize_file_with_llm(client, system_prompt, model, rel_path, file_content)
+            summary = await summarize_file_with_llm(client, system_prompt, model, rel_path, file_content, rate_limiter)
             
             # Save summary to cache
             if summary:
@@ -273,8 +383,8 @@ def process_single_program(client: OpenAI, system_prompt: str, model: str, progr
     
     # Generate report if not cached or cache read failed
     if report is None:
-        report = generate_program_report(client, system_prompt, model, cargo_file, package_name,
-                                       dependencies, file_summaries)
+        report = await generate_program_report(client, system_prompt, model, cargo_file, package_name,
+                                             dependencies, file_summaries, rate_limiter)
         
         # Save report to cache
         if report:
@@ -296,21 +406,46 @@ def process_single_program(client: OpenAI, system_prompt: str, model: str, progr
     return None
 
 
-def process_programs_with_progress(client: OpenAI, system_prompt: str, model: str, 
-                                 programs_to_analyze: List[ProgramInfo], root_path: Path) -> Dict[str, List[Dict]]:
-    """Process all programs with a progress bar, grouped by repository."""
+async def process_programs_with_progress_async(client: OpenAI, system_prompt: str, model: str, 
+                                             programs_to_analyze: List[ProgramInfo], root_path: Path,
+                                             max_concurrent: int = 4, rate_limiter: TokenRateLimiter = None) -> Dict[str, List[Dict]]:
+    """Process all programs with async concurrency control and rate limiting."""
     results_by_repo = {}
+    semaphore = asyncio.Semaphore(max_concurrent)
+    
+    async def process_single_program_async(program_info: ProgramInfo, pbar: tqdm) -> Optional[Dict]:
+        """Async wrapper for processing a single program."""
+        async with semaphore:
+            try:
+                result = await process_single_program(
+                    client, system_prompt, model, program_info, root_path, pbar, rate_limiter
+                )
+                return result
+            except Exception as e:
+                print(f"Error processing {program_info.package_name}: {e}", file=sys.stderr)
+                pbar.update(1)  # Still update progress on error
+                return None
     
     with tqdm(total=len(programs_to_analyze), desc="Analyzing programs", unit="program") as pbar:
-        for program_info in programs_to_analyze:
-            repo_name = program_info.repo_name
-            
-            if repo_name not in results_by_repo:
-                results_by_repo[repo_name] = []
-            
-            result = process_single_program(client, system_prompt, model, program_info, root_path, pbar)
+        # Create all tasks
+        tasks = [
+            process_single_program_async(program_info, pbar)
+            for program_info in programs_to_analyze
+        ]
+        
+        # Wait for all tasks to complete
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        # Process results
+        for i, result in enumerate(results):
+            if isinstance(result, Exception):
+                print(f"Error processing program {programs_to_analyze[i].package_name}: {result}", file=sys.stderr)
+                continue
             
             if result:
+                repo_name = programs_to_analyze[i].repo_name
+                if repo_name not in results_by_repo:
+                    results_by_repo[repo_name] = []
                 results_by_repo[repo_name].append(result)
     
     return results_by_repo
@@ -331,7 +466,8 @@ def create_markdown_report(repo_name: str, program_reports: List[Dict]) -> str:
     return markdown_content
 
 
-def main():
+async def main_async():
+    """Async main function."""
     # Load environment variables from .env file
     load_dotenv()
     
@@ -354,6 +490,18 @@ def main():
         "--exclude-dependency",
         help="Name of the dependency to exclude - skip Cargo files that contain this dependency"
     )
+    parser.add_argument(
+        "--max-concurrent",
+        type=int,
+        default=4,
+        help="Maximum number of concurrent programs to process (default: 4)"
+    )
+    parser.add_argument(
+        "--tokens-per-minute",
+        type=int,
+        default=80000,
+        help="Maximum tokens per minute for API rate limiting (default: 80000)"
+    )
     
     args = parser.parse_args()
     
@@ -361,6 +509,8 @@ def main():
     target_dependency = args.target_dependency
     system_prompt_path = Path(args.system_prompt_file)
     exclude_dependency = args.exclude_dependency
+    max_concurrent = args.max_concurrent
+    tokens_per_minute = args.tokens_per_minute
     
     # Validation
     if not root_path.exists():
@@ -397,6 +547,9 @@ def main():
     client_kwargs = {"api_key": api_key, "base_url": base_url}
     client = OpenAI(**client_kwargs)
     
+    # Initialize rate limiter
+    rate_limiter = TokenRateLimiter(tokens_per_minute, model)
+    
     # Find all programs to analyze upfront
     programs_to_analyze = find_programs_to_analyze(root_path, target_dependency, exclude_dependency)
     
@@ -418,9 +571,13 @@ def main():
     print(f"\nTarget dependency: {target_dependency}")
     if exclude_dependency:
         print(f"Excluding dependency: {exclude_dependency}")
+    print(f"Max concurrent: {max_concurrent}")
+    print(f"Token rate limit: {tokens_per_minute:,} tokens/minute")
     
-    # Process all programs with progress tracking
-    results_by_repo = process_programs_with_progress(client, system_prompt, model, programs_to_analyze, root_path)
+    # Process all programs with async progress tracking
+    results_by_repo = await process_programs_with_progress_async(
+        client, system_prompt, model, programs_to_analyze, root_path, max_concurrent, rate_limiter
+    )
     
     # Create markdown reports for each repository
     total_analyzed = 0
@@ -442,6 +599,11 @@ def main():
                 print(f"Error writing {markdown_path}: {e}", file=sys.stderr)
     
     print(f"\nTotal programs successfully analyzed: {total_analyzed}")
+
+
+def main():
+    """Synchronous main function that runs the async version."""
+    asyncio.run(main_async())
 
 
 if __name__ == "__main__":

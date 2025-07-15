@@ -5,3 +5,4 @@ target
 .env
 __pycache__
 research/solana-repos
+research/anchor-repos
