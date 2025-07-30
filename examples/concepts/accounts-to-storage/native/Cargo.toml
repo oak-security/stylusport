@@ -1,0 +1,20 @@
+[package]
+name = "accounts-to-storage-solana-native"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+borsh.workspace = true
+borsh-derive.workspace = true
+solana-program.workspace = true
+solana-system-interface.workspace = true
+
+[dev-dependencies]
+mollusk-svm.workspace = true
+solana-account.workspace = true
+solana-pubkey.workspace = true
+solana-sdk-ids.workspace = true
+

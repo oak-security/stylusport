@@ -1,0 +1,11 @@
+[package]
+name = "accounts-to-storage-stylus"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+alloy-primitives = { workspace = true, features = [ "tiny-keccak" ] }
+stylus-sdk.workspace = true
+
+[dev-dependencies]
+stylus-sdk = { workspace = true, features = [ "stylus-test" ] }

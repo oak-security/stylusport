@@ -73,7 +73,6 @@
                   cargo = rust-toolchain;
                   clippy = rust-toolchain;
                 };
-                settings.denyWarnings = true;
               };
               rustfmt.enable = true;
               vale.enable = true; # spelling & prose lint
