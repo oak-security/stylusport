@@ -1,12 +1,13 @@
 [workspace]
 members = [
   "cli", 
-  "examples/concepts/accounts-to-storage/*"
+  "examples/concepts/*/*"
 ]
 resolver = "2"
 
 [workspace.dependencies]
 alloy-primitives = "=0.8.20"
+alloy-sol-types = "=0.8.20"
 anchor-lang = "0.31.1"
 borsh = "1.5.7"
 borsh-derive = "1.5.7"
