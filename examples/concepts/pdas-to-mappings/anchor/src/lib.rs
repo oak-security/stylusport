@@ -45,10 +45,9 @@ pub mod data_storage {
 
 #[cfg(test)]
 mod test {
-    use crate::{PlayerAccountState, STARTING_LIVES};
-
     use super::{
-        instruction::CreatePlayerAccount, ID as PROGRAM_ID, PLAYER_PDA_ACCOUNT_SEED, SEED_SEPARATOR,
+        instruction::CreatePlayerAccount, PlayerAccountState, ID as PROGRAM_ID,
+        PLAYER_PDA_ACCOUNT_SEED, SEED_SEPARATOR, STARTING_LIVES,
     };
 
     use anchor_lang::{

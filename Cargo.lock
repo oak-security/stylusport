@@ -1667,6 +1667,56 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b"
 
 [[package]]
+name = "cpi-to-external-call-solana-adder"
+version = "0.1.0"
+dependencies = [
+ "borsh 1.5.7",
+ "borsh-derive 1.5.7",
+ "mollusk-svm",
+ "solana-account",
+ "solana-program",
+ "solana-pubkey",
+ "solana-sdk-ids",
+ "solana-system-interface",
+]
+
+[[package]]
+name = "cpi-to-external-call-solana-anchor"
+version = "0.1.0"
+dependencies = [
+ "anchor-lang",
+ "borsh 1.5.7",
+ "cpi-to-external-call-solana-adder",
+ "mollusk-svm",
+ "solana-account",
+ "solana-pubkey",
+ "solana-sdk-ids",
+]
+
+[[package]]
+name = "cpi-to-external-call-solana-native"
+version = "0.1.0"
+dependencies = [
+ "borsh 1.5.7",
+ "borsh-derive 1.5.7",
+ "cpi-to-external-call-solana-adder",
+ "mollusk-svm",
+ "solana-account",
+ "solana-program",
+ "solana-pubkey",
+ "solana-sdk-ids",
+ "solana-system-interface",
+]
+
+[[package]]
+name = "cpi-to-external-call-stylus"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "stylus-sdk",
+]
+
+[[package]]
 name = "cpufeatures"
 version = "0.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"

@@ -1,0 +1,14 @@
+[package]
+name = "cpi-to-external-call-stylus"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["lib", "cdylib"]
+
+[dependencies]
+alloy-primitives = { workspace = true, features = [ "tiny-keccak" ] }
+stylus-sdk.workspace = true
+
+[dev-dependencies]
+stylus-sdk = { workspace = true, features = [ "stylus-test" ] }

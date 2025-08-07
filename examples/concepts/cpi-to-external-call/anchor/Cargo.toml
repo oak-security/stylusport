@@ -1,0 +1,18 @@
+[package]
+name = "cpi-to-external-call-solana-anchor"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+anchor-lang = { workspace = true, features = ["init-if-needed"] }
+borsh.workspace = true
+cpi-to-external-call-solana-adder = { path = "../solana-adder", features = ["no-entrypoint"] }
+
+[dev-dependencies]
+mollusk-svm.workspace = true
+solana-account.workspace = true
+solana-pubkey.workspace = true
+solana-sdk-ids.workspace = true

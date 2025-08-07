@@ -1,0 +1,23 @@
+[package]
+name = "cpi-to-external-call-solana-adder"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[features]
+no-entrypoint = []
+
+[dependencies]
+borsh.workspace = true
+borsh-derive.workspace = true
+solana-program.workspace = true
+solana-system-interface.workspace = true
+
+[dev-dependencies]
+mollusk-svm.workspace = true
+solana-account.workspace = true
+solana-pubkey.workspace = true
+solana-sdk-ids.workspace = true
+
