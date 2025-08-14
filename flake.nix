@@ -43,6 +43,7 @@
           devShells.default = pkgs.mkShell {
             packages = [
               pkgs.bashInteractive # for correct prompt display in VHS
+              pkgs.cargo-expand
               pkgs.mdbook
               pkgs.ollama
               pkgs.rust-analyzer-unwrapped
