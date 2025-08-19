@@ -1,0 +1,13 @@
+[package]
+name = "program-structure-stylus"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+alloy-primitives.workspace = true
+alloy-sol-types.workspace = true
+stylus-sdk.workspace = true
+
+[dev-dependencies]
+stylus-sdk = { workspace = true, features = [ "stylus-test" ] }
+alloy-primitives = { workspace = true, features = [ "tiny-keccak" ] }
