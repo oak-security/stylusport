@@ -18,7 +18,6 @@ pub const STARTING_LIVES: u8 = 10;
 #[derive(BorshSerialize, BorshDeserialize)]
 pub struct PlayerAccountState {
     pub lives: u8,
-    pub bump: u8,
 }
 
 pub fn process_instruction(
@@ -43,6 +42,23 @@ pub fn process_instruction(
         return Err(ProgramError::InvalidAccountData);
     };
 
+    // ensure PDA has not already been initialized
+    if !player_pda_account.data_is_empty()
+        || player_pda_account.lamports() > 0
+        || *player_pda_account.owner == ID
+    {
+        return Err(ProgramError::AccountAlreadyInitialized);
+    }
+
+    let (player_pda_account_key, bump) = Pubkey::find_program_address(
+        &[PLAYER_PDA_ACCOUNT_SEED, SEED_SEPARATOR, payer.key.as_ref()],
+        &ID,
+    );
+
+    if player_pda_account_key != *player_pda_account.key {
+        return Err(ProgramError::InvalidSeeds);
+    }
+
     let lamports_required = Rent::get()?.minimum_balance(instruction_data.len());
 
     invoke_signed(
@@ -62,7 +78,7 @@ pub fn process_instruction(
             PLAYER_PDA_ACCOUNT_SEED,
             SEED_SEPARATOR,
             payer.key.as_ref(),
-            &[args.bump],
+            &[bump],
         ]],
     )?;
 
@@ -100,7 +116,7 @@ mod test {
             &PROGRAM_ID,
         );
 
-        let instruction_data = borsh::to_vec(&PlayerAccountState { lives: 10, bump }).unwrap();
+        let instruction_data = borsh::to_vec(&PlayerAccountState { lives: 10 }).unwrap();
 
         let initialize_instruction = Instruction::new_with_bytes(
             PROGRAM_ID,

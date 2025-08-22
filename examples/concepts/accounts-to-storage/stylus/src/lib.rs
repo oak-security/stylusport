@@ -4,9 +4,7 @@ extern crate alloc;
 use stylus_sdk::{alloy_primitives::*, prelude::*, storage::*};
 
 #[storage]
-#[entrypoint]
-pub struct DataStorage {
-    bool: StorageBool,
+pub struct IntegerStore {
     uint8: StorageU8,
     uint16: StorageU16,
     uint32: StorageU32,
@@ -19,6 +17,15 @@ pub struct DataStorage {
     int64: StorageI64,
     int128: StorageI128,
     int256: StorageI256,
+}
+
+#[storage]
+#[entrypoint]
+pub struct DataStorage {
+    // Types that implement `StorageType` can be nested
+    // in order to namespace and organize related storage items
+    integers: IntegerStore,
+    bool: StorageBool,
     string: StorageString,
     bytes: StorageBytes,
     fixed_bytes: StorageFixedBytes<4>,
@@ -29,7 +36,7 @@ pub struct DataStorage {
 #[public]
 impl DataStorage {
     #[constructor]
-    // for example purposes only
+    // for example purposes only, avoid using this many parameters to functions
     #[allow(clippy::too_many_arguments)]
     pub fn constructor(
         &mut self,
@@ -52,19 +59,20 @@ impl DataStorage {
         vec: Vec<U64>,
         address: Address,
     ) {
+        // unless explicitly set, all storage is initialized to the types respective zero-value
         self.bool.set(bool);
-        self.uint8.set(uint8);
-        self.uint16.set(uint16);
-        self.uint32.set(uint32);
-        self.uint64.set(uint64);
-        self.uint128.set(uint128);
-        self.uint256.set(uint256);
-        self.int8.set(int8);
-        self.int16.set(int16);
-        self.int32.set(int32);
-        self.int64.set(int64);
-        self.int128.set(int128);
-        self.int256.set(int256);
+        self.integers.uint8.set(uint8);
+        self.integers.uint16.set(uint16);
+        self.integers.uint32.set(uint32);
+        self.integers.uint64.set(uint64);
+        self.integers.uint128.set(uint128);
+        self.integers.uint256.set(uint256);
+        self.integers.int8.set(int8);
+        self.integers.int16.set(int16);
+        self.integers.int32.set(int32);
+        self.integers.int64.set(int64);
+        self.integers.int128.set(int128);
+        self.integers.int256.set(int256);
         self.string.set_str(string);
         self.bytes.set_bytes(bytes);
         self.fixed_bytes.set(fixed_bytes);
@@ -80,40 +88,40 @@ impl DataStorage {
         self.bool.get()
     }
     fn get_uint8(&self) -> U8 {
-        self.uint8.get()
+        self.integers.uint8.get()
     }
     fn get_uint16(&self) -> U16 {
-        self.uint16.get()
+        self.integers.uint16.get()
     }
     fn get_uint32(&self) -> U32 {
-        self.uint32.get()
+        self.integers.uint32.get()
     }
     fn get_uint64(&self) -> U64 {
-        self.uint64.get()
+        self.integers.uint64.get()
     }
     fn get_uint128(&self) -> U128 {
-        self.uint128.get()
+        self.integers.uint128.get()
     }
     fn get_uint256(&self) -> U256 {
-        self.uint256.get()
+        self.integers.uint256.get()
     }
     fn get_int8(&self) -> I8 {
-        self.int8.get()
+        self.integers.int8.get()
     }
     fn get_int16(&self) -> I16 {
-        self.int16.get()
+        self.integers.int16.get()
     }
     fn get_int32(&self) -> I32 {
-        self.int32.get()
+        self.integers.int32.get()
     }
     fn get_int64(&self) -> I64 {
-        self.int64.get()
+        self.integers.int64.get()
     }
     fn get_int128(&self) -> I128 {
-        self.int128.get()
+        self.integers.int128.get()
     }
     fn get_int256(&self) -> I256 {
-        self.int256.get()
+        self.integers.int256.get()
     }
     fn get_string(&self) -> String {
         self.string.get_string()
@@ -128,6 +136,8 @@ impl DataStorage {
         self.address.get()
     }
 
+    // Option<T> is not available as a return or a public function parameter type
+    // as `None` cannot be EVM ABI-encoded, hence the use of (bool, T)
     fn get_vec_item(&self, idx: u32) -> (bool, U64) {
         self.vec.get(idx).map_or((false, U64::ZERO), |x| (true, x))
     }

@@ -13,7 +13,6 @@ declare_id!("JEKNVnkbo3jma5nREBBJCDoXFVeKkD56V3xKrvRmWxFG");
 #[account]
 pub struct PlayerAccountState {
     pub lives: u8,
-    pub bump: u8,
 }
 
 #[derive(Accounts)]
@@ -38,7 +37,6 @@ pub mod data_storage {
 
     pub fn create_player_account(ctx: Context<CreatePlayerAccount>) -> Result<()> {
         ctx.accounts.player_account.lives = STARTING_LIVES;
-        ctx.accounts.player_account.bump = ctx.bumps.player_account;
         Ok(())
     }
 }
