@@ -5,7 +5,7 @@ edition = "2018"
 
 [dependencies]
 clap = { version = "4.5.40", features = ["derive"] }
-color-eyre = "0.6.5"
+color-eyre.workspace = true
 dotenv = "0.15.0"
 ratatui = "0.29.0"
 rayon = "1.10.0"
