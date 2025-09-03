@@ -1,0 +1,18 @@
+[package]
+name = "ownable-stylus"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+export-abi = ["stylus-sdk/export-abi", "openzeppelin-stylus/export-abi"]
+
+[dependencies]
+alloy-primitives.workspace = true
+alloy-sol-types.workspace = true
+openzeppelin-stylus.workspace = true
+stylus-sdk.workspace = true
+
+[dev-dependencies]
+alloy-primitives = { workspace = true, features = [ "tiny-keccak" ] }
+arbitrary = { workspace = true, features = [ "derive" ] } 
+motsu.workspace = true
