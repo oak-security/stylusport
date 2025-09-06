@@ -1,0 +1,19 @@
+[package]
+name = "non-fungible-tokens-solana-anchor"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+anchor-lang = { workspace = true, features = [ "init-if-needed" ] }
+anchor-spl = { workspace = true, features = [ "metadata" ] }
+solana-sdk-ids.workspace = true
+
+[dev-dependencies]
+mollusk-svm.workspace = true
+mollusk-svm-programs-token.workspace = true
+solana-account.workspace = true
+solana-pubkey.workspace = true
+solana-program-pack.workspace = true

@@ -3,6 +3,7 @@ members = [
   "cli", 
   "examples/concepts/*/*"
 ]
+exclude = ["examples/concepts/non-fungible-tokens/elf"]
 resolver = "2"
 
 [workspace.dependencies]
