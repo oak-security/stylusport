@@ -15,7 +15,7 @@
 
 # Part II: Case Study
 
-- [Case Study - Migrating Draffle from Anchor to Stylus](./case-study-draffle.md)
+- [Case Study - Migrating Bonafida's Token Vesting to Stylus](./case-study-bonafida-token-vesting.md)
 
 # Part III: Development and Deployment
 

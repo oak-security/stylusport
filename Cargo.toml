@@ -1,7 +1,8 @@
 [workspace]
 members = [
   "cli", 
-  "examples/concepts/*/*"
+  "examples/concepts/*/*",
+  "examples/case-studies/*"
 ]
 exclude = ["examples/concepts/non-fungible-tokens/elf"]
 resolver = "2"
