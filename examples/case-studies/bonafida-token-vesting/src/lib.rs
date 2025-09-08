@@ -69,7 +69,7 @@ impl TokenVestingContract {
     /// - InvalidToken: if the provided token address is zero
     /// - InvalidSource: if the provided source address is zero
     /// - InvalidDestination: if the provided destination address is zero
-    /// - InvalidSchedule: if the provided schedule is empty, contains a zero timestamp or amount, or the total amount overflows 256 bits.
+    /// - InvalidSchedule: if the provided schedule is empty, contains a zero timestamp or amount, not ordered chronologically or the total amount overflows 256 bits.
     /// - TokenDepositTransferFailed: if there is an error transferring the total vesting amount from the caller to the contract
     pub fn create(
         &mut self,
@@ -242,6 +242,40 @@ impl TokenVestingContract {
         self.owner.insert(schedule_id, owner);
 
         Ok(())
+    }
+
+    // View functions
+    fn schedule_count(&self) -> U256 {
+        self.schedule_count.get()
+    }
+
+    fn token(&self, schedule_id: U256) -> Address {
+        self.token.get(schedule_id)
+    }
+
+    fn destination(&self, schedule_id: U256) -> Address {
+        self.destination.get(schedule_id)
+    }
+
+    fn owner(&self, schedule_id: U256) -> Address {
+        self.owner.get(schedule_id)
+    }
+
+    fn schedule(&self, schedule_id: U256) -> Vec<(U64, U256)> {
+        if self.token(schedule_id).is_zero() {
+            return vec![];
+        }
+
+        let schedule_store = self.schedule.getter(schedule_id);
+
+        let mut schedule = vec![];
+        let mut idx = 0;
+        while let Some(schedule_item) = schedule_store.getter(idx) {
+            schedule.push((schedule_item.timestamp.get(), schedule_item.amount.get()));
+            idx += 1;
+        }
+
+        schedule
     }
 }
 
