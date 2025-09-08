@@ -2,6 +2,10 @@
 
 A comprehensive handbook and AI-augmented CLI tool for developers transitioning from Solana Programs to Stylus Contracts.
 
+## ⚠️ Disclaimer
+
+**This handbook and its accompanying code examples have not yet been audited or peer reviewed.** The content is provided for educational and reference purposes only. Users should exercise caution and conduct their own thorough review and testing before implementing any concepts, patterns, or code from this repository in production systems.
+
 ## Project Structure
 
 - **`handbook/`** - mdbook source files containing the complete guide for porting Solana Programs to Stylus Contracts
