@@ -18,7 +18,9 @@ borsh-derive = "1.5.7"
 color-eyre = "0.6.5"
 mollusk-svm = "0.4.1"
 mollusk-svm-programs-token = "0.4.1"
-motsu = "0.10.0"
+# TODO: Use version once https://github.com/OpenZeppelin/stylus-test-helpers/pull/121 is merged & published
+# motsu = "0.10.0"
+motsu = { git = "https://github.com/OpenZeppelin/stylus-test-helpers", branch = "set-block-timestamp" }
 mpl-token-metadata = "5.1.0"
 openzeppelin-stylus = "=0.2.0"
 solana-account = "2.2.1"

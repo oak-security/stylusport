@@ -3604,8 +3604,7 @@ dependencies = [
 [[package]]
 name = "motsu"
 version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "86ffb08358f3acb5e97757047c898c2e0f852997f6b8ff4b32613971a4d8219d"
+source = "git+https://github.com/OpenZeppelin/stylus-test-helpers?branch=set-block-timestamp#361dc5f18055ac0f8d2682b9b4f3468c95ca0625"
 dependencies = [
  "alloy-primitives",
  "alloy-signer-local",
@@ -3623,8 +3622,7 @@ dependencies = [
 [[package]]
 name = "motsu-proc"
 version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "596b892439b97b288be7c6bf616c62ea607fe74a7a9a41903f9d78b7b1274ac4"
+source = "git+https://github.com/OpenZeppelin/stylus-test-helpers?branch=set-block-timestamp#361dc5f18055ac0f8d2682b9b4f3468c95ca0625"
 dependencies = [
  "proc-macro2",
  "quote",
