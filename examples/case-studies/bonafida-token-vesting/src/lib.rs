@@ -21,6 +21,34 @@ sol! {
     error NoUnlocksAvailable();
     #[derive(Debug)]
     error Unauthorized();
+
+    event ScheduleCreated(
+        uint256 schedule_id,
+        address token,
+        address owner,
+        address source,
+        address destination,
+        uint64[] timestamps,
+        uint256[] amounts
+    );
+
+    event TokensUnlocked(
+        uint256 schedule_id,
+        address destination,
+        uint256 unlocked_token_amount,
+    );
+
+    event DestinationChanged(
+        uint256 schedule_id,
+        address old_destination,
+        address new_destination,
+    );
+
+    event OwnerChanged(
+        uint256 schedule_id,
+        address old_owner,
+        address new_owner,
+    );
 }
 
 #[derive(SolidityError, Debug)]
@@ -69,7 +97,7 @@ impl TokenVestingContract {
     /// - InvalidToken: if the provided token address is zero
     /// - InvalidSource: if the provided source address is zero
     /// - InvalidDestination: if the provided destination address is zero
-    /// - InvalidSchedule: if the provided schedule is empty, contains a zero timestamp or amount, not ordered chronologically or the total amount overflows 256 bits.
+    /// - InvalidSchedule: if the provided schedule is empty, contains a zero amount, is not ordered chronologically or the total amount overflows 256 bits.
     /// - TokenDepositTransferFailed: if there is an error transferring the total vesting amount from the caller to the contract
     pub fn create(
         &mut self,
@@ -77,9 +105,8 @@ impl TokenVestingContract {
         owner: Address,
         source: Address,
         destination: Address,
-        schedule: Vec<(U64, U256)>,
+        schedule: Vec<(u64, U256)>,
     ) -> Result<U256, ContractError> {
-        // Step 1: validate inputs
         if token == Address::ZERO {
             return Err(InvalidToken {}.into());
         }
@@ -96,24 +123,28 @@ impl TokenVestingContract {
             return Err(InvalidSchedule {}.into());
         }
 
-        // Step 2/3: calculate total vested amount & write schedule state
         let schedule_id = self.schedule_count.get() + U256::ONE;
 
-        // Only iterate through schedule unlocks once
         let mut schedule_store = self.schedule.setter(schedule_id);
         let mut total_vested_amount = U256::ZERO;
+        let mut last_timestamp = 0u64;
+        let mut timestamps = Vec::with_capacity(schedule.len());
+        let mut amounts = Vec::with_capacity(schedule.len());
         for (timestamp, amount) in schedule {
-            if amount.is_zero() || timestamp.is_zero() {
+            if amount.is_zero() || timestamp < last_timestamp {
                 return Err(InvalidSchedule {}.into());
             }
 
+            last_timestamp = timestamp;
             total_vested_amount = total_vested_amount
                 .checked_add(amount)
                 .ok_or(InvalidSchedule {})?;
 
-            let mut schedule_item = schedule_store.grow();
+            timestamps.push(timestamp);
+            amounts.push(amount);
 
-            schedule_item.timestamp.set(timestamp);
+            let mut schedule_item = schedule_store.grow();
+            schedule_item.timestamp.set(U64::from(timestamp));
             schedule_item.amount.set(amount);
         }
 
@@ -122,7 +153,19 @@ impl TokenVestingContract {
         self.owner.insert(schedule_id, owner);
         self.destination.insert(schedule_id, destination);
 
-        // Step 4: Transfer the total vesting amount to the contract
+        log(
+            self.vm(),
+            ScheduleCreated {
+                schedule_id,
+                token,
+                owner,
+                source,
+                destination,
+                timestamps,
+                amounts,
+            },
+        );
+
         let contract_addr = self.vm().contract_address();
         Erc20Interface::new(token)
             .transfer_from(self, source, contract_addr, total_vested_amount)
@@ -137,20 +180,17 @@ impl TokenVestingContract {
     /// - ScheduleNotFound: if the provided `schedule_id` is not associated with a schedule
     /// - NoUnlocksAvailable: if there a zero unlocked tokens to transfer
     pub fn unlock(&mut self, schedule_id: U256) -> Result<(), ContractError> {
-        // Step 1: Check that the schedule exits
         let token = self.token.get(schedule_id);
 
         if token.is_zero() {
             return Err(ScheduleNotFound {}.into());
         }
 
-        // Step 2: Determine unlocked token amount & zero newly unlocked amounts
         let now = U64::from(self.vm().block_timestamp());
 
         let mut schedule = self.schedule.setter(schedule_id);
         let mut idx = 0;
         let mut unlocked_token_amount = U256::ZERO;
-
         loop {
             let Some(mut schedule_item) = schedule.setter(idx) else {
                 break;
@@ -174,13 +214,21 @@ impl TokenVestingContract {
             unlocked_token_amount += amount;
         }
 
-        // Step 3: Check that unlocks are available
         if unlocked_token_amount.is_zero() {
             return Err(NoUnlocksAvailable {}.into());
         }
 
-        // Step 4: Transfer the unlocked amount to the current destination account
         let destination = self.destination.get(schedule_id);
+
+        log(
+            self.vm(),
+            TokensUnlocked {
+                schedule_id,
+                destination,
+                unlocked_token_amount,
+            },
+        );
+
         Erc20Interface::new(token)
             .transfer(self, destination, unlocked_token_amount)
             .expect("Invariant: the contract always has sufficient balance to satisfy unlocks");
@@ -197,25 +245,30 @@ impl TokenVestingContract {
     pub fn change_destination(
         &mut self,
         schedule_id: U256,
-        destination: Address,
+        new_destination: Address,
     ) -> Result<(), ContractError> {
-        // Step 1: Check that the proposed destination is valid
-        if destination == Address::ZERO {
+        if new_destination == Address::ZERO {
             return Err(InvalidDestination {}.into());
         }
 
-        // Step 2: Check that the schedule exists
         if self.token.get(schedule_id).is_zero() {
             return Err(ScheduleNotFound {}.into());
         }
 
-        // Step 3: Check that the caller is the current owner
         if self.vm().msg_sender() != self.owner.get(schedule_id) {
             return Err(Unauthorized {}.into());
         }
 
-        // Step 4: Overwrite the stored destination
-        self.destination.insert(schedule_id, destination);
+        let old_destination = self.destination.replace(schedule_id, new_destination);
+
+        log(
+            self.vm(),
+            DestinationChanged {
+                schedule_id,
+                old_destination,
+                new_destination,
+            },
+        );
 
         Ok(())
     }
@@ -227,19 +280,29 @@ impl TokenVestingContract {
     /// # Errors
     /// - ScheduleNotFound: if the provided `schedule_id` is not associated with a schedule
     /// - Unauthorized: if the caller is not the owner of the schedule
-    pub fn change_owner(&mut self, schedule_id: U256, owner: Address) -> Result<(), ContractError> {
-        // Step 1: Check that the schedule exists
+    pub fn change_owner(
+        &mut self,
+        schedule_id: U256,
+        new_owner: Address,
+    ) -> Result<(), ContractError> {
         if self.token.get(schedule_id).is_zero() {
             return Err(ScheduleNotFound {}.into());
         }
 
-        // Step 2: Check that the caller is the current owner
         if self.vm().msg_sender() != self.owner.get(schedule_id) {
             return Err(Unauthorized {}.into());
         }
 
-        // Step 3: Overwrite the stored owner
-        self.owner.insert(schedule_id, owner);
+        let old_owner = self.owner.replace(schedule_id, new_owner);
+
+        log(
+            self.vm(),
+            OwnerChanged {
+                schedule_id,
+                old_owner,
+                new_owner,
+            },
+        );
 
         Ok(())
     }
