@@ -248,6 +248,7 @@ impl ExternalCaller {
 ## Next Steps
 
 With external calls mastered, you're ready to explore:
+- [Native Token Handling](./native-tokens.md) - Differences in receiving, escrowing and transferring native SOL and ETH
 - [Fungible Tokens](./fungible-tokens.md) - Migrating SPL tokens to ERC-20
 - [Non-Fungible Tokens](./non-fungible-tokens.md) - Migrating Metaplex NFTs to ERC-721
 

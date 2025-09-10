@@ -8,9 +8,9 @@
 - [State Storage Patterns](./state-storage.md)
 - [Access Control Migration](./access-control.md)
 - [External Program Calls](./external-calls.md)
+- [Native Token Operations](./native-tokens.md)
 - [Fungible Token Handling](./fungible-tokens.md)
 - [Non-Fungible Token Handling](./non-fungible-tokens.md)
-- [Native Token Operations](./native-tokens.md)
 - [Errors and Events](./errors-events.md)
 
 # Part II: Case Study

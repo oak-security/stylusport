@@ -8,19 +8,6 @@ pub static DEPOSIT_PDA_ACCOUNT_SEED: &[u8] = b"deposit";
 
 declare_id!("JEKNVnkbo3jma5nREBBJCDoXFVeKkD56V3xKrvRmWxFG");
 
-#[derive(Accounts)]
-#[instruction()]
-pub struct WithdrawAllLamports<'info> {
-    #[account(mut)]
-    pub payer: Signer<'info>,
-    #[account(
-        seeds = [DEPOSIT_PDA_ACCOUNT_SEED, SEED_SEPARATOR, payer.key().as_ref()],
-        bump,
-    )]
-    pub deposit_account: SystemAccount<'info>,
-    pub system_program: Program<'info, System>,
-}
-
 #[program]
 pub mod native_token_handling {
     use super::*;
@@ -45,6 +32,19 @@ pub mod native_token_handling {
 
         Ok(())
     }
+}
+
+#[derive(Accounts)]
+#[instruction()]
+pub struct WithdrawAllLamports<'info> {
+    #[account(mut)]
+    pub payer: Signer<'info>,
+    #[account(
+        seeds = [DEPOSIT_PDA_ACCOUNT_SEED, SEED_SEPARATOR, payer.key().as_ref()],
+        bump,
+    )]
+    pub deposit_account: SystemAccount<'info>,
+    pub system_program: Program<'info, System>,
 }
 
 #[cfg(test)]
