@@ -1,895 +1,643 @@
 # Chapter 8: Errors and Events
 
-Proper error handling and event emission provide crucial functionality for robust smart contracts and user experience. This chapter covers migrating from Solana's `msg!()` logging and `ProgramError` returns to Stylus's structured events and custom error types.
+Proper error reporting and event emission are crucial for robust smart contracts and user experience. This chapter covers migrating from Solana's `msg!()` logging and `ProgramError` type to Stylus's structured events and custom error types.
 
-## Error and Event Model Comparison
+## Errors
 
-### Solana Error/Event Model
-- **Errors**: Return `ProgramError` variants or custom errors
-- **Logging**: Use `msg!()` macro for simple string messages
-- **Program Logs**: All outputs captured in transaction logs
-- **Structured Data**: Limited - primarily string messages
+### Solana
 
-### Stylus Error/Event Model  
-- **Errors**: Return `Result<T, CustomError>` with structured error types
-- **Events**: Emit typed events with indexed parameters using `evm::log()`
-- **ABI Integration**: Events become part of contract ABI for frontend integration
-- **Rich Data**: Full support for complex event data structures
+The error type used for all Solana programs is [`solana_program::program_error::ProgramError`](https://docs.rs/solana-program/latest/solana_program/program_error/enum.ProgramError.html) which is defined as:
 
-## Basic Error Handling Migration
-
-### From Solana Errors
-
-**Solana Native:**
 ```rust
-use solana_program::*;
-
-#[derive(Clone, Debug, Eq, Error, FromPrimitive, PartialEq)]
-pub enum CustomError {
-    #[error("Insufficient funds")]
+pub enum ProgramError {
+    /// Allows on-chain programs to implement program-specific error types and see them returned
+    /// by the Solana runtime. A program-specific error may be any type that is represented as
+    /// or serialized to a u32 integer.
+    Custom(u32),
+    InvalidArgument,
+    InvalidInstructionData,
+    InvalidAccountData,
+    AccountDataTooSmall,
     InsufficientFunds,
-    #[error("Invalid authority")]
-    InvalidAuthority,
-    #[error("Account not initialized")]
-    NotInitialized,
-}
-
-impl From<CustomError> for ProgramError {
-    fn from(e: CustomError) -> Self {
-        ProgramError::Custom(e as u32)
-    }
-}
-
-fn process_transfer(
-    accounts: &[AccountInfo],
-    amount: u64,
-) -> ProgramResult {
-    let user_account = &accounts[0];
-    let authority = &accounts[1];
-    
-    if !authority.is_signer {
-        msg!("Authority must sign the transaction");
-        return Err(CustomError::InvalidAuthority.into());
-    }
-    
-    let user_data = UserAccount::try_from_slice(&user_account.data.borrow())?;
-    
-    if user_data.balance < amount {
-        msg!("Insufficient funds: {} < {}", user_data.balance, amount);
-        return Err(CustomError::InsufficientFunds.into());
-    }
-    
-    // Process transfer
-    msg!("Transfer successful: {} tokens", amount);
-    Ok(())
+    IncorrectProgramId,
+    MissingRequiredSignature,
+    AccountAlreadyInitialized,
+    UninitializedAccount,
+    NotEnoughAccountKeys,
+    AccountBorrowFailed,
+    MaxSeedLengthExceeded,
+    InvalidSeeds,
+    BorshIoError(String),
+    AccountNotRentExempt,
+    UnsupportedSysvar,
+    IllegalOwner,
+    MaxAccountsDataAllocationsExceeded,
+    InvalidRealloc,
+    MaxInstructionTraceLengthExceeded,
+    BuiltinProgramsMustConsumeComputeUnits,
+    InvalidAccountOwner,
+    ArithmeticOverflow,
+    Immutable,
+    IncorrectAuthority,
 }
 ```
 
-**Anchor:**
-```rust
-use anchor_lang::prelude::*;
+Many of these generic variants can be returned during account and instruction validation. The `Custom` variant can be used to return program-specific errors such as those arising from business logic. The user simply needs to be able to convert their custom error to a `u32` integer.
 
-#[error_code]
-pub enum CustomError {
-    #[msg("Insufficient funds for this operation")]
-    InsufficientFunds,
-    #[msg("Invalid authority for this operation")]
-    InvalidAuthority,
-    #[msg("Account has not been initialized")]
-    NotInitialized,
+In native Solana programs, this is done like so:
+
+```rust
+#[derive(BorshSerialize, BorshDeserialize)]
+pub enum Instruction {
+    InvalidAmount {},
+    Unauthorized {},
 }
 
+#[derive(Debug, Clone, Copy)]
+// allows casting to u32 for value enums (no associated data)
+#[repr(u32)]
+pub enum ErrorCode {
+    InvalidAmount,
+    Unauthorized,
+}
+
+impl From<ErrorCode> for ProgramError {
+    fn from(value: ErrorCode) -> Self {
+        Self::Custom(value as _)
+    }
+}
+
+pub fn process_instruction(
+    program_id: &Pubkey,
+    accounts: &[AccountInfo],
+    instruction_data: &[u8],
+) -> ProgramResult {
+    if !check_id(program_id) {
+        return Err(ProgramError::IncorrectProgramId);
+    }
+
+    let Ok(ix) = Instruction::try_from_slice(instruction_data) else {
+        return Err(ProgramError::InvalidInstructionData);
+    };
+
+    match ix {
+        Instruction::InvalidAmount {} => process_invalid_value(accounts),
+        Instruction::Unauthorized {} => process_unauthorized(accounts),
+    }
+}
+
+fn process_invalid_value(_accounts: &[AccountInfo]) -> ProgramResult {
+    Err(ErrorCode::InvalidAmount.into())
+}
+
+fn process_unauthorized(_accounts: &[AccountInfo]) -> ProgramResult {
+    Err(ErrorCode::Unauthorized.into())
+}
+```
+
+If we expand the `entrypoint!` macro, we can see that ultimately the program returns a `u64` integer after processing an instruction:
+
+```rust
+#[no_mangle]
+pub unsafe extern "C" fn entrypoint(input: *mut u8) -> u64 {
+    let (program_id, accounts, instruction_data) = unsafe {
+        ::solana_program_entrypoint::deserialize(input)
+    };
+    match process_instruction(program_id, &accounts, instruction_data) {
+        // returns 0 for success
+        Ok(()) => ::solana_program_entrypoint::SUCCESS,
+        // returns solana_program::program_error::ProgramError converted to u64
+        // Every variant apart from Custom(_) is mapped to a value > u32::MAX + 1
+        // Custom(0) is converted to 1 << 32, ensuring that every custom error: 0 < error_code <= u32::MAX + 1
+        Err(error) => error.into(),
+    }
+}
+```
+
+Anchor provides the `#[error_code]` macro to reduce the boilerplate required to setup custom errors. Custom errors can also be specified within constraint rules:
+
+```rust
 #[program]
-pub mod my_program {
-    pub fn process_transfer(ctx: Context<TransferAccounts>, amount: u64) -> Result<()> {
-        let user_account = &ctx.accounts.user_account;
-        
-        if user_account.balance < amount {
-            msg!("Insufficient funds: {} < {}", user_account.balance, amount);
-            return Err(error!(CustomError::InsufficientFunds));
-        }
-        
-        // Process transfer
-        user_account.balance -= amount;
-        
-        msg!("Transfer successful: {} tokens", amount);
+pub mod errors_events {
+    use super::*;
+
+    pub fn invalid_amount(_ctx: Context<InvalidAmount>) -> Result<()> {
+        Err(ErrorCode::InvalidAmount.into())
+    }
+
+    pub fn unauthorized(_ctx: Context<Unauthorized>) -> Result<()> {
         Ok(())
     }
 }
-```
 
-### To Stylus Structured Errors
-
-**Stylus:**
-```rust
-use stylus_sdk::prelude::*;
-use stylus_sdk::{evm, msg, block};
-use alloy_primitives::{Address, U256};
-
-// Define custom error types with the sol! macro
-sol! {
-    error InsufficientFunds(uint256 requested, uint256 available);
-    error InvalidAuthority(address provided, address expected);
-    error NotInitialized();
-    error TransferFailed(address from, address to, uint256 amount);
-    error InvalidAmount(uint256 amount);
-    error Unauthorized(address caller);
+#[derive(Accounts)]
+pub struct InvalidAmount<'info> {
+    #[account(mut)]
+    pub signer: Signer<'info>,
+    pub system_program: Program<'info, System>,
 }
 
-// Define the SolidityError enum that derives from the errors above
+#[derive(Accounts)]
+pub struct Unauthorized<'info> {
+    #[account(mut, constraint = false @ ErrorCode::Unauthorized)]
+    pub signer: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+#[error_code]
+pub enum ErrorCode {
+    #[msg("Invalid amount: amount must be greater than 0")]
+    InvalidAmount,
+    #[msg("Unauthorized")]
+    Unauthorized,
+}
+```
+
+The `#[error_code]` macro expands to:
+
+```rust
+#[repr(u32)]
+pub enum ErrorCode {
+    InvalidAmount,
+    Unauthorized,
+}
+
+impl ErrorCode {
+    /// Gets the name of this [#enum_name].
+    pub fn name(&self) -> String {
+        match self {
+            ErrorCode::InvalidAmount => "InvalidAmount".to_string(),
+            ErrorCode::Unauthorized => "Unauthorized".to_string(),
+        }
+    }
+}
+
+impl From<ErrorCode> for u32 {
+    fn from(e: ErrorCode) -> u32 {
+        e as u32 + anchor_lang::error::ERROR_CODE_OFFSET
+    }
+}
+
+impl From<ErrorCode> for anchor_lang::error::Error {
+    fn from(error_code: ErrorCode) -> anchor_lang::error::Error {
+        anchor_lang::error::Error::from(anchor_lang::error::AnchorError {
+            error_name: error_code.name(),
+            error_code_number: error_code.into(),
+            error_msg: error_code.to_string(),
+            error_origin: None,
+            compared_values: None,
+        })
+    }
+}
+
+impl std::fmt::Display for ErrorCode {
+    fn fmt(
+        &self,
+        fmt: &mut std::fmt::Formatter<'_>,
+    ) -> std::result::Result<(), std::fmt::Error> {
+        match self {
+            ErrorCode::InvalidAmount => {
+                fmt.write_fmt(
+                    format_args!("Invalid amount: amount must be greater than 0"),
+                )
+            }
+            ErrorCode::Unauthorized => fmt.write_fmt(format_args!("Unauthorized")),
+        }
+    }
+}
+```
+
+Note that `anchor_lang::error::ERROR_CODE_OFFSET` is used to reserve space for Anchor's own custom errors.
+
+Each instruction handler returns `Result<T, anchor_lang::error::Error>`. If a handler returns `Err(anchor_lang::error::Error)`, it is converted first to a `solana_program::error::ProgramError` before ultimately being returned as an integer, as show in the macro expansion below:
+
+```rust
+#[no_mangle]
+pub unsafe extern "C" fn entrypoint(input: *mut u8) -> u64 {
+    let (program_id, accounts, instruction_data) = unsafe {
+        ::solana_program_entrypoint::deserialize(input)
+    };
+    match entry(program_id, &accounts, instruction_data) {
+        Ok(()) => ::solana_program_entrypoint::SUCCESS,
+        Err(error) => error.into(),
+    }
+}
+
+pub fn entry<'info>(
+    program_id: &Pubkey,
+    accounts: &'info [AccountInfo<'info>],
+    data: &[u8],
+) -> anchor_lang::solana_program::entrypoint::ProgramResult {
+    try_entry(program_id, accounts, data)
+        .map_err(|e| {
+            e.log();
+            e.into()
+        })
+}
+
+fn try_entry<'info>(
+    program_id: &Pubkey,
+    accounts: &'info [AccountInfo<'info>],
+    data: &[u8],
+) -> Result<(), > {
+    if *program_id != ID {
+        return Err(anchor_lang::error::ErrorCode::DeclaredProgramIdMismatch.into());
+    }
+    dispatch(program_id, accounts, data)
+}
+```
+
+### Stylus
+
+In contrast to Solana programs, a Stylus contract entrypoint always returns either zero or one, where zero denotes a successful call and one signifies an error occured. For a contract function with returns, `Result<T, E>`, the error type `E` is converted to a byte array and written to the return data buffer:
+
+```rust
+#[no_mangle]
+pub extern "C" fn user_entrypoint(len: usize) -> usize {
+    let host = stylus_sdk::host::VM(stylus_sdk::host::WasmVM {});
+    if host.msg_reentrant() {
+        return 1;
+    }
+    host.pay_for_memory_grow(0);
+    let input = host.read_args(len);
+    // Calls the stylus_sdk::abi::router_entrypoint function returning ArbResult aka Result<Vec<u8>, Vec<u8>>
+    let (data, status) = match __stylus_struct_entrypoint(input, host.clone()) {
+        Ok(data) => (data, 0),
+        Err(data) => (data, 1),
+    };
+    host.flush_cache(false);
+    host.write_result(&data);
+    status
+}
+```
+
+The `SolidityError` derive macro can be used to implement `From<E>` for `Vec<u8>` for the contract defined error type `E`:
+
+```rust
+sol! {
+    error InvalidAmount(uint256 expected, uint256 received);
+    error Unauthorized(address account);
+}
+
 #[derive(SolidityError)]
-pub enum CustomError {
-    InsufficientFunds(InsufficientFunds),
-    InvalidAuthority(InvalidAuthority),
-    NotInitialized(NotInitialized),
-    TransferFailed(TransferFailed),
+pub enum ContractError {
+    InvalidAmount(InvalidAmount),
+    Unauthorized(Unauthorized),
+}
+```
+
+Note that there is not also a trait with the name `SolidityError` like most Rust derive macros, instead it expands to the following:
+
+```rust 
+impl From<InvalidAmount> for ContractError {
+    fn from(value: InvalidAmount) -> Self {
+        ContractError::InvalidAmount(value)
+    }
+}
+
+impl From<Unauthorized> for ContractError {
+    fn from(value: Unauthorized) -> Self {
+        ContractError::Unauthorized(value)
+    }
+}
+
+impl From<ContractError> for alloc::vec::Vec<u8> {
+    fn from(err: ContractError) -> Self {
+        match err {
+            ContractError::InvalidAmount(e) => stylus_sdk::call::MethodError::encode(e),
+            ContractError::Unauthorized(e) => stylus_sdk::call::MethodError::encode(e),
+        }
+    }
+}
+```
+
+The derive macro expects an enum consisting on one or more unit variants containing a single type implementing the [`stylus_sdk::call::MethodError`](https://docs.rs/stylus-sdk/latest/stylus_sdk/call/trait.MethodError.html) trait. There is a [blanket implementation](https://docs.rs/stylus-sdk/latest/stylus_sdk/call/trait.MethodError.html#impl-MethodError-for-T) of `stylus_sdk::call::MethodError` for any type which also implements [`alloy_sol_types::SolError`](https://docs.rs/alloy-sol-types/0.8.20/alloy_sol_types/trait.SolError.html). The [`sol!`](https://docs.rs/alloy-sol-macro/0.8.20/alloy_sol_macro/macro.sol.html) macro is the easiest way to define types that implement `SolError`.
+
+The above mechanisms can be combined to allow Stylus contracts to return structured custom errors:
+
+```rust
+#[storage]
+#[entrypoint]
+pub struct ErrorsEvents {}
+
+sol! {
+    error InvalidAmount(uint256 expected, uint256 received);
+    error Unauthorized(address account);
+}
+
+#[derive(SolidityError)]
+pub enum ContractError {
     InvalidAmount(InvalidAmount),
     Unauthorized(Unauthorized),
 }
 
-sol! {
-    event TransferCompleted(address indexed from, address indexed to, uint256 amount);
-    event OwnershipTransferred(address indexed previous_owner, address indexed new_owner);
-    event FunctionCalled(address indexed caller, string function_name, uint256 timestamp);
-}
-
-#[storage]
-#[entrypoint]
-pub struct TokenContract {
-    balances: StorageMap<Address, StorageU256>,
-    owner: StorageAddress,
-}
-
 #[public]
-impl TokenContract {
-    pub fn transfer(&mut self, to: Address, amount: U256) -> Result<(), CustomError> {
-        let sender = msg::sender();
-        let sender_balance = self.balances.get(sender);
-        
-        // Structured error with data
-        if sender_balance < amount {
-            return Err(CustomError::InsufficientFunds(InsufficientFunds {
-                requested: amount,
-                available: sender_balance,
-            }));
-        }
-        
-        if to == Address::ZERO {
-            return Err(CustomError::TransferFailed(TransferFailed {
-                from: sender,
-                to,
-                amount,
-            }));
-        }
-        
-        // Update balances
-        self.balances.setter(sender).set(sender_balance - amount);
-        let to_balance = self.balances.get(to);
-        self.balances.setter(to).set(to_balance + amount);
-        
-        evm::log(TransferCompleted {
-            from: sender,
-            to,
-            amount,
-        });
-        
-        Ok(())
+impl ErrorsEvents {
+    pub fn invalid_amount(&mut self, expected: U256, received: U256) -> Result<(), ContractError> {
+        Err(InvalidAmount { expected, received }.into())
     }
-    
-    pub fn restricted_function(&mut self) -> Result<(), CustomError> {
-        let sender = msg::sender();
-        let expected_owner = self.owner.get();
-        
-        if sender != expected_owner {
-            return Err(CustomError::InvalidAuthority(InvalidAuthority {
-                provided: sender,
-                expected: expected_owner,
-            }));
+
+    pub fn unauthorized(&mut self) -> Result<(), ContractError> {
+        Err(Unauthorized {
+            account: self.vm().msg_sender(),
         }
-        
-        // Function implementation
-        Ok(())
+        .into())
     }
 }
 ```
 
-## Event Emission Patterns
+## Logging and events
 
-### From Simple Logging
+### Solana
 
-**Solana `msg!()` Calls:**
-```rust
-msg!("User {} deposited {} tokens", user_key, amount);
-msg!("Withdrawal processed for account {}", account_key);
-msg!("Price updated from {} to {}", old_price, new_price);
-```
+[Logging](https://docs.rs/solana-program/latest/solana_program/log/index.html) in Solana is in the form of lines of free text. Due to the lack of standardized ABI for function selection and all errors being reduced to integers, Solana program logs are an important part of instruction execution auditing and tracking. Additionally, they are frequently used for debugging programs during the development process.
 
-**Stylus Structured Events:**
-```rust
-// Define events with typed parameters
-sol! {
-    event Deposit(address indexed user, uint256 amount, uint256 timestamp);
-    event Withdrawal(address indexed account, uint256 amount, uint256 new_balance);
-    event PriceUpdated(uint256 old_price, uint256 new_price, address indexed updater);
-}
-
-#[public]
-impl MyContract {
-    pub fn deposit(&mut self, amount: U256) -> Result<(), CustomError> {
-        let user = msg::sender();
-        if amount == U256::ZERO {
-            return Err(CustomError::InvalidAmount(InvalidAmount { amount }));
-        }
-        
-        // ... deposit logic
-        
-        // Emit structured event
-        evm::log(Deposit {
-            user,
-            amount,
-            timestamp: U256::from(block::timestamp()),
-        });
-        
-        Ok(())
-    }
-    
-    pub fn withdraw(&mut self, amount: U256) -> Result<(), CustomError> {
-        let account = msg::sender();
-        
-        // ... withdrawal logic
-        let new_balance = self.balances.get(account);
-        
-        // Emit event with computed data
-        evm::log(Withdrawal {
-            account,
-            amount,
-            new_balance,
-        });
-        
-        Ok(())
-    }
-    
-    pub fn update_price(&mut self, new_price: U256) -> Result<(), CustomError> {
-        let old_price = self.price.get();
-        self.price.set(new_price);
-        
-        // Event with indexed parameter for efficient filtering
-        evm::log(PriceUpdated {
-            old_price,
-            new_price,
-            updater: msg::sender(),
-        });
-        
-        Ok(())
-    }
-}
-```
-
-### Advanced Event Patterns
-
-**Complex Event Data:**
-```rust
-use alloc::vec::Vec;
-use alloc::string::{String, ToString};
-
-sol! {
-    struct TradeInfo {
-        address token_in;
-        address token_out;
-        uint256 amount_in;
-        uint256 amount_out;
-        uint256 fee;
-    }
-    
-    event TradeExecuted(
-        address indexed trader,
-        TradeInfo trade,
-        uint256 timestamp
-    );
-    
-    event BatchOperation(
-        address indexed operator,
-        string operation_type,
-        uint256[] token_ids,
-        address[] recipients
-    );
-}
-
-#[public]
-impl DEXContract {
-    pub fn execute_trade(
-        &mut self,
-        token_in: Address,
-        token_out: Address,
-        amount_in: U256,
-    ) -> Result<U256, Vec<u8>> {
-        let trader = msg::sender();
-        
-        // ... trade execution logic
-        let amount_out = self.calculate_output(token_in, token_out, amount_in)?;
-        let fee = amount_out * U256::from(3) / U256::from(1000); // 0.3% fee
-        
-        // Emit complex structured event
-        evm::log(TradeExecuted {
-            trader,
-            trade: TradeInfo {
-                token_in,
-                token_out,
-                amount_in,
-                amount_out,
-                fee,
-            },
-            timestamp: U256::from(block::timestamp()),
-        });
-        
-        Ok(amount_out - fee)
-    }
-    
-    pub fn batch_mint(&mut self, recipients: Vec<Address>, amounts: Vec<U256>) -> Result<(), Vec<u8>> {
-        // ... minting logic
-        
-        // Convert amounts to token_ids for the event
-        let mut token_ids = Vec::new();
-        for (i, _) in amounts.iter().enumerate() {
-            token_ids.push(U256::from(self.next_token_id.get() + U256::from(i)));
-        }
-        
-        evm::log(BatchOperation {
-            operator: msg::sender(),
-            operation_type: "batch_mint".to_string(),
-            token_ids,
-            recipients,
-        });
-        
-        Ok(())
-    }
-}
-```
-
-## Working Example: Complete Migration
-
-The `errors-events` example demonstrates the full transformation:
-
-### Running the Example
-
-```bash
-cd examples/concepts/errors-events
-
-# Compare implementations
-ls -la anchor/src/lib.rs native/src/lib.rs stylus/src/lib.rs
-
-# Test Stylus error and event handling
-cd stylus && cargo test
-
-# Check generated ABI for events and errors
-cargo stylus export-abi
-```
-
-### Key Transformations
-
-1. **Error Codes to Structured Errors**
-   ```rust
-   // Solana: Numeric error codes
-   return Err(ProgramError::Custom(101));
-   
-   // Stylus: Rich error data
-   return Err(CustomError::InsufficientFunds(InsufficientFunds { 
-       requested, 
-       available 
-   }));
-   ```
-
-2. **msg!() to Typed Events**
-   ```rust
-   // Solana: String logging
-   msg!("Transfer of {} tokens completed", amount);
-   
-   // Stylus: Structured events
-   evm::log(TransferCompleted { from, to, amount });
-   ```
-
-3. **Limited Data to Rich Event Parameters**
-   ```rust
-   // Solana: Basic information
-   msg!("Trade executed");
-   
-   // Stylus: Comprehensive trade data
-   evm::log(TradeExecuted { trader, trade_info, timestamp });
-   ```
-
-## Error Recovery Patterns
-
-### Graceful Failure Handling
+The following excerpt from the [spl-token-2022](https://github.com/solana-program/token-2022/blob/57b3bcbd3c15de22db47ae2024fc73b43dafdd8a/program/src/processor.rs#L1637-L1945) illustrates the convention of logging the name of the instruction being executed:
 
 ```rust
-use alloc::string::String;
-
-sol! {
-    error BatchOperationFailed(uint256 failed_index, string reason);
-    error PartialSuccess(uint256 successful, uint256 failed);
-}
-
-#[derive(SolidityError)]
-pub enum BatchError {
-    BatchOperationFailed(BatchOperationFailed),
-    PartialSuccess(PartialSuccess),
-}
-
-#[public]
-impl BatchProcessor {
-    pub fn process_batch(&mut self, operations: Vec<Operation>) -> Result<(), BatchError> {
-        let mut successful = 0u32;
-        let mut failed = 0u32;
-        
-        for (index, operation) in operations.iter().enumerate() {
-            match self.process_single_operation(operation.clone()) {
-                Ok(_) => {
-                    successful += 1;
-                    evm::log(OperationSuccess {
-                        index: U256::from(index),
-                        operation_type: operation.operation_type.clone(),
-                    });
+ pub fn process(program_id: &Pubkey, accounts: &[AccountInfo], input: &[u8]) -> ProgramResult {
+        if let Ok(instruction_type) = decode_instruction_type(input) {
+            match instruction_type {
+                PodTokenInstruction::InitializeMint => {
+                    msg!("Instruction: InitializeMint");
+                    let (data, freeze_authority) =
+                        decode_instruction_data_with_coption_pubkey::<InitializeMintData>(input)?;
+                    Self::process_initialize_mint(
+                        accounts,
+                        data.decimals,
+                        &data.mint_authority,
+                        freeze_authority,
+                    )
                 }
-                Err(error_msg) => {
-                    failed += 1;
-                    evm::log(OperationFailed {
-                        index: U256::from(index),
-                        reason: String::from_utf8_lossy(&error_msg).to_string(),
-                    });
+                PodTokenInstruction::InitializeMint2 => {
+                    msg!("Instruction: InitializeMint2");
+                    let (data, freeze_authority) =
+                        decode_instruction_data_with_coption_pubkey::<InitializeMintData>(input)?;
+                    Self::process_initialize_mint2(
+                        accounts,
+                        data.decimals,
+                        &data.mint_authority,
+                        freeze_authority,
+                    )
+                }
+                PodTokenInstruction::InitializeAccount => {
+                    msg!("Instruction: InitializeAccount");
+                    Self::process_initialize_account(accounts)
+                }
+                // ...
+                PodTokenInstruction::PausableExtension => {
+                    msg!("Instruction: PausableExtension");
+                    pausable::processor::process_instruction(program_id, accounts, &input[1..])
                 }
             }
+        } else if let Ok(instruction) = TokenMetadataInstruction::unpack(input) {
+            token_metadata::processor::process_instruction(program_id, accounts, instruction)
+        } else if let Ok(instruction) = TokenGroupInstruction::unpack(input) {
+            token_group::processor::process_instruction(program_id, accounts, instruction)
+        } else {
+            Err(TokenError::InvalidInstruction.into())
         }
-        
-        if failed > 0 {
-            if successful > 0 {
-                return Err(BatchError::PartialSuccess(PartialSuccess {
-                    successful: U256::from(successful),
-                    failed: U256::from(failed),
-                }));
-            } else {
-                return Err(BatchError::BatchOperationFailed(BatchOperationFailed {
-                    failed_index: U256::from(0),
-                    reason: "All operations failed".to_string(),
-                }));
-            }
-        }
-        
-        evm::log(BatchCompleted {
-            total_operations: U256::from(operations.len()),
-            successful_operations: U256::from(successful),
-        });
-        
-        Ok(())
-    }
-}
-
-sol! {
-    event OperationSuccess(uint256 indexed index, string operation_type);
-    event OperationFailed(uint256 indexed index, string reason);
-    event BatchCompleted(uint256 total_operations, uint256 successful_operations);
-}
-```
-
-### State Recovery Mechanisms
-
-```rust
-use alloc::format;
-
-sol! {
-    error StateCorrupted(string details);
-    error RecoveryRequired(address recovery_authority);
-}
-
-#[derive(SolidityError)]
-pub enum RecoveryError {
-    StateCorrupted(StateCorrupted),
-    RecoveryRequired(RecoveryRequired),
-    InvalidAuthority(InvalidAuthority),
-}
-
-#[storage]
-#[entrypoint]
-pub struct RecoverableContract {
-    balances: StorageMap<Address, StorageU256>,
-    total_supply: StorageU256,
-    recovery_authority: StorageAddress,
-    recovery_mode: StorageBool,
-    last_checkpoint: StorageU256,
-}
-
-#[public]
-impl RecoverableContract {
-    pub fn verify_state_integrity(&self) -> Result<(), RecoveryError> {
-        let calculated_total = self.calculate_total_balances();
-        let stored_total = self.total_supply.get();
-        
-        if calculated_total != stored_total {
-            evm::log(StateIntegrityViolation {
-                calculated_total,
-                stored_total,
-                timestamp: U256::from(block::timestamp()),
-            });
-            
-            return Err(RecoveryError::StateCorrupted(StateCorrupted {
-                details: format!("Total mismatch: {} vs {}", calculated_total, stored_total),
-            }));
-        }
-        
-        evm::log(StateVerificationPassed {
-            total_supply: stored_total,
-            timestamp: U256::from(block::timestamp()),
-        });
-        
-        Ok(())
-    }
-    
-    pub fn enter_recovery_mode(&mut self) -> Result<(), RecoveryError> {
-        if msg::sender() != self.recovery_authority.get() {
-            return Err(RecoveryError::InvalidAuthority(InvalidAuthority {
-                provided: msg::sender(),
-                expected: self.recovery_authority.get(),
-            }));
-        }
-        
-        self.recovery_mode.set(true);
-        
-        evm::log(RecoveryModeActivated {
-            authority: msg::sender(),
-            timestamp: U256::from(block::timestamp()),
-        });
-        
-        Ok(())
-    }
-    
-    fn calculate_total_balances(&self) -> U256 {
-        // Implementation to sum all balances
-        // This is a simplified example
-        U256::from(0)
-    }
-}
-
-sol! {
-    event StateIntegrityViolation(uint256 calculated_total, uint256 stored_total, uint256 timestamp);
-    event StateVerificationPassed(uint256 total_supply, uint256 timestamp);
-    event RecoveryModeActivated(address indexed authority, uint256 timestamp);
-}
-```
-
-## Event Indexing and Filtering
-
-### Efficient Event Design
-
-```rust
-use stylus_sdk::abi::Bytes;
-
-sol! {
-    // Events with indexed parameters for efficient filtering
-    event Transfer(
-        address indexed from,
-        address indexed to,
-        uint256 value
-    );
-    
-    event UserAction(
-        address indexed user,
-        bytes32 indexed action_type_hash, // Hash of action type for indexing
-        uint256 timestamp,
-        bytes data // Additional unindexed data
-    );
-    
-    // Events for different contract states
-    event ContractStateChanged(
-        bytes32 indexed previous_state_hash,
-        bytes32 indexed new_state_hash,
-        address indexed changer,
-        uint256 block_number
-    );
-}
-
-#[public]
-impl EventAwareContract {
-    pub fn perform_action(&mut self, action_type: String, data: Bytes) -> Result<(), CustomError> {
-        let user = msg::sender();
-        
-        // Validate action
-        if !self.is_valid_action(&action_type) {
-            return Err(CustomError::Unauthorized(Unauthorized { caller: user }));
-        }
-        
-        // Process action
-        self.execute_action(&action_type, &data)?;
-        
-        // Hash the action type for indexing
-        let action_type_hash = keccak(action_type.as_bytes());
-        
-        // Emit detailed event for frontend filtering
-        evm::log(UserAction {
-            user,
-            action_type_hash: action_type_hash.into(),
-            timestamp: U256::from(block::timestamp()),
-            data: data.to_vec().into(),
-        });
-        
-        Ok(())
-    }
-    
-    pub fn change_state(&mut self, new_state: String) -> Result<(), CustomError> {
-        let current_state = self.contract_state.get_string();
-        
-        if current_state == new_state {
-            return Err(CustomError::InvalidAmount(InvalidAmount { amount: U256::ZERO }));
-        }
-        
-        self.contract_state.set_str(&new_state);
-        
-        // Hash states for efficient indexing
-        let previous_state_hash = keccak(current_state.as_bytes());
-        let new_state_hash = keccak(new_state.as_bytes());
-        
-        // Emit state change event
-        evm::log(ContractStateChanged {
-            previous_state_hash: previous_state_hash.into(),
-            new_state_hash: new_state_hash.into(),
-            changer: msg::sender(),
-            block_number: U256::from(block::number()),
-        });
-        
-        Ok(())
-    }
-    
-    fn is_valid_action(&self, action_type: &str) -> bool {
-        // Implementation to validate action types
-        matches!(action_type, "deposit" | "withdraw" | "transfer")
-    }
-    
-    fn execute_action(&mut self, action_type: &str, data: &Bytes) -> Result<(), CustomError> {
-        // Implementation to execute the action
-        Ok(())
-    }
-}
-
-use stylus_sdk::crypto::keccak;
-```
-
-## Testing Error and Event Patterns
-
-### Stylus Event Testing
-
-```rust
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use stylus_sdk::testing::TestVM;
-    use alloy_primitives::B256;
-    
-    #[test]
-    fn test_transfer_events() {
-        let vm = TestVM::new();
-        let mut contract = TokenContract::from(&vm);
-        
-        // Set up initial state
-        vm.set_balance(Address::from([1u8; 20]), U256::from(1_000_000));
-        contract.balances.setter(Address::from([1u8; 20])).set(U256::from(1000));
-        
-        // Set sender for the test
-        vm.set_sender(Address::from([1u8; 20]));
-        
-        // Perform transfer
-        let result = contract.transfer(Address::from([2u8; 20]), U256::from(500));
-        assert!(result.is_ok());
-        
-        // Verify event was emitted
-        let logs = vm.get_emitted_logs();
-        assert_eq!(logs.len(), 1);
-        
-        // Check the event signature
-        let transfer_event_sig = B256::from(keccak(
-            "TransferCompleted(address,address,uint256)".as_bytes()
-        ));
-        assert_eq!(logs[0].0[0], transfer_event_sig);
-    }
-    
-    #[test]
-    fn test_error_handling() {
-        let vm = TestVM::new();
-        let mut contract = TokenContract::from(&vm);
-        
-        // Set sender
-        vm.set_sender(Address::from([1u8; 20]));
-        
-        // Try to transfer with insufficient funds
-        let result = contract.transfer(Address::from([2u8; 20]), U256::from(500));
-        assert!(result.is_err());
-        
-        // Verify error type
-        match result {
-            Err(CustomError::InsufficientFunds(error)) => {
-                assert_eq!(error.requested, U256::from(500));
-                assert_eq!(error.available, U256::ZERO);
-            }
-            _ => panic!("Expected InsufficientFunds error"),
-        }
-    }
-    
-    #[test]
-    fn test_complex_events() {
-        let vm = TestVM::new();
-        let mut contract = DEXContract::from(&vm);
-        
-        // Set up state for trade
-        contract.initialize_liquidity(
-            Address::from([10u8; 20]), 
-            Address::from([11u8; 20]),
-            U256::from(1_000_000),
-            U256::from(2_000_000)
-        ).unwrap();
-        
-        // Execute trade
-        let result = contract.execute_trade(
-            Address::from([10u8; 20]),
-            Address::from([11u8; 20]),
-            U256::from(1000)
-        );
-        assert!(result.is_ok());
-        
-        // Check emitted events
-        let logs = vm.get_emitted_logs();
-        assert!(!logs.is_empty());
-        
-        // Verify TradeExecuted event was emitted
-        let trade_event_sig = B256::from(keccak(
-            "TradeExecuted(address,(address,address,uint256,uint256,uint256),uint256)".as_bytes()
-        ));
-        assert_eq!(logs[logs.len() - 1].0[0], trade_event_sig);
     }
 }
 ```
 
-## Best Practices
+Another common use is to provide additional context before returning errors, as can be seen in the [metaplex-token-metadata program](https://github.com/metaplex-foundation/mpl-token-metadata/blob/a7ee5e17ed60feaafeaa5582a4f46d9317c1b412/programs/token-metadata/program/src/utils/token.rs#L145-L202):
 
-### 1. Use Structured Errors
 ```rust
-// Good: Rich error information
-return Err(CustomError::InsufficientFunds(InsufficientFunds { 
-    requested, 
-    available 
-}));
+pub(crate) fn validate_mint(
+    mint: &AccountInfo,
+    metadata: &AccountInfo,
+    token_standard: TokenStandard,
+) -> Result<Mint, ProgramError> {
+let mint_data = &mint.data.borrow();
+    let mint = StateWithExtensions::<Mint>::unpack(mint_data)?;
 
-// Bad: Generic error message
-return Err(b"Insufficient funds".to_vec());
+    if !mint.base.is_initialized() {
+        return Err(MetadataError::Uninitialized.into());
+    }
+
+    if matches!(
+        token_standard,
+        TokenStandard::NonFungible | TokenStandard::ProgrammableNonFungible
+    ) {
+        // validates the mint extensions
+        mint.get_extension_types()?
+            .iter()
+            .try_for_each(|extension_type| {
+                if !NON_FUNGIBLE_MINT_EXTENSIONS.contains(extension_type) {
+                    msg!("Invalid mint extension: {:?}", extension_type);
+                    return Err(MetadataError::InvalidMintExtensionType);
+                }
+                Ok(())
+            })?;
+    }
+
+    // For all token standards:
+    //
+    // 1) if the mint close authority extension is enabled, it must
+    //    be set to be the metadata account; and
+    if let Ok(extension) = mint.get_extension::<MintCloseAuthority>() {
+        let close_authority: Option<Pubkey> = extension.close_authority.into();
+        if close_authority.is_none() || close_authority != Some(*metadata.key) {
+            return Err(MetadataError::InvalidMintCloseAuthority.into());
+        }
+    }
+
+    // 2) if the metadata pointer extension is enabled, it must be set
+    //    to the metadata account address
+    if let Ok(extension) = mint.get_extension::<MetadataPointer>() {
+        let authority: Option<Pubkey> = extension.authority.into();
+        let metadata_address: Option<Pubkey> = extension.metadata_address.into();
+
+        if authority.is_some() {
+            msg!("Metadata pointer extension: authority must be None");
+            return Err(MetadataError::InvalidMetadataPointer.into());
+        }
+
+        if metadata_address != Some(*metadata.key) {
+            msg!("Metadata pointer extension: metadata address mismatch");
+            return Err(MetadataError::InvalidMetadataPointer.into());
+        }
+    }
+
+    Ok(mint.base)
+}
 ```
 
-### 2. Index Important Event Parameters
+In addition to the `msg!` macro providing string logging with formatting, the `solana::log` module provides a number of other options:
+
 ```rust
-// Good: Indexed parameters for efficient filtering
-event Transfer(address indexed from, address indexed to, uint256 value);
-
-// Less optimal: No indexed parameters
-event Transfer(address from, address to, uint256 value);
-```
-
-Note: The EVM supports up to 3 indexed parameters per event. Dynamic types (such as `string` and `bytes`) can be indexed but are hashed rather than stored verbatim in topics.
-
-### 3. Emit Events for All State Changes
-```rust
-pub fn update_value(&mut self, new_value: U256) -> Result<(), Vec<u8>> {
-    let old_value = self.value.get();
-    self.value.set(new_value);
-    
-    // Always emit event for state changes
-    evm::log(ValueUpdated { 
-        old_value, 
-        new_value, 
-        updater: msg::sender() 
-    });
-    
+fn process_log(accounts: &[AccountInfo]) -> ProgramResult {
+    log::sol_log("just a regular string");
+    log::sol_log_64(1, 2, 3, 4, 5);
+    log::sol_log_compute_units();
+    log::sol_log_data(&[b"some", b"serialized", b"structures", b"as base64"]);
+    log::sol_log_params(accounts, &[]);
+    log::sol_log_slice(b"some bytes as hex");
     Ok(())
 }
 ```
 
-### 4. Provide Context in Events
+The program log from executing the above instruction handler is:
+
+```
+# sol_log:
+Program log: just a regular string
+
+# sol_log_u64:
+Program log: 0x1, 0x2, 0x3, 0x4, 0x5
+
+# sol_log_compute_units:
+Program consumption: 1399140 units remaining
+
+# sol_log_data:
+Program data: c29tZQ== c2VyaWFsaXplZA== c3RydWN0dXJlcw== YXMgYmFzZTY0
+
+# sol_log_params:
+Program log: AccountInfo
+Program log: 0x0, 0x0, 0x0, 0x0, 0x0
+Program log: - Is signer
+Program log: 0x0, 0x0, 0x0, 0x0, 0x1
+Program log: - Key
+Program log: 11157t3sqMV725NVRLrVQbAu98Jjfk1uCKehJnXXQs
+Program log: - Lamports
+Program log: 0x0, 0x0, 0x0, 0x0, 0x5f5e100
+Program log: - Account data length
+Program log: 0x0, 0x0, 0x0, 0x0, 0x0
+Program log: - Owner
+Program log: 11111111111111111111111111111111
+Program log: AccountInfo
+Program log: 0x0, 0x0, 0x0, 0x0, 0x1
+Program log: - Is signer
+Program log: 0x0, 0x0, 0x0, 0x0, 0x0
+Program log: - Key
+Program log: 11111111111111111111111111111111
+Program log: - Lamports
+Program log: 0x0, 0x0, 0x0, 0x0, 0xf14a0
+Program log: - Account data length
+Program log: 0x0, 0x0, 0x0, 0x0, 0xe
+Program log: - Owner
+Program log: NativeLoader1111111111111111111111111111111
+Program log: Instruction data
+Program log: 0x0, 0x0, 0x0, 0x0, 0x69
+Program log: 0x0, 0x0, 0x0, 0x1, 0x6e
+Program log: 0x0, 0x0, 0x0, 0x2, 0x73
+Program log: 0x0, 0x0, 0x0, 0x3, 0x74
+Program log: 0x0, 0x0, 0x0, 0x4, 0x72
+Program log: 0x0, 0x0, 0x0, 0x5, 0x75
+Program log: 0x0, 0x0, 0x0, 0x6, 0x63
+Program log: 0x0, 0x0, 0x0, 0x7, 0x74
+Program log: 0x0, 0x0, 0x0, 0x8, 0x69
+Program log: 0x0, 0x0, 0x0, 0x9, 0x6f
+Program log: 0x0, 0x0, 0x0, 0xa, 0x6e
+Program log: 0x0, 0x0, 0x0, 0xb, 0x20
+Program log: 0x0, 0x0, 0x0, 0xc, 0x64
+Program log: 0x0, 0x0, 0x0, 0xd, 0x61
+Program log: 0x0, 0x0, 0x0, 0xe, 0x74
+Program log: 0x0, 0x0, 0x0, 0xf, 0x61
+
+# sol_log_slice:
+Program log: 0x0, 0x0, 0x0, 0x0, 0x73
+Program log: 0x0, 0x0, 0x0, 0x1, 0x6f
+Program log: 0x0, 0x0, 0x0, 0x2, 0x6d
+Program log: 0x0, 0x0, 0x0, 0x3, 0x65
+Program log: 0x0, 0x0, 0x0, 0x4, 0x20
+Program log: 0x0, 0x0, 0x0, 0x5, 0x62
+Program log: 0x0, 0x0, 0x0, 0x6, 0x79
+Program log: 0x0, 0x0, 0x0, 0x7, 0x74
+Program log: 0x0, 0x0, 0x0, 0x8, 0x65
+Program log: 0x0, 0x0, 0x0, 0x9, 0x73
+Program log: 0x0, 0x0, 0x0, 0xa, 0x20
+Program log: 0x0, 0x0, 0x0, 0xb, 0x61
+Program log: 0x0, 0x0, 0x0, 0xc, 0x73
+Program log: 0x0, 0x0, 0x0, 0xd, 0x20
+Program log: 0x0, 0x0, 0x0, 0xe, 0x68
+Program log: 0x0, 0x0, 0x0, 0xf, 0x65
+Program log: 0x0, 0x0, 0x0, 0x10, 0x78
+```
+
+In addition to the logging facilities provided by `solana_program::log`, Anchor provides macros to reduce the boilerplate in emiting structured events via the underlying `sol_log_data` function:
+
 ```rust
-// Good: Rich context
-event TradeExecuted {
-    address indexed trader,
-    address token_in,
-    address token_out,
-    uint256 amount_in,
-    uint256 amount_out,
-    uint256 timestamp
+#[event]
+pub struct OwnerChanged {
+    previous_owner: Pubkey,
+    current_owner: Pubkey,
 }
 
-// Less useful: Minimal context  
-event TradeExecuted(address trader);
-```
+#[program]
+pub mod errors_events {
+    use super::*;
 
-## Migration Checklist
+    // ...
 
-### Analysis Phase
-- [ ] Identify all error types in Solana code
-- [ ] Map `msg!()` calls to potential events
-- [ ] Document important state changes needing events
-- [ ] List data that frontends need to track
+    pub fn emit_event(ctx: Context<EmitEvent>) -> Result<()> {
+        emit!(OwnerChanged {
+            previous_owner: *ctx.accounts.signer.key,
+            current_owner: ID
+        });
 
-### Implementation Phase
-- [ ] Define custom error types with `sol!` macro
-- [ ] Create SolidityError enum for error handling
-- [ ] Replace `ProgramError` returns with structured errors
-- [ ] Convert `msg!()` calls to typed events
-- [ ] Add event emission to all state changes
-- [ ] Include proper indexing for filtering
-
-### Testing Phase
-- [ ] Test all error conditions return proper error types
-- [ ] Verify events emit correctly
-- [ ] Check event data matches expectations
-- [ ] Test event filtering and indexing
-- [ ] Check gas costs for events and errors
-
-## Common Pitfalls
-
-### Forgetting to Derive SolidityError
-```rust
-// Bad: Missing derive
-pub enum CustomError {
-    InsufficientFunds(InsufficientFunds),
+        Ok(())
+    }
 }
 
-// Good: Proper derive
-#[derive(SolidityError)]
-pub enum CustomError {
-    InsufficientFunds(InsufficientFunds),
+#[derive(Accounts)]
+pub struct EmitEvent<'info> {
+    #[account(mut)]
+    pub signer: Signer<'info>,
+    pub system_program: Program<'info, System>,
 }
 ```
 
-### Too Many Indexed Parameters
-```rust
-// Bad: Too many indexed params (max 3 in EVM)
-event ComplexEvent(
-    address indexed a,
-    address indexed b, 
-    address indexed c,
-    address indexed d  // This won't be indexed!
-);
+Executing the `EmitEvent` instruction results in the following program log:
 
-// Good: Use indexed strategically
-event ComplexEvent(
-    address indexed user,
-    address indexed token,
-    uint256 indexed action_type,
-    uint256 amount
-);
+```
+Program JEKNVnkbo3jma5nREBBJCDoXFVeKkD56V3xKrvRmWxFG invoke [1]
+Program log: Instruction: EmitEvent
+Program data: It9n4e/nMzUAAAABkHB7w+8lvcmO11y3DWHIsQbcJI2O9h4dHbHKQP//////////////////////////////////////////
+Program JEKNVnkbo3jma5nREBBJCDoXFVeKkD56V3xKrvRmWxFG consumed 1074 of 1400000 compute units
+Program JEKNVnkbo3jma5nREBBJCDoXFVeKkD56V3xKrvRmWxFG success
 ```
 
-### Using Raw Vec<u8> Errors
+Note how Anchor automatically inserts the `Instruction: EmitEvent` log message.
+
+### Stylus
+
+For Stylus contracts, emitting structured events is considered best practice whenever contract state changes. Similar to errors, events are defined using the `sol!` macro and then emitted using the [`log`](https://docs.rs/stylus-sdk/latest/stylus_sdk/prelude/fn.log.html) function:
+
 ```rust
-// Bad: No structured information
-return Err(b"Operation failed".to_vec());
+sol! {
+    event OwnerChanged(address previous_owner, address current_owner);
+}
 
-// Good: Structured error with context
-return Err(CustomError::OperationFailed(OperationFailed {
-    reason: "Insufficient balance".to_string(),
-    user: msg::sender(),
-}));
+#[storage]
+#[entrypoint]
+pub struct ErrorsEvents {
+    owner: StorageAddress,
+}
+
+#[public]
+impl ErrorsEvents {
+    pub fn take_ownership(&mut self) {
+        let msg_sender = self.vm().msg_sender();
+
+        let previous_owner = self.owner.get();
+
+        self.owner.set(msg_sender);
+
+        log(
+            self.vm(),
+            OwnerChanged {
+                previous_owner,
+                current_owner: msg_sender,
+            },
+        );
+    }
+}
 ```
-
-## Summary
-
-In this chapter, we covered:
-
-1. **Error Model Transformation**: Converting from Solana's ProgramError to Stylus's structured errors
-2. **Event System Migration**: Replacing msg!() calls with typed EVM events
-3. **Rich Error Information**: Using the SolidityError derive macro for comprehensive error handling
-4. **Event Indexing**: Strategic use of indexed parameters for efficient filtering
-5. **Testing Patterns**: Verifying error handling and event emission in tests
-
-The migration from Solana's simple logging to Stylus's rich error and event system provides better debugging capabilities, improved frontend integration, and more comprehensive error information for users and developers.
 
 ## Next Steps
 
-With error handling and events covered, you've completed the core migration concepts. The next chapters will explore:
-- Real-world case studies of complete program migrations
-- Advanced optimization techniques
-- Security considerations specific to EVM
+With error handling and events covered, you've completed the core migration concepts.
 
-Continue to [Chapter 9: Case Study - Draffle Migration](./09-case-study-draffle.md) to see these concepts applied in a complete program migration.
+Continue to [Case Study - Migrating Bonafida's Token Vesting to Stylus](./case-study-bonafida-token-vesting.md) to see these concepts applied in a complete program migration.

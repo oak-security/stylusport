@@ -1,0 +1,16 @@
+[package]
+name = "errors-events-solana-anchor"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+anchor-lang.workspace = true
+
+[dev-dependencies]
+mollusk-svm.workspace = true
+solana-account.workspace = true
+solana-pubkey.workspace = true
+solana-sdk-ids.workspace = true
