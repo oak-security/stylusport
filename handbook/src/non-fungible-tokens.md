@@ -1,1008 +1,1004 @@
-# Non-fungible token handling
+# Non-Fungible Token Handling
 
 Solana's NFT ecosystem primarily uses the Metaplex Token Metadata standard for non-fungible tokens. This chapter covers migrating Metaplex NFT operations to ERC-721 patterns in Stylus, including minting, transfers, approvals, and metadata management.
 
-## NFT model comparison
+To illustrate NFT operations comprehensively, we will implement a contract that creates a complete NFT collection with minting, metadata, and transfer capabilities.
 
-### Metaplex NFTs (Solana)
-- **Standard**: Metaplex Token Metadata Program
-- **Structure**: SPL Token with supply of 1 + metadata account
-- **Metadata**: Separate account with JSON URI reference
-- **Collections**: Master Edition and Collection NFTs
-- **Operations**: CPIs to Token Metadata Program
+## Solana
 
-### ERC-721 NFTs (Stylus)
-- **Standard**: ERC-721 Non-Fungible Token Standard
-- **Structure**: Contract storage with token mappings
-- **Metadata**: Built-in tokenURI function with metadata JSON
-- **Collections**: Single contract can represent entire collection
-- **Operations**: Direct contract method calls
+Solana NFTs use the Metaplex Token Metadata Program built on top of SPL Tokens. Each NFT requires three accounts: a mint account (SPL Token with supply of 1), a metadata account (storing name, symbol, URI), and optionally a master edition account (marking it as an NFT). Programs interact with NFTs through CPIs to both the SPL Token and Metaplex programs. Collections use a collection NFT that individual NFTs reference. Creators and royalties are stored on-chain in the metadata. Token Metadata v2 adds programmable NFTs with rule sets for transfer restrictions and utility uses.
 
-## Basic NFT operations
+#### Native 
 
-### NFT collection creation
-
-**Solana Native (with Metaplex):**
 ```rust
-use solana_program::*;
-use mpl_token_metadata::{
-    instruction::{create_metadata_accounts_v3, create_master_edition_v3},
-    state::{DataV2, Creator},
-};
+#[derive(BorshSerialize, BorshDeserialize, Debug)]
+pub enum Instruction {
+    CreateNameCollection,
+    MintNameNft { name: String },
+}
 
-fn create_nft(
+pub fn process_instruction(
+    program_id: &Pubkey,
     accounts: &[AccountInfo],
-    name: String,
-    symbol: String,
-    uri: String,
+    instruction_data: &[u8],
 ) -> ProgramResult {
-    let mint_account = &accounts[0];
-    let metadata_account = &accounts[1];
-    let master_edition_account = &accounts[2];
-    let mint_authority = &accounts[3];
-    let update_authority = &accounts[4];
-    let token_metadata_program = &accounts[5];
-    
+    if !check_id(program_id) {
+        return Err(ProgramError::IncorrectProgramId);
+    }
+
+    let instruction = Instruction::try_from_slice(instruction_data)
+        .map_err(|_| ProgramError::InvalidInstructionData)?;
+
+    match instruction {
+        Instruction::CreateNameCollection => process_create_name_collection(program_id, accounts),
+        Instruction::MintNameNft { name } => process_mint_name_nft(program_id, accounts, name),
+    }
+}
+
+fn process_create_name_collection(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramResult {
+    msg!("Create Name Collection");
+
+    let [authority, collection_mint, collection_metadata, collection_master_edition, collection_token, system_program, token_program, associated_token_program, token_metadata_program, rent_sysvar] =
+        accounts
+    else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    if !authority.is_signer {
+        return Err(ProgramError::MissingRequiredSignature);
+    }
+
+    // Verify program IDs
+    if *system_program.key != system_program::id()
+        || *token_program.key != spl_token_2022::id()
+        || *associated_token_program.key != spl_associated_token_account::id()
+        || *token_metadata_program.key != mpl_token_metadata::ID
+        || *rent_sysvar.key != rent::sysvar::id()
+    {
+        return Err(ProgramError::IncorrectProgramId);
+    }
+
+    // Derive and verify collection mint PDA
+    let (collection_mint_key, collection_bump) =
+        Pubkey::find_program_address(&[COLLECTION_SEED], program_id);
+
+    if collection_mint_key != *collection_mint.key {
+        return Err(ProgramError::InvalidSeeds);
+    }
+
+    // Check if collection mint already exists
+    if !collection_mint.data_is_empty() || *collection_mint.owner == spl_token_2022::id() {
+        return Err(ProgramError::AccountAlreadyInitialized);
+    }
+
+    // Verify collection token account
+    let expected_collection_token =
+        spl_associated_token_account::get_associated_token_address_with_program_id(
+            authority.key,
+            &collection_mint_key,
+            &spl_token_2022::id(),
+        );
+
+    if expected_collection_token != *collection_token.key {
+        return Err(ProgramError::InvalidAccountData);
+    }
+
+    // Verify metadata account
+    let (expected_metadata, _) = Pubkey::find_program_address(
+        &[
+            b"metadata",
+            &mpl_token_metadata::ID.to_bytes(),
+            &collection_mint_key.to_bytes(),
+        ],
+        &mpl_token_metadata::ID,
+    );
+
+    if expected_metadata != *collection_metadata.key {
+        return Err(ProgramError::InvalidAccountData);
+    }
+
+    // Verify master edition account
+    let (expected_edition, _) = Pubkey::find_program_address(
+        &[
+            b"metadata",
+            &mpl_token_metadata::ID.to_bytes(),
+            &collection_mint_key.to_bytes(),
+            b"edition",
+        ],
+        &mpl_token_metadata::ID,
+    );
+
+    if expected_edition != *collection_master_edition.key {
+        return Err(ProgramError::InvalidAccountData);
+    }
+
+    let signer_seeds = &[COLLECTION_SEED, &[collection_bump]];
+
+    // Create mint account
+    let mint_space = Mint::get_packed_len();
+    let mint_lamports = Rent::get()?.minimum_balance(mint_space);
+
+    invoke_signed(
+        &system_instruction::create_account(
+            authority.key,
+            collection_mint.key,
+            mint_lamports,
+            mint_space as u64,
+            &spl_token_2022::id(),
+        ),
+        &[
+            authority.clone(),
+            collection_mint.clone(),
+            system_program.clone(),
+        ],
+        &[signer_seeds],
+    )?;
+
+    msg!("Created Name Collection Mint Account");
+
+    // Initialize mint with 0 decimals for NFT
+    invoke_signed(
+        &token_instruction::initialize_mint(
+            &spl_token_2022::id(),
+            collection_mint.key,
+            collection_mint.key,
+            Some(collection_mint.key),
+            0,
+        )?,
+        &[collection_mint.clone(), rent_sysvar.clone()],
+        &[signer_seeds],
+    )?;
+
+    msg!("Intitialized Name Collection Mint");
+
+    // Create associated token account
+    invoke(
+        &associated_token_instruction::create_associated_token_account(
+            authority.key,
+            authority.key,
+            collection_mint.key,
+            &spl_token_2022::id(),
+        ),
+        &[
+            authority.clone(),
+            collection_token.clone(),
+            authority.clone(),
+            collection_mint.clone(),
+            system_program.clone(),
+            token_program.clone(),
+            associated_token_program.clone(),
+        ],
+    )?;
+
+    msg!("Created Name Collection ATA");
+
+    // Mint 1 token to the collection token account
+    invoke_signed(
+        &token_instruction::mint_to(
+            &spl_token_2022::id(),
+            collection_mint.key,
+            collection_token.key,
+            collection_mint.key,
+            &[],
+            1,
+        )?,
+        &[
+            collection_mint.clone(),
+            collection_token.clone(),
+            collection_mint.clone(),
+        ],
+        &[signer_seeds],
+    )?;
+
+    msg!("Minted Collection to ATA");
+
     // Create metadata account
     let creators = vec![Creator {
-        address: *mint_authority.key,
+        address: *collection_mint.key,
         verified: true,
         share: 100,
     }];
-    
-    let data = DataV2 {
-        name,
-        symbol,
-        uri,
-        seller_fee_basis_points: 500, // 5%
-        creators: Some(creators),
-        collection: None,
-        uses: None,
-    };
-    
-    let create_metadata_ix = create_metadata_accounts_v3(
-        *token_metadata_program.key,
-        *metadata_account.key,
-        *mint_account.key,
-        *mint_authority.key,
-        *mint_authority.key,
-        *update_authority.key,
-        data,
-        true, // is_mutable
-        true, // update_authority_is_signer
-        None, // collection_details
-    );
-    
-    invoke(&create_metadata_ix, accounts)?;
-    
-    // Create master edition (makes it an NFT)
-    let create_master_edition_ix = create_master_edition_v3(
-        *token_metadata_program.key,
-        *master_edition_account.key,
-        *mint_account.key,
-        *update_authority.key,
-        *mint_authority.key,
-        *metadata_account.key,
-        *mint_authority.key,
-        Some(0), // max_supply (0 = unlimited prints)
-    );
-    
-    invoke(&create_master_edition_ix, accounts)?;
-    
-    msg!("NFT created: {}", name);
-    Ok(())
-}
-```
 
-**Anchor (with Metaplex):**
-```rust
-use anchor_lang::prelude::*;
-use anchor_spl::{
-    metadata::{
-        CreateMetadataAccountsV3, CreateMasterEditionV3,
-        Metadata, MetadataAccount, MasterEdition,
-    },
-    token::{Mint, Token, TokenAccount},
-};
-
-#[derive(Accounts)]
-#[instruction(name: String, symbol: String, uri: String)]
-pub struct CreateNFT<'info> {
-    #[account(
-        init,
-        payer = creator,
-        mint::decimals = 0,
-        mint::authority = creator,
-        mint::freeze_authority = creator,
-    )]
-    pub mint: Account<'info, Mint>,
-    
-    /// CHECK: This account will be created by the metadata program
-    #[account(mut)]
-    pub metadata: UncheckedAccount<'info>,
-    
-    /// CHECK: This account will be created by the metadata program  
-    #[account(mut)]
-    pub master_edition: UncheckedAccount<'info>,
-    
-    #[account(mut)]
-    pub creator: Signer<'info>,
-    
-    pub token_program: Program<'info, Token>,
-    pub metadata_program: Program<'info, Metadata>,
-    pub system_program: Program<'info, System>,
-    pub rent: Sysvar<'info, Rent>,
-}
-
-pub fn create_nft(
-    ctx: Context<CreateNFT>,
-    name: String,
-    symbol: String, 
-    uri: String,
-) -> Result<()> {
-    // Create metadata
-    let metadata_ctx = CpiContext::new(
-        ctx.accounts.metadata_program.to_account_info(),
-        CreateMetadataAccountsV3 {
-            metadata: ctx.accounts.metadata.to_account_info(),
-            mint: ctx.accounts.mint.to_account_info(),
-            mint_authority: ctx.accounts.creator.to_account_info(),
-            update_authority: ctx.accounts.creator.to_account_info(),
-            payer: ctx.accounts.creator.to_account_info(),
-            system_program: ctx.accounts.system_program.to_account_info(),
-            rent: ctx.accounts.rent.to_account_info(),
-        },
-    );
-    
-    let creators = vec![mpl_token_metadata::state::Creator {
-        address: ctx.accounts.creator.key(),
-        verified: false,
-        share: 100,
-    }];
-    
-    create_metadata_accounts_v3(
-        metadata_ctx,
-        DataV2 {
-            name: name.clone(),
-            symbol: symbol.clone(),
-            uri: uri.clone(),
-            seller_fee_basis_points: 500,
+    let create_metadata_ix = CreateMetadataAccountV3Builder::new()
+        .metadata(*collection_metadata.key)
+        .mint(*collection_mint.key)
+        .mint_authority(*collection_mint.key)
+        .payer(*authority.key)
+        .update_authority(*collection_mint.key, true)
+        .system_program(*system_program.key)
+        .data(DataV2 {
+            name: "Mock Name Service".to_string(),
+            symbol: "MNS".to_string(),
+            uri: String::new(),
+            seller_fee_basis_points: 0,
             creators: Some(creators),
             collection: None,
             uses: None,
-        },
-        true,
-        true,
-        None,
+        })
+        .is_mutable(true)
+        .collection_details(CollectionDetails::V1 { size: 0 })
+        .instruction();
+
+    invoke_signed(
+        &create_metadata_ix,
+        &[
+            collection_metadata.clone(),
+            collection_mint.clone(),
+            collection_mint.clone(),
+            authority.clone(),
+            collection_mint.clone(),
+            system_program.clone(),
+        ],
+        &[signer_seeds],
     )?;
-    
+
+    msg!("Created Name Collection Metadata");
+
     // Create master edition
-    let master_edition_ctx = CpiContext::new(
-        ctx.accounts.metadata_program.to_account_info(),
-        CreateMasterEditionV3 {
-            edition: ctx.accounts.master_edition.to_account_info(),
-            mint: ctx.accounts.mint.to_account_info(),
-            update_authority: ctx.accounts.creator.to_account_info(),
-            mint_authority: ctx.accounts.creator.to_account_info(),
-            payer: ctx.accounts.creator.to_account_info(),
-            metadata: ctx.accounts.metadata.to_account_info(),
-            token_program: ctx.accounts.token_program.to_account_info(),
-            system_program: ctx.accounts.system_program.to_account_info(),
-            rent: ctx.accounts.rent.to_account_info(),
-        },
+    let create_edition_ix = CreateMasterEditionV3Builder::new()
+        .edition(*collection_master_edition.key)
+        .update_authority(*collection_mint.key)
+        .mint_authority(*collection_mint.key)
+        .mint(*collection_mint.key)
+        .payer(*authority.key)
+        .metadata(*collection_metadata.key)
+        .token_program(*token_program.key)
+        .system_program(*system_program.key)
+        .max_supply(0)
+        .instruction();
+
+    invoke_signed(
+        &create_edition_ix,
+        &[
+            collection_master_edition.clone(),
+            collection_mint.clone(),
+            collection_mint.clone(),
+            collection_mint.clone(),
+            authority.clone(),
+            collection_metadata.clone(),
+            token_program.clone(),
+            system_program.clone(),
+        ],
+        &[signer_seeds],
+    )?;
+
+    msg!("Created Name Collection Master Edition");
+
+    Ok(())
+}
+
+fn process_mint_name_nft(
+    program_id: &Pubkey,
+    accounts: &[AccountInfo],
+    name: String,
+) -> ProgramResult {
+    let [owner, name_mint, name_token, name_metadata, name_master_edition, collection_mint, collection_metadata, collection_master_edition, system_program, token_program, associated_token_program, token_metadata_program, sysvar_instruction, rent_sysvar] =
+        accounts
+    else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    if !owner.is_signer {
+        return Err(ProgramError::MissingRequiredSignature);
+    }
+
+    // Validate name
+    if name.is_empty() || name.len() > MAX_NAME_LENGTH {
+        return Err(ProgramError::InvalidArgument);
+    }
+
+    if !name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_') {
+        return Err(ProgramError::InvalidArgument);
+    }
+
+    // Verify program IDs
+    if *system_program.key != system_program::id()
+        || *token_program.key != spl_token_2022::id()
+        || *associated_token_program.key != spl_associated_token_account::id()
+        || *token_metadata_program.key != mpl_token_metadata::ID
+        || *sysvar_instruction.key != solana_sdk_ids::sysvar::instructions::id()
+    {
+        return Err(ProgramError::IncorrectProgramId);
+    }
+
+    // Derive and verify name mint PDA
+    let (name_mint_key, name_bump) =
+        Pubkey::find_program_address(&[MINT_SEED, name.as_bytes()], program_id);
+
+    if name_mint_key != *name_mint.key {
+        return Err(ProgramError::InvalidSeeds);
+    }
+
+    // Check if name mint already exists
+    if !name_mint.data_is_empty() || *name_mint.owner == spl_token_2022::id() {
+        return Err(ProgramError::AccountAlreadyInitialized);
+    }
+
+    // Verify collection mint PDA
+    let (collection_mint_key, collection_bump) =
+        Pubkey::find_program_address(&[COLLECTION_SEED], program_id);
+
+    if collection_mint_key != *collection_mint.key {
+        return Err(ProgramError::InvalidSeeds);
+    }
+
+    // Verify name token account
+    let expected_name_token =
+        spl_associated_token_account::get_associated_token_address_with_program_id(
+            owner.key,
+            &name_mint_key,
+            &spl_token_2022::id(),
+        );
+
+    if expected_name_token != *name_token.key {
+        return Err(ProgramError::InvalidAccountData);
+    }
+
+    // Verify metadata accounts
+    let (expected_name_metadata, _) = Pubkey::find_program_address(
+        &[
+            b"metadata",
+            &mpl_token_metadata::ID.to_bytes(),
+            &name_mint_key.to_bytes(),
+        ],
+        &mpl_token_metadata::ID,
     );
-    
-    create_master_edition_v3(master_edition_ctx, Some(0))?;
-    
-    msg!("NFT created: {}", name);
+
+    if expected_name_metadata != *name_metadata.key {
+        return Err(ProgramError::InvalidAccountData);
+    }
+
+    let (expected_name_edition, _) = Pubkey::find_program_address(
+        &[
+            b"metadata",
+            &mpl_token_metadata::ID.to_bytes(),
+            &name_mint_key.to_bytes(),
+            b"edition",
+        ],
+        &mpl_token_metadata::ID,
+    );
+
+    if expected_name_edition != *name_master_edition.key {
+        return Err(ProgramError::InvalidAccountData);
+    }
+
+    let collection_signer_seeds = &[COLLECTION_SEED, &[collection_bump]];
+
+    // Create name mint account
+    let mint_space = Mint::get_packed_len();
+    let mint_lamports = Rent::get()?.minimum_balance(mint_space);
+
+    invoke_signed(
+        &system_instruction::create_account(
+            owner.key,
+            name_mint.key,
+            mint_lamports,
+            mint_space as u64,
+            &spl_token_2022::id(),
+        ),
+        &[owner.clone(), name_mint.clone(), system_program.clone()],
+        &[&[MINT_SEED, &[name_bump]]],
+    )?;
+
+    // Initialize name mint with collection mint as authority
+    invoke_signed(
+        &token_instruction::initialize_mint(
+            &spl_token_2022::id(),
+            name_mint.key,
+            collection_mint.key,
+            Some(collection_mint.key),
+            0,
+        )?,
+        &[name_mint.clone(), rent_sysvar.clone()],
+        &[collection_signer_seeds],
+    )?;
+
+    // Create associated token account for name NFT
+    invoke(
+        &associated_token_instruction::create_associated_token_account(
+            owner.key,
+            owner.key,
+            name_mint.key,
+            &spl_token_2022::id(),
+        ),
+        &[
+            owner.clone(),
+            name_token.clone(),
+            owner.clone(),
+            name_mint.clone(),
+            system_program.clone(),
+            token_program.clone(),
+            associated_token_program.clone(),
+        ],
+    )?;
+
+    // Mint 1 token
+    invoke_signed(
+        &token_instruction::mint_to(
+            &spl_token_2022::id(),
+            name_mint.key,
+            name_token.key,
+            collection_mint.key,
+            &[],
+            1,
+        )?,
+        &[
+            name_mint.clone(),
+            name_token.clone(),
+            collection_mint.clone(),
+        ],
+        &[collection_signer_seeds],
+    )?;
+
+    // Create metadata for name NFT
+    let creators = vec![Creator {
+        address: *collection_mint.key,
+        verified: true,
+        share: 100,
+    }];
+
+    let create_metadata_ix = CreateMetadataAccountV3Builder::new()
+        .metadata(*name_metadata.key)
+        .mint(*name_mint.key)
+        .mint_authority(*collection_mint.key)
+        .payer(*owner.key)
+        .update_authority(*collection_mint.key, true)
+        .system_program(*system_program.key)
+        .data(DataV2 {
+            name: name.clone(),
+            symbol: "MSN".to_owned(),
+            uri: String::new(),
+            seller_fee_basis_points: 0,
+            creators: Some(creators),
+            collection: Some(Collection {
+                verified: false,
+                key: *collection_mint.key,
+            }),
+            uses: None,
+        })
+        .is_mutable(true)
+        .instruction();
+
+    invoke_signed(
+        &create_metadata_ix,
+        &[
+            name_metadata.clone(),
+            name_mint.clone(),
+            collection_mint.clone(),
+            owner.clone(),
+            collection_mint.clone(),
+            system_program.clone(),
+        ],
+        &[collection_signer_seeds],
+    )?;
+
+    // Create master edition for name NFT
+    let create_edition_ix = CreateMasterEditionV3Builder::new()
+        .edition(*name_master_edition.key)
+        .update_authority(*collection_mint.key)
+        .mint_authority(*collection_mint.key)
+        .mint(*name_mint.key)
+        .payer(*owner.key)
+        .metadata(*name_metadata.key)
+        .token_program(*token_program.key)
+        .system_program(*system_program.key)
+        .max_supply(1)
+        .instruction();
+
+    invoke_signed(
+        &create_edition_ix,
+        &[
+            name_master_edition.clone(),
+            collection_mint.clone(),
+            collection_mint.clone(),
+            name_mint.clone(),
+            owner.clone(),
+            name_metadata.clone(),
+            token_program.clone(),
+            system_program.clone(),
+        ],
+        &[collection_signer_seeds],
+    )?;
+
+    // Verify collection membership
+    let verify_collection_ix = VerifyCollectionV1Builder::new()
+        .authority(*collection_mint.key)
+        .metadata(*name_metadata.key)
+        .collection_mint(*collection_mint.key)
+        .collection_metadata(Some(*collection_metadata.key))
+        .collection_master_edition(Some(*collection_master_edition.key))
+        .system_program(*system_program.key)
+        .sysvar_instructions(*sysvar_instruction.key)
+        .instruction();
+
+    invoke_signed(
+        &verify_collection_ix,
+        &[
+            collection_mint.clone(),
+            name_metadata.clone(),
+            collection_mint.clone(),
+            collection_metadata.clone(),
+            collection_master_edition.clone(),
+            system_program.clone(),
+            sysvar_instruction.clone(),
+        ],
+        &[collection_signer_seeds],
+    )?;
+
     Ok(())
 }
 ```
 
-**Stylus:**
+#### Anchor 
+
 ```rust
-use stylus_sdk::prelude::*;
-use stylus_sdk::{alloy_primitives::{Address, U256, FixedBytes}, msg, evm};
-use stylus_sdk::storage::*;
-use stylus_sdk::call::transfer_eth;
+#[program]
+pub mod non_fungible_tokens {
+    use super::*;
+
+    pub fn create_name_collection(ctx: Context<CreateNameCollection>) -> Result<()> {
+        // Mint the collection NFT
+        let seeds = &[COLLECTION_SEED, &[ctx.bumps.collection_mint]];
+        let signer_seeds = &[&seeds[..]];
+
+        mint_to(
+            CpiContext::new_with_signer(
+                ctx.accounts.token_program.to_account_info(),
+                MintTo {
+                    mint: ctx.accounts.collection_mint.to_account_info(),
+                    to: ctx.accounts.collection_token.to_account_info(),
+                    authority: ctx.accounts.collection_mint.to_account_info(),
+                },
+                signer_seeds,
+            ),
+            1,
+        )?;
+        msg!("Name Collection NFT minted!");
+
+        // Create metadata account for the collection
+        let creator = vec![Creator {
+            address: ctx.accounts.collection_mint.key(),
+            verified: true,
+            share: 100,
+        }];
+
+        CreateMetadataAccountV3Cpi::new(
+            &ctx.accounts.token_metadata_program.to_account_info(),
+            CreateMetadataAccountV3CpiAccounts {
+                metadata: &ctx.accounts.collection_metadata.to_account_info(),
+                mint: &ctx.accounts.collection_mint.to_account_info(),
+                mint_authority: &ctx.accounts.collection_mint.to_account_info(),
+                payer: &ctx.accounts.authority.to_account_info(),
+                update_authority: (&ctx.accounts.collection_mint.to_account_info(), true),
+                system_program: &ctx.accounts.system_program.to_account_info(),
+                rent: None,
+            },
+            CreateMetadataAccountV3InstructionArgs {
+                data: DataV2 {
+                    name: "Mock Name Service".to_owned(),
+                    symbol: "MNS".to_owned(),
+                    uri: String::new(),
+                    seller_fee_basis_points: 0,
+                    creators: Some(creator),
+                    collection: None,
+                    uses: None,
+                },
+                is_mutable: true,
+                collection_details: Some(CollectionDetails::V1 { size: 0 }),
+            },
+        )
+        .invoke_signed(signer_seeds)?;
+
+        // Create master edition for collection
+        CreateMasterEditionV3Cpi::new(
+            &ctx.accounts.token_metadata_program.to_account_info(),
+            CreateMasterEditionV3CpiAccounts {
+                edition: &ctx.accounts.collection_master_edition.to_account_info(),
+                update_authority: &ctx.accounts.collection_mint.to_account_info(),
+                mint_authority: &ctx.accounts.collection_mint.to_account_info(),
+                mint: &ctx.accounts.collection_mint.to_account_info(),
+                payer: &ctx.accounts.authority.to_account_info(),
+                metadata: &ctx.accounts.collection_metadata.to_account_info(),
+                token_program: &ctx.accounts.token_program.to_account_info(),
+                system_program: &ctx.accounts.system_program.to_account_info(),
+                rent: None,
+            },
+            CreateMasterEditionV3InstructionArgs {
+                max_supply: Some(0),
+            },
+        )
+        .invoke_signed(signer_seeds)?;
+
+        Ok(())
+    }
+
+    pub fn mint_name_nft(ctx: Context<MintNameNFT>, name: String) -> Result<()> {
+        require!(
+            !name.is_empty() && name.len() <= MAX_NAME_LENGTH,
+            ErrorCode::InvalidNameLength
+        );
+        require!(
+            name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_'),
+            ErrorCode::InvalidNameCharacters
+        );
+
+        let collection_seeds = &[COLLECTION_SEED, &[ctx.bumps.collection_mint]];
+        let collection_signer_seeds = &[&collection_seeds[..]];
+
+        // Mint the Name NFT
+        mint_to(
+            CpiContext::new_with_signer(
+                ctx.accounts.token_program.to_account_info(),
+                MintTo {
+                    mint: ctx.accounts.name_mint.to_account_info(),
+                    to: ctx.accounts.name_token.to_account_info(),
+                    authority: ctx.accounts.collection_mint.to_account_info(),
+                },
+                collection_signer_seeds,
+            ),
+            1,
+        )?;
+
+        // Create metadata with the name
+        let creator = vec![Creator {
+            address: ctx.accounts.collection_mint.key(),
+            verified: true,
+            share: 100,
+        }];
+
+        CreateMetadataAccountV3Cpi::new(
+            &ctx.accounts.token_metadata_program.to_account_info(),
+            CreateMetadataAccountV3CpiAccounts {
+                metadata: &ctx.accounts.name_metadata.to_account_info(),
+                mint: &ctx.accounts.name_mint.to_account_info(),
+                mint_authority: &ctx.accounts.collection_mint.to_account_info(),
+                payer: &ctx.accounts.owner.to_account_info(),
+                update_authority: (&ctx.accounts.collection_mint.to_account_info(), true),
+                system_program: &ctx.accounts.system_program.to_account_info(),
+                rent: None,
+            },
+            CreateMetadataAccountV3InstructionArgs {
+                data: DataV2 {
+                    name,
+                    symbol: "MSN".to_owned(),
+                    uri: String::new(),
+                    seller_fee_basis_points: 0,
+                    creators: Some(creator),
+                    collection: Some(Collection {
+                        verified: false,
+                        key: ctx.accounts.collection_mint.key(),
+                    }),
+                    uses: None,
+                },
+                is_mutable: true,
+                collection_details: None,
+            },
+        )
+        .invoke_signed(collection_signer_seeds)?;
+
+        // Create master edition for the name NFT
+        CreateMasterEditionV3Cpi::new(
+            &ctx.accounts.token_metadata_program.to_account_info(),
+            CreateMasterEditionV3CpiAccounts {
+                edition: &ctx.accounts.name_master_edition.to_account_info(),
+                update_authority: &ctx.accounts.collection_mint.to_account_info(),
+                mint_authority: &ctx.accounts.collection_mint.to_account_info(),
+                mint: &ctx.accounts.name_mint.to_account_info(),
+                payer: &ctx.accounts.owner.to_account_info(),
+                metadata: &ctx.accounts.name_metadata.to_account_info(),
+                token_program: &ctx.accounts.token_program.to_account_info(),
+                system_program: &ctx.accounts.system_program.to_account_info(),
+                rent: None,
+            },
+            CreateMasterEditionV3InstructionArgs {
+                max_supply: Some(0),
+            },
+        )
+        .invoke_signed(collection_signer_seeds)?;
+
+        // Verify collection membership
+        VerifyCollectionV1Cpi::new(
+            &ctx.accounts.token_metadata_program.to_account_info(),
+            VerifyCollectionV1CpiAccounts {
+                authority: &ctx.accounts.collection_mint.to_account_info(),
+                delegate_record: None,
+                metadata: &ctx.accounts.name_metadata.to_account_info(),
+                collection_mint: &ctx.accounts.collection_mint.to_account_info(),
+                collection_metadata: Some(&ctx.accounts.collection_metadata.to_account_info()),
+                collection_master_edition: Some(
+                    &ctx.accounts.collection_master_edition.to_account_info(),
+                ),
+                system_program: &ctx.accounts.system_program.to_account_info(),
+                sysvar_instructions: &ctx.accounts.sysvar_instruction.to_account_info(),
+            },
+        )
+        .invoke_signed(collection_signer_seeds)?;
+
+        Ok(())
+    }
+}
+
+#[derive(Accounts)]
+pub struct CreateNameCollection<'info> {
+    #[account(mut)]
+    pub authority: Signer<'info>,
+
+    #[account(
+        init,
+        payer = authority,
+        mint::decimals = 0,
+        mint::authority = collection_mint.key(),
+        mint::freeze_authority = collection_mint.key(),
+        seeds = [COLLECTION_SEED],
+        bump,
+    )]
+    pub collection_mint: Account<'info, Mint>,
+
+    #[account(mut)]
+    /// CHECK: This account will be initialized by the metaplex program
+    pub collection_metadata: UncheckedAccount<'info>,
+
+    #[account(mut)]
+    /// CHECK: This account will be initialized by the metaplex program
+    pub collection_master_edition: UncheckedAccount<'info>,
+
+    #[account(
+        init,
+        payer = authority,
+        associated_token::mint = collection_mint,
+        associated_token::authority = authority
+    )]
+    pub collection_token: Account<'info, TokenAccount>,
+
+    pub system_program: Program<'info, System>,
+    pub token_program: Program<'info, Token>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
+    pub token_metadata_program: Program<'info, Metadata>,
+}
+
+#[derive(Accounts)]
+#[instruction(name: String)]
+pub struct MintNameNFT<'info> {
+    #[account(mut)]
+    pub owner: Signer<'info>,
+
+    #[account(
+        init,
+        payer = owner,
+        mint::decimals = 0,
+        mint::authority = collection_mint,
+        mint::freeze_authority = collection_mint,
+        seeds = [MINT_SEED, name.as_bytes()],
+        bump,
+    )]
+    pub name_mint: Account<'info, Mint>,
+
+    #[account(
+        init,
+        payer = owner,
+        associated_token::mint = name_mint,
+        associated_token::authority = owner
+    )]
+    pub name_token: Account<'info, TokenAccount>,
+
+    #[account(mut)]
+    /// CHECK: This account will be initialized by the metaplex program
+    pub name_metadata: UncheckedAccount<'info>,
+
+    #[account(mut)]
+    /// CHECK: This account will be initialized by the metaplex program
+    pub name_master_edition: UncheckedAccount<'info>,
+
+    // Collection accounts for verification
+    #[account(
+        mut,
+        seeds = [COLLECTION_SEED],
+        bump,
+    )]
+    pub collection_mint: Account<'info, Mint>,
+
+    #[account(mut)]
+    pub collection_metadata: Account<'info, MetadataAccount>,
+
+    pub collection_master_edition: Account<'info, MasterEditionAccount>,
+
+    // System accounts
+    pub system_program: Program<'info, System>,
+    pub token_program: Program<'info, Token>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
+    pub token_metadata_program: Program<'info, Metadata>,
+
+    #[account(address = solana_sdk_ids::sysvar::instructions::ID)]
+    /// CHECK: Sysvar instruction account that is being checked with an address constraint
+    pub sysvar_instruction: UncheckedAccount<'info>,
+}
+```
+
+## Stylus
+
+Stylus NFTs follow the ERC-721 standard: each collection is a single contract managing all tokens through internal mappings. Token ownership, approvals, and metadata are stored directly in contract storage. The standard interface - ownerOf, approve, transferFrom - ensures marketplace compatibility. Contracts extend base functionality through modular patterns. OpenZeppelin's Stylus implementations provide components for enumeration, metadata URIs, and royalties. The single-contract model simplifies collection management compared to Solana's multi-account approach.
+
+```rust
+sol! {
+    #[derive(Debug)]
+    error InvalidNameLength();
+
+    #[derive(Debug)]
+    error InvalidNameCharacters();
+
+    #[derive(Debug)]
+    error NameAlreadyMinted();
+}
+
+#[derive(SolidityError, Debug)]
+pub enum ContractError {
+    InvalidNameLength(InvalidNameLength),
+    InvalidNameCharacters(InvalidNameCharacters),
+    NameAlreadyMinted(NameAlreadyMinted),
+    Erc721(erc721::Error),
+}
 
 #[storage]
 #[entrypoint]
-pub struct NFTCollection {
-    // ERC-721 standard storage
-    owners: StorageMap<U256, StorageAddress>,
-    balances: StorageMap<Address, StorageU256>,
-    token_approvals: StorageMap<U256, StorageAddress>,
-    operator_approvals: StorageMap<Address, StorageMap<Address, StorageBool>>,
-    
-    // Collection metadata
-    name: StorageString,
-    symbol: StorageString,
-    base_uri: StorageString,
-    
-    // NFT-specific storage
-    token_uris: StorageMap<U256, StorageString>,
+pub struct NameCollectionContract {
+    erc721: Erc721,
+    metadata: Erc721Metadata,
+    // Map names to token ID
+    minted_names: StorageMap<String, StorageU256>,
+    // Map token ID to name
+    token_names: StorageMap<U256, StorageString>,
+    // track supply
     next_token_id: StorageU256,
-    max_supply: StorageU256,
-    owner: StorageAddress,
-    
-    // Minting configuration
-    mint_price: StorageU256,
-    public_mint_active: StorageBool,
 }
-
-sol! {
-    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
-    event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);
-    event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
-}
-
-sol_interface! {
-    interface IERC721Receiver {
-        function onERC721Received(address operator, address from, uint256 tokenId, bytes data) external returns (bytes4);
-    }
-}
-
-const ON_ERC721_RECEIVED: [u8;4] = [0x15, 0x0b, 0x7a, 0x02]; // 0x150b7a02
 
 #[public]
-impl NFTCollection {
-    #[selector(name = "supportsInterface")]
-    pub fn supports_interface(&self, interface_id: [u8; 4]) -> bool {
-        let id = FixedBytes::<4>::from(interface_id);
-        // 0x80ac58cd ERC721, 0x5b5e139f ERC721Metadata
-        id == FixedBytes::from_hex("0x80ac58cd").unwrap()
-        || id == FixedBytes::from_hex("0x5b5e139f").unwrap()
-    }
-    
-    pub fn initialize(
-        &mut self,
-        name: String,
-        symbol: String,
-        base_uri: String,
-        max_supply: U256,
-        mint_price: U256,
-    ) -> Result<(), Vec<u8>> {
-        // Ensure not already initialized
-        if self.owner.get() != Address::ZERO {
-            return Err(b"Already initialized".to_vec());
-        }
-        
-        self.name.set_str(&name);
-        self.symbol.set_str(&symbol);
-        self.base_uri.set_str(&base_uri);
-        self.max_supply.set(max_supply);
-        self.mint_price.set(mint_price);
-        self.owner.set(msg::sender());
-        self.next_token_id.set(U256::from(1)); // Start from token ID 1
-        
+#[implements(IErc721<Error = erc721::Error>, IErc721Metadata<Error = erc721::Error>, IErc165)]
+impl NameCollectionContract {
+    #[constructor]
+    pub fn constructor(&mut self) -> Result<(), ContractError> {
+        // Initialize the collection metadata
+        self.metadata
+            .constructor("Mock Name Service".into(), "MNS".into());
+        self.next_token_id.set(U256::ONE);
         Ok(())
     }
-    
-    // ERC-721 standard view functions
-    pub fn name(&self) -> String {
-        self.name.get_string()
-    }
-    
-    pub fn symbol(&self) -> String {
-        self.symbol.get_string()
-    }
-    
-    #[selector(name = "totalSupply")]
-    pub fn total_supply(&self) -> U256 {
-        self.next_token_id.get() - U256::from(1)
-    }
-    
-    #[selector(name = "balanceOf")]
-    pub fn balance_of(&self, owner: Address) -> U256 {
-        if owner == Address::ZERO {
-            panic!("ERC721: balance query for the zero address");
-        }
-        self.balances.get(owner)
-    }
-    
-    #[selector(name = "ownerOf")]
-    pub fn owner_of(&self, token_id: U256) -> Result<Address, Vec<u8>> {
-        let owner = self.owners.get(token_id);
-        if owner == Address::ZERO {
-            return Err(b"ERC721: owner query for nonexistent token".to_vec());
-        }
-        Ok(owner)
-    }
-    
-    #[selector(name = "tokenURI")]
-    pub fn token_uri(&self, token_id: U256) -> Result<String, Vec<u8>> {
-        if !self.exists(token_id) {
-            return Err(b"ERC721: URI query for nonexistent token".to_vec());
-        }
-        
-        // Check for individual token URI first
-        let individual_uri = self.token_uris.getter(token_id).get_string();
-        if !individual_uri.is_empty() {
-            return Ok(individual_uri);
-        }
-        
-        // Fall back to base URI + token ID
-        let base = self.base_uri.get_string();
-        if base.is_empty() {
-            return Ok(String::new());
-        }
-        
-        Ok(format!("{}{}", base, token_id))
-    }
-}
-```
 
-### NFT minting
+    pub fn mint_name_nft(&mut self, to: Address, name: String) -> Result<U256, ContractError> {
+        // Validate name length
+        if name.is_empty() || name.len() > MAX_NAME_LENGTH {
+            return Err(ContractError::InvalidNameLength(InvalidNameLength {}));
+        }
 
-**Stylus Minting Implementation:**
-```rust
-#[public]
-impl NFTCollection {
-    #[payable]
-    pub fn mint(&mut self, to: Address) -> Result<U256, Vec<u8>> {
-        if !self.public_mint_active.get() {
-            return Err(b"Public minting not active".to_vec());
+        // Validate name characters (alphanumeric and underscore only)
+        if !name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_') {
+            return Err(ContractError::InvalidNameCharacters(
+                InvalidNameCharacters {},
+            ));
         }
-        
-        let price = self.mint_price.get();
-        if msg::value() < price {
-            return Err(b"Insufficient payment".to_vec());
+
+        // Check if name is already minted
+        if self.is_name_minted(name.clone()) {
+            return Err(NameAlreadyMinted {}.into());
         }
-        
+
+        // Get next token ID
         let token_id = self.next_token_id.get();
-        if token_id > self.max_supply.get() {
-            return Err(b"Max supply reached".to_vec());
-        }
-        
-        // Effects first
-        self.safe_mint(to, token_id)?;
-        
-        // Record credit for pull-based refund (avoid forced sends)
-        // self.credits.setter(msg::sender()).set(self.credits.get(msg::sender()) + (msg::value() - price));
-        
+
+        // Mint the NFT
+        self.erc721._mint(to, token_id)?;
+
+        // Set the bi-directional name mapping
+        self.minted_names.setter(name.clone()).set(token_id);
+        self.token_names.setter(token_id).set_str(&name);
+
+        // Increment token ID for next mint
+        self.next_token_id.set(token_id + U256::from(1));
+
         Ok(token_id)
     }
-    
-    pub fn owner_mint(&mut self, to: Address, token_id: U256) -> Result<(), Vec<u8>> {
-        if msg::sender() != self.owner.get() {
-            return Err(b"Only owner can mint".to_vec());
-        }
-        if token_id == U256::ZERO || token_id > self.max_supply.get() {
-            return Err(b"ERC721: tokenId out of range".to_vec());
-        }
-        self.safe_mint(to, token_id)
+
+    pub fn get_token_id_by_name(&self, name: String) -> U256 {
+        self.minted_names.get(name)
     }
-    
-    pub fn batch_mint(&mut self, to: Address, quantity: U256) -> Result<Vec<U256>, Vec<u8>> {
-        if msg::sender() != self.owner.get() {
-            return Err(b"Only owner can batch mint".to_vec());
-        }
-        
-        let mut minted_tokens = Vec::new();
-        let start_token_id = self.next_token_id.get();
-        
-        for i in 0..quantity.as_u32() {
-            let token_id = start_token_id + U256::from(i);
-            
-            if token_id > self.max_supply.get() {
-                return Err(b"Exceeds max supply".to_vec());
-            }
-            
-            self.safe_mint(to, token_id)?;
-            minted_tokens.push(token_id);
-        }
-        
-        Ok(minted_tokens)
+
+    pub fn get_name_by_token_id(&self, token_id: U256) -> String {
+        self.token_names.getter(token_id).get_string()
     }
-    
-    pub fn toggle_public_mint(&mut self) -> Result<(), Vec<u8>> {
-        if msg::sender() != self.owner.get() {
-            return Err(b"Only owner can toggle minting".to_vec());
-        }
-        
-        let current = self.public_mint_active.get();
-        self.public_mint_active.set(!current);
-        
-        Ok(())
+
+    pub fn is_name_minted(&self, name: String) -> bool {
+        self.minted_names.get(name) > U256::ZERO
     }
-    
-    pub fn set_mint_price(&mut self, new_price: U256) -> Result<(), Vec<u8>> {
-        if msg::sender() != self.owner.get() {
-            return Err(b"Only owner can set price".to_vec());
-        }
-        
-        self.mint_price.set(new_price);
-        
-        Ok(())
+
+    pub fn total_minted(&self) -> U256 {
+        self.next_token_id.get() - U256::ONE
     }
 }
 
-impl NFTCollection {
-    fn safe_mint(&mut self, to: Address, token_id: U256) -> Result<(), Vec<u8>> {
-        if to == Address::ZERO {
-            return Err(b"ERC721: mint to zero address".to_vec());
-        }
-        
-        if self.exists(token_id) {
-            return Err(b"ERC721: token already minted".to_vec());
-        }
-        
-        // Update balances and ownership
-        let balance = self.balances.get(to);
-        self.balances.setter(to).set(balance + U256::from(1));
-        self.owners.setter(token_id).set(to);
-        
-        // Update next token ID if sequential
-        if token_id >= self.next_token_id.get() {
-            self.next_token_id.set(token_id + U256::from(1));
-        }
-        
-        // Emit Transfer event
-        evm::log(Transfer {
-            from: Address::ZERO,
-            to,
-            tokenId: token_id,
-        });
-        
-        Ok(())
-    }
-    
-    fn exists(&self, token_id: U256) -> bool {
-        self.owners.get(token_id) != Address::ZERO
-    }
-}
-```
-
-### NFT transfers and approvals
-
-**Stylus Transfer Implementation:**
-```rust
 #[public]
-impl NFTCollection {
-    pub fn approve(&mut self, to: Address, token_id: U256) -> Result<(), Vec<u8>> {
-        let owner = self.owner_of(token_id)?;
-        
-        if to == owner {
-            return Err(b"ERC721: approval to current owner".to_vec());
-        }
-        
-        let sender = msg::sender();
-        if sender != owner && !self.is_approved_for_all(owner, sender) {
-            return Err(b"ERC721: approve caller is not owner nor approved for all".to_vec());
-        }
-        
-        self.approve_internal(owner, to, token_id);
-        Ok(())
+impl IErc721 for NameCollectionContract {
+    type Error = erc721::Error;
+
+    fn balance_of(&self, owner: Address) -> Result<U256, Self::Error> {
+        self.erc721.balance_of(owner)
     }
-    
-    pub fn get_approved(&self, token_id: U256) -> Result<Address, Vec<u8>> {
-        if !self.exists(token_id) {
-            return Err(b"ERC721: approved query for nonexistent token".to_vec());
-        }
-        
-        Ok(self.token_approvals.get(token_id))
+
+    fn owner_of(&self, token_id: U256) -> Result<Address, Self::Error> {
+        self.erc721.owner_of(token_id)
     }
-    
-    #[selector(name = "setApprovalForAll")]
-    pub fn set_approval_for_all(&mut self, operator: Address, approved: bool) -> Result<(), Vec<u8>> {
-        let owner = msg::sender();
-        if owner == operator { 
-            return Err(b"ERC721: approve to caller".to_vec()); 
-        }
-        self.operator_approvals.setter(owner).setter(operator).set(approved);
-        evm::log(ApprovalForAll { owner, operator, approved });
-        Ok(())
-    }
-    
-    pub fn is_approved_for_all(&self, owner: Address, operator: Address) -> bool {
-        self.operator_approvals.getter(owner).get(operator)
-    }
-    
-    pub fn transfer_from(&mut self, from: Address, to: Address, token_id: U256) -> Result<(), Vec<u8>> {
-        if !self.is_approved_or_owner(msg::sender(), token_id)? {
-            return Err(b"ERC721: transfer caller is not owner nor approved".to_vec());
-        }
-        
-        self.transfer_internal(from, to, token_id)?;
-        Ok(())
-    }
-    
-    #[selector(name = "safeTransferFrom")]
-    pub fn safe_transfer_from(
+
+    fn safe_transfer_from(
         &mut self,
         from: Address,
         to: Address,
-        token_id: U256
-    ) -> Result<(), Vec<u8>> {
-        self.safe_transfer_from_with_data(from, to, token_id, Bytes::new())
+        token_id: U256,
+    ) -> Result<(), Self::Error> {
+        self.erc721.safe_transfer_from(from, to, token_id)
     }
 
-    #[selector(name = "safeTransferFrom")]
-    pub fn safe_transfer_from_with_data(
+    fn safe_transfer_from_with_data(
         &mut self,
         from: Address,
         to: Address,
         token_id: U256,
         data: Bytes,
-    ) -> Result<(), Vec<u8>> {
-        if !self.is_approved_or_owner(msg::sender(), token_id)? {
-            return Err(b"ERC721: transfer caller is not owner nor approved".to_vec());
-        }
-        self.safe_transfer_internal(from, to, token_id, data)?;
-        Ok(())
-    }
-}
-
-impl NFTCollection {
-    fn approve_internal(&mut self, owner: Address, to: Address, token_id: U256) {
-        self.token_approvals.setter(token_id).set(to);
-        
-        evm::log(Approval {
-            owner,
-            approved: to,
-            tokenId: token_id,
-        });
-    }
-    
-    fn is_approved_or_owner(&self, spender: Address, token_id: U256) -> Result<bool, Vec<u8>> {
-        let owner = self.owner_of(token_id)?;
-        
-        Ok(spender == owner
-            || self.get_approved(token_id)? == spender
-            || self.is_approved_for_all(owner, spender))
-    }
-    
-    fn transfer_internal(&mut self, from: Address, to: Address, token_id: U256) -> Result<(), Vec<u8>> {
-        if self.owner_of(token_id)? != from {
-            return Err(b"ERC721: transfer from incorrect owner".to_vec());
-        }
-        
-        if to == Address::ZERO {
-            return Err(b"ERC721: transfer to zero address".to_vec());
-        }
-        
-        // Clear approval
-        self.token_approvals.setter(token_id).set(Address::ZERO);
-        evm::log(Approval { owner: from, approved: Address::ZERO, tokenId: token_id });
-        
-        // Update balances
-        let from_balance = self.balances.get(from);
-        self.balances.setter(from).set(from_balance - U256::from(1));
-        
-        let to_balance = self.balances.get(to);
-        self.balances.setter(to).set(to_balance + U256::from(1));
-        
-        // Update ownership
-        self.owners.setter(token_id).set(to);
-        
-        evm::log(Transfer {
-            from,
-            to,
-            tokenId: token_id,
-        });
-        
-        Ok(())
-    }
-    
-    fn safe_transfer_internal(&mut self, from: Address, to: Address, token_id: U256, data: Bytes) -> Result<(), Vec<u8>> {
-        self.transfer_internal(from, to, token_id)?;
-        // External call to `to.onERC721Received` happens AFTER state updates (CEI).
-        // Be aware: receiver can reenter other functions; guard critical paths if needed.
-        // If `to` is a contract, it must return the magic value
-        if evm::code_size(to) > 0 {
-            let rcpt = IERC721Receiver::new(to);
-            let ret = rcpt.on_erc721_received(self, msg::sender(), from, token_id, data)
-                .map_err(|_| b"ERC721: onERC721Received reverted".to_vec())?;
-            if ret.0 != ON_ERC721_RECEIVED { 
-                return Err(b"ERC721: receiver rejected tokens".to_vec()); 
-            }
-        }
-        Ok(())
-    }
-}
-```
-
-## Working example: complete migration
-
-The `non-fungible-tokens` example demonstrates the full transformation:
-
-### Running the example
-
-```bash
-cd examples/concepts/non-fungible-tokens
-
-# Compare implementations
-ls -la anchor/src/lib.rs native/src/lib.rs stylus/src/lib.rs
-
-# Test Stylus ERC-721 implementation
-cd stylus && cargo test
-
-# Check generated ABI
-cargo stylus export-abi
-```
-
-### Key transformations
-
-1. **Metaplex Metadata to ERC-721 Storage**
-   ```rust
-   // Solana: Separate metadata account
-   pub struct Metadata {
-       pub key: Key,
-       pub update_authority: Pubkey,
-       pub mint: Pubkey,
-       pub data: Data,
-       // ...
-   }
-   
-   // Stylus: Built-in contract storage
-   token_uris: StorageMap<U256, StorageString>,
-   base_uri: StorageString,
-   ```
-
-2. **SPL Token + Metadata to Single Contract**
-   ```rust
-   // Solana: Multiple accounts per NFT
-   // - Mint account (SPL Token)
-   // - Metadata account (Metaplex)
-   // - Master Edition account
-   
-   // Stylus: Single contract manages all NFTs
-   owners: StorageMap<U256, StorageAddress>,
-   balances: StorageMap<Address, StorageU256>,
-   ```
-
-3. **CPI Complexity to Direct Methods**
-   ```rust
-   // Solana: Complex CPI setup
-   invoke(&create_metadata_accounts_v3(...), accounts)?;
-   
-   // Stylus: Simple method call
-   nft_contract.mint(to_address)?;
-   ```
-
-## Advanced NFT features
-
-### Royalties and Marketplace Integration
-
-```rust
-#[storage]
-pub struct NFTWithRoyalties {
-    // ... standard ERC-721 storage
-    
-    // Royalty information
-    royalty_recipient: StorageAddress,
-    royalty_percentage: StorageU256, // In basis points (500 = 5%)
-    token_royalties: StorageMap<U256, RoyaltyInfo>,
-}
-
-#[storage]
-pub struct RoyaltyInfo {
-    recipient: StorageAddress,
-    percentage: StorageU256,
-}
-
-#[public]
-impl NFTWithRoyalties {
-    #[selector(name = "supportsInterface")]
-    pub fn supports_interface(&self, interface_id: [u8; 4]) -> bool {
-        let id = FixedBytes::<4>::from(interface_id);
-        id == FixedBytes::from_hex("0x80ac58cd").unwrap() // ERC721
-        || id == FixedBytes::from_hex("0x5b5e139f").unwrap() // Metadata
-        || id == FixedBytes::from_hex("0x2a55205a").unwrap() // ERC-2981
-    }
-    
-    pub fn set_default_royalty(&mut self, recipient: Address, percentage: U256) -> Result<(), Vec<u8>> {
-        if msg::sender() != self.owner.get() {
-            return Err(b"Only owner can set royalties".to_vec());
-        }
-        
-        if percentage > U256::from(1000) { // Max 10%
-            return Err(b"Royalty too high".to_vec());
-        }
-        
-        self.royalty_recipient.set(recipient);
-        self.royalty_percentage.set(percentage);
-        
-        Ok(())
-    }
-    
-    pub fn set_token_royalty(&mut self, token_id: U256, recipient: Address, percentage: U256) -> Result<(), Vec<u8>> {
-        if msg::sender() != self.owner.get() {
-            return Err(b"Only owner can set royalties".to_vec());
-        }
-        
-        if !self.exists(token_id) {
-            return Err(b"Token does not exist".to_vec());
-        }
-        
-        let mut royalty_info = self.token_royalties.setter(token_id);
-        royalty_info.recipient.set(recipient);
-        royalty_info.percentage.set(percentage);
-        
-        Ok(())
-    }
-    
-    // EIP-2981 Royalty Standard
-    pub fn royalty_info(&self, token_id: U256, sale_price: U256) -> (Address, U256) {
-        let token_royalty = self.token_royalties.getter(token_id);
-        let recipient = token_royalty.recipient.get();
-        
-        if recipient != Address::ZERO {
-            let percentage = token_royalty.percentage.get();
-            let royalty_amount = sale_price * percentage / U256::from(10000);
-            return (recipient, royalty_amount);
-        }
-        
-        // Fall back to default royalty
-        let default_recipient = self.royalty_recipient.get();
-        let default_percentage = self.royalty_percentage.get();
-        let royalty_amount = sale_price * default_percentage / U256::from(10000);
-        
-        (default_recipient, royalty_amount)
-    }
-}
-```
-
-### Enumerable extension
-
-```rust
-#[storage]
-pub struct EnumerableNFT {
-    // ... standard ERC-721 storage
-    
-    // Enumeration support
-    all_tokens: StorageVec<StorageU256>,
-    all_tokens_index: StorageMap<U256, StorageU256>,
-    owned_tokens: StorageMap<Address, StorageMap<U256, StorageU256>>,
-    owned_tokens_index: StorageMap<U256, StorageU256>,
-}
-
-#[public]
-impl EnumerableNFT {
-    #[selector(name = "totalSupply")]
-    pub fn total_supply(&self) -> U256 { 
-        U256::from(self.all_tokens.len()) 
+    ) -> Result<(), Self::Error> {
+        self.erc721
+            .safe_transfer_from_with_data(from, to, token_id, data)
     }
 
-    #[selector(name = "tokenByIndex")]
-    pub fn token_by_index(&self, index: U256) -> Result<U256, Vec<u8>> {
-        if index >= U256::from(self.all_tokens.len()) { 
-            return Err(b"ERC721Enumerable: global index out of bounds".to_vec()); 
-        }
-        Ok(self.all_tokens.get(index).unwrap())
-    }
-
-    #[selector(name = "tokenOfOwnerByIndex")]
-    pub fn token_of_owner_by_index(&self, owner: Address, index: U256) -> Result<U256, Vec<u8>> {
-        let bal = self.balances.get(owner);
-        if index >= bal { 
-            return Err(b"ERC721Enumerable: owner index out of bounds".to_vec()); 
-        }
-        Ok(self.owned_tokens.getter(owner).get(index))
-    }
-}
-
-impl EnumerableNFT {
-    fn add_token_to_all_tokens_enumeration(&mut self, token_id: U256) {
-        let idx = U256::from(self.all_tokens.len());
-        self.all_tokens.push(token_id);
-        self.all_tokens_index.setter(token_id).set(idx);
-    }
-
-    fn add_token_to_owner_enumeration(&mut self, to: Address, token_id: U256) {
-        let idx = self.balances.get(to) - U256::from(1); // already incremented
-        self.owned_tokens.setter(to).setter(idx).set(token_id);
-        self.owned_tokens_index.setter(token_id).set(idx);
-    }
-
-    fn remove_token_from_owner_enumeration(&mut self, from: Address, token_id: U256) {
-        let last_index = self.balances.get(from);
-        let idx = self.owned_tokens_index.get(token_id);
-        let last_token_id = self.owned_tokens.getter(from).get(last_index - U256::from(1));
-        self.owned_tokens.setter(from).setter(idx).set(last_token_id);
-        self.owned_tokens_index.setter(last_token_id).set(idx);
-        // delete last entry
-        // (implementation detail depends on SDK helpers; intent: shrink "array")
-        self.owned_tokens_index.delete(token_id);
-    }
-}
-```
-
-### Metadata management
-
-```rust
-#[storage]
-pub struct UpdatableMetadata {
-    // ... standard ERC-721 storage
-    
-    token_metadata: StorageMap<U256, TokenMetadata>,
-    metadata_frozen: StorageBool,
-}
-
-#[storage]    
-pub struct TokenMetadata {
-    name: StorageString,
-    description: StorageString,
-    image: StorageString,
-    attributes: StorageVec<StorageString>,
-}
-
-sol! {
-    event MetadataUpdate(uint256 indexed token_id);
-    event MetadataFrozen();
-}
-
-#[public]
-impl UpdatableMetadata {
-    pub fn set_token_metadata(
+    fn transfer_from(
         &mut self,
+        from: Address,
+        to: Address,
         token_id: U256,
-        name: String,
-        description: String,
-        image: String,
-        attributes: Vec<String>,
-    ) -> Result<(), Vec<u8>> {
-        if msg::sender() != self.owner.get() {
-            return Err(b"Only owner can update metadata".to_vec());
-        }
-        
-        if self.metadata_frozen.get() {
-            return Err(b"Metadata is frozen".to_vec());
-        }
-        
-        if !self.exists(token_id) {
-            return Err(b"Token does not exist".to_vec());
-        }
-        
-        let mut metadata = self.token_metadata.setter(token_id);
-        metadata.name.set_str(&name);
-        metadata.description.set_str(&description);
-        metadata.image.set_str(&image);
-        
-        // Clear existing attributes
-        let mut attrs = metadata.attributes;
-        while attrs.len() > 0 {
-            attrs.pop();
-        }
-        
-        // Set new attributes
-        for attr in attributes {
-            attrs.push(StorageString::new());
-            let last_idx = attrs.len() - 1;
-            attrs.setter(last_idx).unwrap().set_str(&attr);
-        }
-        
-        evm::log(MetadataUpdate { token_id });
-        
-        Ok(())
+    ) -> Result<(), Self::Error> {
+        self.erc721.transfer_from(from, to, token_id)
     }
-    
-    pub fn freeze_metadata(&mut self) -> Result<(), Vec<u8>> {
-        if msg::sender() != self.owner.get() {
-            return Err(b"Only owner can freeze metadata".to_vec());
-        }
-        
-        self.metadata_frozen.set(true);
-        evm::log(MetadataFrozen {});
-        
-        Ok(())
+
+    fn approve(&mut self, to: Address, token_id: U256) -> Result<(), Self::Error> {
+        self.erc721.approve(to, token_id)
     }
-    
-    pub fn get_token_metadata(&self, token_id: U256) -> Result<(String, String, String, Vec<String>), Vec<u8>> {
-        if !self.exists(token_id) {
-            return Err(b"Token does not exist".to_vec());
-        }
-        
-        let metadata = self.token_metadata.getter(token_id);
-        let name = metadata.name.get_string();
-        let description = metadata.description.get_string();
-        let image = metadata.image.get_string();
-        
-        let attrs_storage = metadata.attributes;
-        let mut attributes = Vec::new();
-        for i in 0..attrs_storage.len() {
-            attributes.push(attrs_storage.get(i).unwrap().get_string());
-        }
-        
-        Ok((name, description, image, attributes))
+
+    fn set_approval_for_all(&mut self, to: Address, approved: bool) -> Result<(), Self::Error> {
+        self.erc721.set_approval_for_all(to, approved)
+    }
+
+    fn get_approved(&self, token_id: U256) -> Result<Address, Self::Error> {
+        self.erc721.get_approved(token_id)
+    }
+
+    fn is_approved_for_all(&self, owner: Address, operator: Address) -> bool {
+        self.erc721.is_approved_for_all(owner, operator)
+    }
+}
+
+#[public]
+impl IErc721Metadata for NameCollectionContract {
+    type Error = erc721::Error;
+
+    fn name(&self) -> String {
+        self.metadata.name()
+    }
+
+    fn symbol(&self) -> String {
+        self.metadata.symbol()
+    }
+
+    /// unused
+    fn token_uri(&self, _token_id: U256) -> Result<String, Self::Error> {
+        Ok(String::new())
+    }
+}
+
+#[public]
+impl IErc165 for NameCollectionContract {
+    fn supports_interface(&self, interface_id: B32) -> bool {
+        self.erc721.supports_interface(interface_id)
+            || <Self as IErc721Metadata>::interface_id() == interface_id
     }
 }
 ```
 
-## Best practices
+## Next Steps
 
-### 1. Follow ERC-721 standard
-```rust
-// Always implement all required functions
-pub fn balance_of(&self, owner: Address) -> U256;
-pub fn owner_of(&self, token_id: U256) -> Result<Address, Vec<u8>>;
-pub fn approve(&mut self, to: Address, token_id: U256) -> Result<(), Vec<u8>>;
-// ... etc
-```
-
-### 2. Check all token operations
-```rust
-fn require_minted(&self, token_id: U256) -> Result<(), Vec<u8>> {
-    if !self.exists(token_id) {
-        return Err(b"ERC721: token does not exist".to_vec());
-    }
-    Ok(())
-}
-```
-
-### 3. Emit events for all state changes
-```rust
-// Always emit Transfer events
-evm::log(Transfer { from, to, token_id });
-```
-
-### 4. Handle zero address checks
-```rust
-if to == Address::ZERO {
-    return Err(b"ERC721: mint to zero address".to_vec());
-}
-```
-
-## Migration checklist
-
-### Analysis phase
-- [ ] Identify all Metaplex NFT operations
-- [ ] Map collection structure and metadata
-- [ ] Document minting patterns and authorities
-- [ ] List any custom NFT features (royalties, traits, etc.)
-
-### Implementation phase
-- [ ] Create ERC-721 contract with appropriate storage
-- [ ] Apply standard ERC-721 methods
-- [ ] Add minting and burning functionality
-- [ ] Migrate metadata management
-- [ ] Add custom features (royalties, enumeration, etc.)
-
-### Testing phase
-- [ ] Test all ERC-721 standard methods
-- [ ] Verify transfer and approval mechanisms
-- [ ] Test minting with payment handling
-- [ ] Check metadata functionality
-- [ ] Check gas costs and limits
-
-## Common pitfalls
-
-### Not checking token existence
-```rust
-// Always verify token exists
-pub fn owner_of(&self, token_id: U256) -> Result<Address, Vec<u8>> {
-    let owner = self.owners.get(token_id);
-    if owner == Address::ZERO {
-        return Err(b"Token does not exist".to_vec());
-    }
-    Ok(owner)
-}
-```
-
-### Forgetting to update balances
-```rust
-// Must update both ownership and balances
-self.owners.setter(token_id).set(to);
-let balance = self.balances.get(to);
-self.balances.setter(to).set(balance + U256::from(1)); // Don't forget this!
-```
-
-### Missing approval clearing
-```rust
-fn transfer_internal(&mut self, from: Address, to: Address, token_id: U256) -> Result<(), Vec<u8>> {
-    // Must clear approvals on transfer
-    self.token_approvals.setter(token_id).set(Address::ZERO);
-    // ... rest of transfer logic
-}
-```
-
-## Next steps
-
-With non-fungible tokens covered, the final chapter explores [Errors and Events](./errors-events.md) - migrating Solana's logging and error patterns to Stylus structured events and custom errors.
-
-## Reference
-
-- [Example Code: non-fungible-tokens](/examples/concepts/non-fungible-tokens/)
-- [ERC-721 Standard](https://eips.ethereum.org/EIPS/eip-721)
-- [OpenZeppelin ERC-721 Implementation](https://docs.openzeppelin.com/contracts/erc721)
+With non-fungible tokens covered, the next chapter explores [Errors and Events](./errors-events.md) - migrating Solana's logging and error patterns to Stylus structured events and custom errors.
