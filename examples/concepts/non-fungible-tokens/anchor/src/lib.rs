@@ -81,6 +81,8 @@ pub mod non_fungible_tokens {
         )
         .invoke_signed(signer_seeds)?;
 
+        msg!("MPL Metadata account created!");
+
         // Create master edition for collection
         CreateMasterEditionV3Cpi::new(
             &ctx.accounts.token_metadata_program.to_account_info(),
@@ -100,6 +102,8 @@ pub mod non_fungible_tokens {
             },
         )
         .invoke_signed(signer_seeds)?;
+
+        msg!("MPL Master Edition account created!");
 
         Ok(())
     }
@@ -264,7 +268,6 @@ pub struct MintNameNFT<'info> {
         bump,
     )]
     pub name_mint: Account<'info, Mint>,
-
     #[account(
         init,
         payer = owner,
@@ -294,12 +297,11 @@ pub struct MintNameNFT<'info> {
 
     pub collection_master_edition: Account<'info, MasterEditionAccount>,
 
-    // System accounts
+    // // System accounts
     pub system_program: Program<'info, System>,
     pub token_program: Program<'info, Token>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub token_metadata_program: Program<'info, Metadata>,
-
     #[account(address = solana_sdk_ids::sysvar::instructions::ID)]
     /// CHECK: Sysvar instruction account that is being checked with an address constraint
     pub sysvar_instruction: UncheckedAccount<'info>,
@@ -321,17 +323,77 @@ mod tests {
     };
 
     use anchor_lang::{
-        prelude::AccountMeta, solana_program::instruction::Instruction, InstructionData,
+        prelude::AccountMeta,
+        solana_program::{
+            instruction::Instruction,
+            sysvar::instructions::{
+                construct_instructions_data, BorrowedAccountMeta, BorrowedInstruction,
+            },
+        },
+        InstructionData,
     };
     use anchor_spl::{associated_token, metadata::mpl_token_metadata, token::spl_token};
     use mollusk_svm::{program::keyed_account_for_system_program, result::Check, Mollusk};
-    use solana_account::Account;
+    use solana_account::{Account, AccountSharedData};
     use solana_pubkey::Pubkey;
     use solana_sdk_ids::system_program;
 
     static MPL_TOKEN_METADATA_ELF: &[u8] = include_bytes!("../../elf/mpl-token-metadata.so");
 
-    // TODO: Fix program so test passes. Directionally correct but account debugging required.
+    // https://github.com/anza-xyz/mollusk/issues/100
+    fn get_account_instructions_sysvar(
+        mollusk: &mut Mollusk,
+        instructions: &[Instruction],
+    ) -> (Pubkey, Account) {
+        // Construct the instructions data from all instructions
+        let mut data = construct_instructions_data(
+            instructions
+                .iter()
+                .map(|instruction| BorrowedInstruction {
+                    program_id: &instruction.program_id,
+                    accounts: instruction
+                        .accounts
+                        .iter()
+                        .map(|meta| BorrowedAccountMeta {
+                            pubkey: &meta.pubkey,
+                            is_signer: meta.is_signer,
+                            is_writable: meta.is_writable,
+                        })
+                        .collect(),
+                    data: &instruction.data,
+                })
+                .collect::<Vec<_>>()
+                .as_slice(),
+        );
+
+        // Find which instruction contains the sysvar account and at what position
+        if let Some((ix_index, _)) = instructions.iter().enumerate().find(|(_, instruction)| {
+            instruction
+                .accounts
+                .iter()
+                .any(|meta| meta.pubkey == solana_sdk_ids::sysvar::instructions::ID)
+        }) {
+            #[allow(deprecated)]
+            spl_token::solana_program::sysvar::instructions::store_current_index(
+                &mut data,
+                ix_index as u16,
+            );
+        }
+
+        // Set the account data
+        let mut instruction_sysvar_account = AccountSharedData::new(
+            mollusk.sysvars.rent.minimum_balance(data.len()),
+            data.len(),
+            &solana_sdk_ids::sysvar::id(),
+        );
+        instruction_sysvar_account.set_data_from_slice(&data);
+
+        (
+            solana_sdk_ids::sysvar::instructions::ID,
+            instruction_sysvar_account.into(),
+        )
+    }
+
     #[test]
     fn test_program() {
         let mut mollusk = Mollusk::new(&PROGRAM_ID, env!("CARGO_CRATE_NAME"));
@@ -358,18 +420,18 @@ mod tests {
             associated_token::get_associated_token_address(&authority_key, &collection_mint_key);
         let collection_token_account = Account::default();
 
-        let collection_metadata_key = Pubkey::find_program_address(
+        let (collection_metadata_key, _) = Pubkey::find_program_address(
             &[
                 b"metadata",
                 &mpl_token_metadata::ID.to_bytes(),
                 &collection_mint_key.to_bytes(),
             ],
             &mpl_token_metadata::ID,
-        )
-        .0;
+        );
+
         let collection_metadata_account = Account::default();
 
-        let collection_master_edition_key = Pubkey::find_program_address(
+        let (collection_master_edition_key, _) = Pubkey::find_program_address(
             &[
                 b"metadata",
                 &mpl_token_metadata::ID.to_bytes(),
@@ -377,8 +439,8 @@ mod tests {
                 b"edition",
             ],
             &mpl_token_metadata::ID,
-        )
-        .0;
+        );
+
         let collection_master_edition_account = Account::default();
 
         // Create collection instruction
@@ -408,18 +470,17 @@ mod tests {
             associated_token::get_associated_token_address(&authority_key, &name_mint_key);
         let name_token_account = Account::default();
 
-        let name_metadata_key = Pubkey::find_program_address(
+        let (name_metadata_key, _) = Pubkey::find_program_address(
             &[
                 b"metadata",
                 &mpl_token_metadata::ID.to_bytes(),
                 &name_mint_key.to_bytes(),
             ],
             &mpl_token_metadata::ID,
-        )
-        .0;
+        );
         let name_metadata_account = Account::default();
 
-        let name_master_edition_key = Pubkey::find_program_address(
+        let (name_master_edition_key, _) = Pubkey::find_program_address(
             &[
                 b"metadata",
                 &mpl_token_metadata::ID.to_bytes(),
@@ -427,8 +488,8 @@ mod tests {
                 b"edition",
             ],
             &mpl_token_metadata::ID,
-        )
-        .0;
+        );
+
         let name_master_edition_account = Account::default();
 
         let mint_name_data = MintNameNft {
@@ -452,6 +513,14 @@ mod tests {
                 AccountMeta::new_readonly(associated_token::ID, false),
                 AccountMeta::new_readonly(mpl_token_metadata::ID, false),
                 AccountMeta::new_readonly(solana_sdk_ids::sysvar::instructions::ID, false),
+            ],
+        );
+
+        let keyed_instructions_sysvar_account = get_account_instructions_sysvar(
+            &mut mollusk,
+            &[
+                create_collection_instruction.clone(),
+                mint_name_instruction.clone(),
             ],
         );
 
@@ -485,7 +554,7 @@ mod tests {
                 ),
                 keyed_account_for_system_program(),
                 // Sysvar
-                (solana_sdk_ids::sysvar::instructions::ID, Account::default()),
+                keyed_instructions_sysvar_account,
             ],
         );
     }
