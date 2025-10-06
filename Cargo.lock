@@ -2384,6 +2384,7 @@ name = "errors-events-stylus"
 version = "0.1.0"
 dependencies = [
  "alloy-primitives",
+ "alloy-sol-types",
  "stylus-sdk",
 ]
 
@@ -7525,6 +7526,15 @@ dependencies = [
  "alloy-sol-types",
  "cfg-if",
  "dyn-clone",
+]
+
+[[package]]
+name = "stylus-gas-optimization"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "alloy-sol-types",
+ "stylus-sdk",
 ]
 
 [[package]]

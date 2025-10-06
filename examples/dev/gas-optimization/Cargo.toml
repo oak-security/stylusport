@@ -1,0 +1,14 @@
+[package]
+name = "stylus-gas-optimization"
+version = "0.1.0"
+edition = "2021"
+doc_test = false
+
+[dependencies]
+alloy-primitives.workspace = true
+alloy-sol-types.workspace = true
+stylus-sdk.workspace = true
+
+[dev-dependencies]
+alloy-primitives = { workspace = true, features = [ "tiny-keccak" ] }
+stylus-sdk = { workspace = true, features = [ "stylus-test" ] }

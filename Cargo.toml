@@ -2,7 +2,8 @@
 members = [
   "cli", 
   "examples/concepts/*/*",
-  "examples/case-studies/*"
+  "examples/case-studies/*",
+  "examples/dev/*"
 ]
 exclude = ["examples/concepts/non-fungible-tokens/elf"]
 resolver = "2"
