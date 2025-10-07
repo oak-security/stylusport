@@ -30,7 +30,7 @@ impl FungibleTokenContract {
     #[constructor]
     pub fn constructor(&mut self) -> Result<(), Erc20Error> {
         self.erc20
-            ._mint(self.vm().msg_sender(), U256::from(TOTAL_SUPPLY))?;
+            ._mint(self.vm().tx_origin(), U256::from(TOTAL_SUPPLY))?;
 
         Ok(())
     }

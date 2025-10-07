@@ -46,7 +46,7 @@ pub struct OwnableContract {
 impl OwnableContract {
     #[constructor]
     pub fn constructor(&mut self) -> Result<(), ContractError> {
-        self.ownable.constructor(self.vm().msg_sender())?;
+        self.ownable.constructor(self.vm().tx_origin())?;
 
         self.is_paused.set(true);
 

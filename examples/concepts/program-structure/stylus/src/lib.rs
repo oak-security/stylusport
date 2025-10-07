@@ -32,7 +32,7 @@ pub struct Counter {
 impl Counter {
     #[constructor]
     pub fn constructor(&mut self, initial_value: U256) {
-        let authority = self.vm().msg_sender();
+        let authority = self.vm().tx_origin();
 
         self.value.set(initial_value);
         self.authority.set(authority);

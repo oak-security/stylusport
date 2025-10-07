@@ -16,3 +16,9 @@
 # Part II: Case Study
 
 - [Case Study - Migrating Bonafida's Token Vesting to Stylus](./case-study-bonafida-token-vesting.md)
+
+# Part III: Development Practices
+
+- [Testing and Debugging](./testing-debugging.md)
+- [Gas Optimization](./gas-optimization.md)
+- [Security Considerations](./security-considerations.md)
