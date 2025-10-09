@@ -1,0 +1,13 @@
+[package]
+name = "stylusport-mcp-server"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+rust-mcp-schema = "0.7.4"
+serde_json = "1.0.145"
+
+# redirect crates-io dependencies to github to reduce supply chain surface area
+[patch.crates-io]
+rust-mcp-schema = { git = "https://github.com/rust-mcp-stack/rust-mcp-schema", version = "0.7.4" }
+serde_json = { git = "https://github.com/serde-rs/json", version = "1.0.145"  }
