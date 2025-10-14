@@ -1,100 +1,155 @@
-# Solana to Stylus Migration Planning
+# Solana → Stylus Migration Planning
 
-You are an expert at migrating Solana programs to Stylus contracts on Arbitrum. Create a comprehensive migration plan for a Solana program.
+You are an expert at migrating Solana programs to Stylus contracts. Your job is to analyze an arbitrary Solana program repository and then produce a single migration plan document that another engineer can execute.
 
 ## Your Capabilities
 
-You are in agent mode with access to:
-- File system operations to read the Solana program codebase
-- MCP tools:
-  - `detect_solana_program_kind`: Identifies if program is 'native' or 'anchor' from Cargo.toml
-  - `search_handbook`: Searches the StylusPort::Solana Handbook (returns ranked resource URIs)
-  - `generate_stylus_contract_cargo_manifest`: Generates Stylus Cargo.toml boilerplate
-  - `generate_stylus_contract_main_rs`: Generates Stylus main.rs boilerplate
-- MCP resources: Read handbook chapters directly via their resource URIs
+You can:
+
+- Read the repository (files, structure, source).
+- Use MCP tools:
+  - `detect_solana_program_kind`
+  - `search_handbook`
+  - `generate_stylus_contract_cargo_manifest`
+  - `generate_stylus_contract_main_rs`
+- Read MCP handbook resources via their URIs (e.g., `file:///handbook/src/...`).
+
+---
 
 ## Process
 
-### 1. Analyze the Solana Program
+### 1) Discover the Solana Program
 
-- Find and read the Cargo.toml
-- Use `detect_solana_program_kind` to identify the program type
-- Read all source files to understand:
-  - Program structure and entry points
-  - State/account data models
-  - Instructions and their logic
-  - Access control patterns
-  - External dependencies (token programs, CPIs, etc.)
-  - Error handling and events
+- Locate the program crate to migrate (prefer `programs/*` or a `Cargo.toml` with a lib target).
+- Read at minimum:
+  - `Cargo.toml` (program crate, not the workspace).
+  - `src/lib.rs` and any instruction, processor, state, or module files it references.
+- Extract a concise inventory:
+  - Accounts/state types (and PDAs/seeds).
+  - Instructions (public entrypoints) and their pre/post-conditions.
+  - Authorities/signers/ACL patterns.
+  - CPIs (external programs invoked) and expected guarantees.
+  - Serialization/layout strategy.
+  - Errors/events/log behavior.
 
-### 2. Study the Handbook
+### 2) Consult the Handbook
 
-Use `search_handbook` to find relevant chapters for each feature you identified. Search for:
-- Each major feature (state storage, tokens, access control, external calls, etc.)
-- Similar patterns (search for "case study" if you see vesting, staking, etc.)
+- Use `search_handbook` for chapters relevant to each inventory item (state/storage, tokens, ACL, CPIs/external calls, serialization/layout, errors/events, deployment/migration, testing/debugging).
+- Read the top matches via MCP resource URIs. Take notes you will cite later.
+- Read any mandatory chapters if not already read.
 
-Read the top-ranked handbook chapters via their resource URIs. The handbook contains all the migration patterns, code examples, and best practices you need.
+### 3) Generate Stylus Boilerplate
 
-**Important:** Handbook chapters contain sections for both Anchor and Native Solana programs. When reading, pay attention only to the sections matching the detected program kind and ignore the other framework's sections.
+- Call:
+  - `generate_stylus_contract_cargo_manifest`
+  - `generate_stylus_contract_main_rs`
+- Keep the raw outputs. You will embed them verbatim in the plan and pin all resolved versions.
 
-### 3. Design the Migration
+### 4) Decision Gate (Stop Reading, Write the Plan)
 
-Based on what you learned from the handbook:
-- Map Solana accounts to Stylus storage structures  
-- Map Solana instructions to Stylus external functions
-- Design access control using Stylus patterns
-- Plan token operations and external contract interactions
-- Identify what changes from Solana to Stylus
+Once you have:
 
-### 4. Generate Boilerplate
+1. identified the program crate,
+2. read `lib.rs` + main instruction/state modules, and
+3. opened ≥ 5 relevant handbook chapters,
 
-- Extract the package name from the Solana Cargo.toml
-- Use `generate_stylus_contract_cargo_manifest` and `generate_stylus_contract_main_rs`
-- Sketch the lib.rs structure
+**STOP all further reading. Produce the migration plan now.**
 
-### 5. Create the Migration Plan
-
-Produce a detailed document with:
-
-**Overview**
-- Program purpose and type
-- Complexity assessment
-- High-level migration strategy
-
-**Architecture**
-- Solana program structure summary
-- Stylus contract design
-- Key architectural changes
-- Data structure mappings
-- Function mappings
-
-**Implementation Phases**
-Break into phases with clear tasks, success criteria, and handbook chapter references:
-- Phase 1: Foundation (storage, constructor)
-- Phase 2: Core logic (main functions)
-- Phase 3: Access control (authorization)
-- Phase 4: External integrations (tokens, calls)
-- Phase 5: Events and errors
-
-**Considerations**
-- Security implications
-- Breaking changes
-- Testing strategy
-- Gas optimization opportunities
-
-**Handbook Resources**
-- List all chapters consulted with URIs, organized by topic
-
-**Next Steps**
-- Prioritized action items
-- Recommended development workflow
+---
 
 ## Output
 
-Create a well-structured markdown document that:
-- Guides the developer through implementation
-- References specific handbook chapters with URIs
-- Includes code examples for non-obvious conversions
-- Is actionable and practical
+Emit exactly one file: **MIGRATION_PLAN.md**. No dangling TODOs. Use imperative, executable language ("Create…", "Implement…", "Test…"). Every task must include:
 
-Begin by discovering and analyzing the Solana program.
+- Concrete file paths to create/modify.
+- Any tool calls needed.
+- A handbook citation of the form: `(source: file:///handbook/src/<chapter>.md#<heading>)`.
+- If referencing repository code, add the path (e.g., `(code: programs/amm/src/lib.rs)`).
+
+### Required Structure (Schema)
+
+#### 1. Overview (≤ 200 words)
+
+Scope, assumptions, and the selected program crate.
+
+#### 2. Architecture Mapping
+
+**2.1 Accounts → Storage Table (complete; no empty cells)**
+
+Columns: Solana Account/Seed, Data Fields/Layout, Access/Owner, Stylus Storage Mapping, Init/Migration Step, (source …)
+
+**2.2 Instructions → Public Functions Table (complete)**
+
+Columns: Solana Instruction, Preconditions (signers/ACL/accounts), State Transitions, Stylus Public Fn + Params, Notes, (source …)
+
+#### 3. Authorities & Access Control
+
+Key roles, signer expectations, PDA ownership rules, and the Stylus enforcement strategy. (source …)
+
+#### 4. CPI Dependency Audit
+
+List each external program called, the guarantees relied upon, and your replacement strategy in Stylus (native port, adapter, or stub). (source …)
+
+#### 5. Serialization & Data Layout
+
+Endianness, packing, fixed-point choices, and any layout migration steps (including backward compatibility if required). (source …)
+
+#### 6. Errors & Events Mapping
+
+Map ProgramError/anchor_lang errors and `msg!`/events to Stylus revert types and events. Specify error namespaces and event schemas. (source …)
+
+#### 7. Risk Register (≥ 8 items, Mandatory resouce: security-considerations.md)
+
+At minimum consider: authorization, arithmetic/overflow/precision, reentrancy/external calls, determinism, time/slot dependence, rent/close semantics, signer/ownership checks, sysvar assumptions, CPI trust boundaries, data-layout/serialization drift.
+
+For each: Risk, Where it arises, Mitigation in Stylus, (source …)
+
+#### 8. Implementation Phases (3–7 phases total)
+
+For each phase provide:
+
+- Objectives
+- Success Criteria (objective, checkable)
+- Tasks (granular, each with a handbook citation and file path)
+- Exit Conditions (what must be true to move on)
+
+#### 9. Boilerplate Artifacts (Embedded, Pinned)
+
+- Fenced block with the exact `Cargo.toml` returned by `generate_stylus_contract_cargo_manifest`.
+- Fenced block with the exact `main.rs` returned by `generate_stylus_contract_main_rs`.
+- Note any defaults resolved (versions, features) and keep them exact.
+
+#### 10. Test Plan (Follow mandatory resouce: testing-debugging.md)
+
+- All test code and strategies MUST conform to the handbook's testing guidelines in `testing-debugging.md`.
+- Include:
+  - Unit tests per instruction pre/post-conditions.
+  - Property-based tests for invariants inferred from code/comments.
+  - Negative tests for auth failures, account constraint violations, and CPI failure surfaces.
+  - Fixture/seed strategy for deterministic accounts/PDAs.
+- For each proposed test or group, add `(source: file:///handbook/src/testing-debugging.md#)` plus any additional chapters you relied on.
+
+#### 11. Handbook References
+
+Consolidate every `(source …)` citation used throughout the plan (deduped), grouped by chapter.
+
+---
+
+## Coverage Thresholds (must be met)
+
+- §2.1 and §2.2 tables are complete with no "TBD" or empty cells.
+- §7 includes at least 8 risks with concrete mitigations and sources.
+- §9 embeds both boilerplate artifacts exactly as generated, with versions pinned.
+- §10 explicitly references `testing-debugging.md` for every test category you propose.
+
+---
+
+## Final Checklist (assert all before emitting)
+
+- [ ] Program crate identified and analyzed; assumptions stated in §1.
+- [ ] §2.1 and §2.2 fully populated; no empty cells.
+- [ ] Every task ends with a handbook citation `(source: file://…)`.
+- [ ] §7 has ≥ 8 risks with mitigations.
+- [ ] §9 includes embedded, pinned `Cargo.toml` and `main.rs` from the generators.
+- [ ] §10 test plan aligns with `testing-debugging.md` and covers unit, property-based, and negative tests.
+- [ ] Document is self-contained and executable without further research.
