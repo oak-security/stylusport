@@ -8,8 +8,6 @@ sol! {
     #[derive(Debug)]
     error InvalidToken();
     #[derive(Debug)]
-    error InvalidSource();
-    #[derive(Debug)]
     error InvalidDestination();
     #[derive(Debug)]
     error InvalidSchedule();
@@ -26,7 +24,6 @@ sol! {
         uint256 schedule_id,
         address token,
         address owner,
-        address source,
         address destination,
         uint64[] timestamps,
         uint256[] amounts
@@ -54,7 +51,6 @@ sol! {
 #[derive(SolidityError, Debug)]
 pub enum ContractError {
     InvalidToken(InvalidToken),
-    InvalidSource(InvalidSource),
     InvalidDestination(InvalidDestination),
     InvalidSchedule(InvalidSchedule),
     TokenDepositFailed(TokenDepositTransferFailed),
@@ -89,30 +85,24 @@ pub struct TokenVestingContract {
 #[public]
 impl TokenVestingContract {
     /// Create a vesting schedule for the specified `token` and initial `destination`, returning the schedule identifier.
-    /// Attempts to transfer the total amount of tokens scheduled from `source` to this contract.
+    /// Attempts to transfer the total amount of tokens scheduled from the sender to this contract.
     ///
     /// Note: setting a zero address for `owner` means the `destination` is immutable.
     ///
     /// # Errors
     /// - InvalidToken: if the provided token address is zero
-    /// - InvalidSource: if the provided source address is zero
     /// - InvalidDestination: if the provided destination address is zero
     /// - InvalidSchedule: if the provided schedule is empty, contains a zero amount, is not ordered chronologically or the total amount overflows 256 bits.
-    /// - TokenDepositTransferFailed: if there is an error transferring the total vesting amount from the caller to the contract
+    /// - TokenDepositTransferFailed: if there is an error transferring the total vesting amount from the sender to the contract
     pub fn create(
         &mut self,
         token: Address,
         owner: Address,
-        source: Address,
         destination: Address,
         schedule: Vec<(u64, U256)>,
     ) -> Result<U256, ContractError> {
         if token == Address::ZERO {
             return Err(InvalidToken {}.into());
-        }
-
-        if source == Address::ZERO {
-            return Err(InvalidSource {}.into());
         }
 
         if destination == Address::ZERO {
@@ -159,7 +149,6 @@ impl TokenVestingContract {
                 schedule_id,
                 token,
                 owner,
-                source,
                 destination,
                 timestamps,
                 amounts,
@@ -167,8 +156,9 @@ impl TokenVestingContract {
         );
 
         let contract_addr = self.vm().contract_address();
+        let sender = self.vm().msg_sender();
         Erc20Interface::new(token)
-            .transfer_from(self, source, contract_addr, total_vested_amount)
+            .transfer_from(self, sender, contract_addr, total_vested_amount)
             .map_err(|_| TokenDepositTransferFailed {})?;
 
         Ok(schedule_id)
@@ -389,13 +379,7 @@ mod tests {
 
         let schedule_id = vesting
             .sender(source)
-            .create(
-                token.address(),
-                owner,
-                source,
-                destination,
-                schedule.clone(),
-            )
+            .create(token.address(), owner, destination, schedule.clone())
             .motsu_unwrap();
 
         // Verify schedule was created
@@ -447,7 +431,7 @@ mod tests {
 
         let schedule_id = vesting
             .sender(source)
-            .create(token.address(), owner, source, destination, schedule)
+            .create(token.address(), owner, destination, schedule)
             .motsu_unwrap();
 
         // Test 1: Unlock at timestamp 1 (immediate unlock for first tranche)
@@ -528,7 +512,7 @@ mod tests {
 
         let schedule_id = vesting
             .sender(source)
-            .create(token.address(), owner, source, destination, schedule)
+            .create(token.address(), owner, destination, schedule)
             .motsu_unwrap();
 
         // Jump to timestamp 120 - should unlock first two tranches at once
@@ -566,7 +550,7 @@ mod tests {
 
         let schedule_id = vesting
             .sender(source)
-            .create(token.address(), owner, source, destination, schedule)
+            .create(token.address(), owner, destination, schedule)
             .motsu_unwrap();
 
         // Test 1: Unauthorized change (not owner)
@@ -618,7 +602,7 @@ mod tests {
 
         let schedule_id = vesting
             .sender(source)
-            .create(token.address(), owner, source, destination, schedule)
+            .create(token.address(), owner, destination, schedule)
             .motsu_unwrap();
 
         // Test 1: Unauthorized change
@@ -665,25 +649,11 @@ mod tests {
             .create(
                 Address::ZERO,
                 owner,
-                source,
                 destination,
                 vec![(100u64, U256::from(20u64))],
             )
             .motsu_unwrap_err();
         assert!(matches!(err, ContractError::InvalidToken(_)));
-
-        // Test 2: Invalid source (zero address)
-        let err = vesting
-            .sender(source)
-            .create(
-                token.address(),
-                owner,
-                Address::ZERO,
-                destination,
-                vec![(100u64, U256::from(20u64))],
-            )
-            .motsu_unwrap_err();
-        assert!(matches!(err, ContractError::InvalidSource(_)));
 
         // Test 3: Invalid destination (zero address)
         let err = vesting
@@ -691,7 +661,6 @@ mod tests {
             .create(
                 token.address(),
                 owner,
-                source,
                 Address::ZERO,
                 vec![(100u64, U256::from(20u64))],
             )
@@ -701,7 +670,7 @@ mod tests {
         // Test 4: Empty schedule
         let err = vesting
             .sender(source)
-            .create(token.address(), owner, source, destination, vec![])
+            .create(token.address(), owner, destination, vec![])
             .motsu_unwrap_err();
         assert!(matches!(err, ContractError::InvalidSchedule(_)));
 
@@ -711,7 +680,6 @@ mod tests {
             .create(
                 token.address(),
                 owner,
-                source,
                 destination,
                 vec![(100u64, U256::ZERO)],
             )
@@ -724,7 +692,6 @@ mod tests {
             .create(
                 token.address(),
                 owner,
-                source,
                 destination,
                 vec![
                     (200u64, U256::from(10u64)),
@@ -745,7 +712,6 @@ mod tests {
             .create(
                 token.address(),
                 owner,
-                source,
                 destination,
                 vec![(100u64, U256::from(20u64))], // Needs 20 but only approved 10
             )
@@ -776,7 +742,6 @@ mod tests {
             .create(
                 token.address(),
                 owner1,
-                source,
                 destination1,
                 vec![(100u64, U256::from(30u64))],
             )
@@ -793,7 +758,6 @@ mod tests {
             .create(
                 token.address(),
                 owner2,
-                source,
                 destination2,
                 vec![(200u64, U256::from(50u64))],
             )
