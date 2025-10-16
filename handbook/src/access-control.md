@@ -345,11 +345,14 @@ pub struct AccessControl {
 
 sol! {
     #[derive(Debug, PartialEq, Eq)]
+    error InvalidAddress(address address);
+    #[derive(Debug, PartialEq, Eq)]
     error Unauthorized();
 }
 
 #[derive(SolidityError, Debug, PartialEq, Eq)]
 pub enum AccessControlError {
+    InvalidAddress(InvalidAddress),
     Unauthorized(Unauthorized),
 }
 
@@ -357,6 +360,17 @@ pub enum AccessControlError {
 impl AccessControl {
     #[constructor]
     pub fn constructor(&mut self, authority: Address, publisher: Address) {
+        assert_ne!(
+            authority,
+            Address::ZERO,
+            "authority cannot be a zero-address"
+        );
+        assert_ne!(
+            publisher,
+            Address::ZERO,
+            "publisher cannot be a zero-address"
+        );
+
         self.config.authority.set(authority);
         self.config.publisher.set(publisher);
     }
@@ -366,6 +380,12 @@ impl AccessControl {
 
         if sender != self.config.authority.get() {
             return Err(AccessControlError::Unauthorized(Unauthorized {}));
+        }
+
+        if publisher == Address::ZERO {
+            return Err(AccessControlError::InvalidAddress(InvalidAddress {
+                address: publisher,
+            }));
         }
 
         self.config.publisher.set(publisher);
