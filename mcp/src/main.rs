@@ -14,9 +14,18 @@ use rust_mcp_schema::{
 
 use crate::server::OutputSink;
 
+const MAX_LOG_LINE_BYTES: usize = 1024;
+
+fn sanitize_for_log(s: &str) -> String {
+    s.chars()
+        .filter(|c| !c.is_control() || *c == '\n' || *c == '\t')
+        .take(MAX_LOG_LINE_BYTES)
+        .collect()
+}
+
 fn parse_client_msg(input: &str) -> Option<Vec<ClientMessage>> {
     let Ok(client_msgs) = serde_json::from_str(input) else {
-        eprintln!("Unexpected input: {input}");
+        eprintln!("Unexpected input: {}", sanitize_for_log(input));
         return None;
     };
 
@@ -30,7 +39,10 @@ fn parse_client_msg(input: &str) -> Option<Vec<ClientMessage>> {
 
 fn handle_client_msg(msg: ClientMessage, output_sink: &mut OutputSink) {
     let ClientMessage::Request(req_msg) = msg else {
-        eprintln!("received non-request: {msg:?}");
+        eprintln!(
+            "received non-request: {}",
+            sanitize_for_log(&msg.to_string())
+        );
         return;
     };
 
