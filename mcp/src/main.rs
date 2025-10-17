@@ -5,7 +5,7 @@ mod server;
 mod tools;
 
 use rust_mcp_schema::{
-    ClientRequest, JsonrpcError, RpcError, ServerResult,
+    ClientRequest, JsonrpcError, RequestId, RpcError, ServerResult,
     schema_utils::{
         ClientMessage, ClientMessages, RequestFromClient, ResultFromServer, ServerJsonrpcResponse,
         ServerMessage,
@@ -23,10 +23,19 @@ fn sanitize_for_log(s: &str) -> String {
         .collect()
 }
 
-fn parse_client_msg(input: &str) -> Option<Vec<ClientMessage>> {
+fn parse_client_msg(input: &str) -> Result<Vec<ClientMessage>, String> {
     let Ok(client_msgs) = serde_json::from_str(input) else {
-        eprintln!("Unexpected input: {}", sanitize_for_log(input));
-        return None;
+        eprintln!("invalid input: {}", sanitize_for_log(input));
+
+        let res = ServerMessage::Error(JsonrpcError::new(
+            RpcError::parse_error(),
+            // cannot parse request so "null" request ID
+            RequestId::String("null".to_owned()),
+        ));
+
+        let err = serde_json::to_string(&res).expect("infallible serialization");
+
+        return Err(err);
     };
 
     let msgs = match client_msgs {
@@ -34,7 +43,7 @@ fn parse_client_msg(input: &str) -> Option<Vec<ClientMessage>> {
         ClientMessages::Batch(msgs) => msgs,
     };
 
-    Some(msgs)
+    Ok(msgs)
 }
 
 fn handle_client_msg(msg: ClientMessage, output_sink: &mut OutputSink) {

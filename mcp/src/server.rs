@@ -85,7 +85,7 @@ impl<T> WorkQueue<T> {
 }
 
 pub fn start<Msg>(
-    parse_fn: impl Fn(&str) -> Option<Vec<Msg>>,
+    parse_fn: impl Fn(&str) -> Result<Vec<Msg>, String>,
     work_fn: impl Fn(Msg, &mut OutputSink) + Send + Sync + 'static,
 ) -> io::Result<()>
 where
@@ -120,8 +120,6 @@ where
         worker_handles.push(handle);
     }
 
-    drop(result_tx);
-
     let result_handle = {
         let mut writer = BufWriter::new(io::stdout());
         thread::spawn(move || -> io::Result<()> {
@@ -138,13 +136,21 @@ where
 
     let mut line = String::new();
     while reader.read_line(&mut line)? > 0 {
-        if let Some(msgs) = parse_fn(line.trim()) {
-            for msg in msgs {
-                work_queue.send(msg);
+        match parse_fn(line.trim()) {
+            Ok(msgs) => {
+                for msg in msgs {
+                    work_queue.send(msg);
+                }
+            }
+            Err(err) => {
+                OutputSink(result_tx.clone()).send(err);
             }
         }
+
         line.clear();
     }
+
+    drop(result_tx);
 
     work_queue.shutdown();
     for handle in worker_handles {
