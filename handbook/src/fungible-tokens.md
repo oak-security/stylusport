@@ -445,9 +445,10 @@ pub struct FungibleTokenContract {
 #[implements(IErc20<Error = Erc20Error>)]
 impl FungibleTokenContract {
     #[constructor]
-    pub fn constructor(&mut self) -> Result<(), Erc20Error> {
-        self.erc20
-            ._mint(self.vm().msg_sender(), U256::from(TOTAL_SUPPLY))?;
+    pub fn constructor(&mut self, mint_to: Address) -> Result<(), Erc20Error> {
+        assert_ne!(mint_to, Address::ZERO, "mint_to cannot be a zero-address");
+
+        self.erc20._mint(mint_to, U256::from(TOTAL_SUPPLY))?;
 
         Ok(())
     }

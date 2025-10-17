@@ -211,6 +211,16 @@ pub struct ExternalCaller {
 impl ExternalCaller {
     #[constructor]
     pub fn constructor(&mut self, adder_address: Address) {
+        assert_ne!(
+            adder_address,
+            Address::ZERO,
+            "adder_address cannot be a zero-address"
+        );
+        assert!(
+            self.vm().code_size(adder_address) > 0,
+            "adder_address must be a contract"
+        );
+
         self.last_result.set(I256::MINUS_ONE);
         self.adder_address.set(adder_address);
     }

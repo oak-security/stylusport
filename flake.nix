@@ -41,24 +41,24 @@
           };
 
           devShells.default = pkgs.mkShell {
-            packages = [
-              pkgs.bashInteractive # for correct prompt display in VHS
-              pkgs.cargo-expand
-              pkgs.mdbook
-              pkgs.ollama
-              pkgs.rust-analyzer-unwrapped
-              pkgs.uv
-              pkgs.vale
-              pkgs.vhs
-              rust-toolchain
-            ];
+            buildInputs = [ pkgs.openssl ];
+            packages =
+              [
+                pkgs.cargo-expand
+                pkgs.mdbook
+                pkgs.rust-analyzer-unwrapped
+                pkgs.vale
+                rust-toolchain
+              ]
+              ++ pkgs.lib.optionals pkgs.stdenv.isLinux [
+                pkgs.pkg-config
+              ];
 
             shellHook = ''
               ${config.pre-commit.installationScript}
               echo 1>&2 "Welcome to the StylusPort development shell!"
             '';
 
-            UV_PROJECT = "scripts";
             RUST_SRC_PATH = "${rust-toolchain}/lib/rustlib/src/rust/library";
           };
 

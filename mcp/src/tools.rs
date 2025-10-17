@@ -1,5 +1,6 @@
 use rust_mcp_schema::{CallToolResult, ContentBlock, TextContent, Tool, ToolInputSchema};
 
+#[derive(Debug, PartialEq, Eq)]
 pub struct CallResponse {
     content: Vec<String>,
     is_error: bool,
@@ -154,9 +155,20 @@ fn detect_solana_program_kind(cargo_manifest: &str) -> CallResponse {
     )
 }
 
+// https://doc.rust-lang.org/cargo/reference/manifest.html#the-name-field
+fn invalid_package_name(package_name: &str) -> bool {
+    package_name.is_empty()
+        || package_name.len() > 64
+        || !package_name
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+}
+
+static INVALID_PACKAGE_NAME_MSG: &str = "invalid package name - must be non-empty, not longer than 64 characters and only contain ASCII alphanumerics, hyphens & underscores";
+
 fn generate_stylus_contract_cargo_manifest(package_name: &str) -> CallResponse {
-    if package_name.is_empty() {
-        return CallResponse::error("package name cannot be an empty string");
+    if invalid_package_name(package_name) {
+        return CallResponse::error(INVALID_PACKAGE_NAME_MSG);
     }
 
     let alloy_primitives_version = std::env::var("STYLUSPORT_MCP_ALLOY_PRIMITIVES_VERSION")
@@ -196,8 +208,8 @@ motsu = "{motsu_version}""#
 }
 
 fn generate_stylus_contract_main_rs(package_name: &str) -> CallResponse {
-    if package_name.is_empty() {
-        return CallResponse::error("package name cannot be an empty string");
+    if invalid_package_name(package_name) {
+        return CallResponse::error(INVALID_PACKAGE_NAME_MSG);
     }
 
     let package_name = package_name.replace("-", "_");
@@ -258,4 +270,75 @@ define_tools! {
             query: "string" = "Search query",
         },
     },
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_invalid_package_name_valid_names() {
+        assert!(!invalid_package_name("my_package"));
+        assert!(!invalid_package_name("my-package"));
+        assert!(!invalid_package_name("package123"));
+        assert!(!invalid_package_name("a"));
+        assert!(!invalid_package_name("Package_Name-123"));
+        assert!(!invalid_package_name("_underscore"));
+        assert!(!invalid_package_name("-dash"));
+    }
+
+    #[test]
+    fn test_invalid_package_name_empty_name() {
+        assert!(invalid_package_name(""));
+    }
+
+    #[test]
+    fn test_invalid_package_name_length_boundary() {
+        let valid_64 = "a".repeat(64);
+        assert!(!invalid_package_name(&valid_64));
+        let invalid_65 = "a".repeat(65);
+        assert!(invalid_package_name(&invalid_65));
+        let invalid_long = "a".repeat(100);
+        assert!(invalid_package_name(&invalid_long));
+    }
+
+    #[test]
+    fn test_invalid_package_name_invalid_characters() {
+        assert!(invalid_package_name("my package")); // space
+        assert!(invalid_package_name("my.package")); // dot
+        assert!(invalid_package_name("my@package")); // @
+        assert!(invalid_package_name("my/package")); // slash
+        assert!(invalid_package_name("my\\package")); // backslash
+        assert!(invalid_package_name("my!package")); // exclamation
+        assert!(invalid_package_name("my#package")); // hash
+        assert!(invalid_package_name("my$package")); // dollar
+        assert!(invalid_package_name("my%package")); // percent
+        assert!(invalid_package_name("my_package\n")); // newline
+                                                       // assert!(invalid_package_name("mypackage"\n[dependencies]\nmalicious-crate = \"1.0\"")) // newlines
+    }
+
+    #[test]
+    fn test_invalid_package_name_unicode() {
+        assert!(invalid_package_name("my_packagé")); // accented char
+        assert!(invalid_package_name("my_package™")); // symbol
+        assert!(invalid_package_name("my_📦")); // emoji
+    }
+
+    #[test]
+    fn test_generate_stylus_contract_main_rs_rejects_code_injection() {
+        assert_eq!(
+            generate_stylus_contract_main_rs("mypackage\n malicious_code();\n"),
+            CallResponse::error(INVALID_PACKAGE_NAME_MSG)
+        )
+    }
+
+    #[test]
+    fn test_generate_stylus_contract_cargo_manifest_rejects_malicious_dependency_injection() {
+        assert_eq!(
+            generate_stylus_contract_cargo_manifest(
+                "mypackage\n[dependencies]\nmalicious-crate = \"1.0\""
+            ),
+            CallResponse::error(INVALID_PACKAGE_NAME_MSG)
+        )
+    }
 }

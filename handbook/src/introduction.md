@@ -15,17 +15,15 @@ Arbitrum Stylus provides a smart contract platform that supports developers writ
 
 ### Technical advantages
 
-**Shared Language**: Both Solana and Stylus support Rust, reducing the learning curve and enabling code reuse of business logic, data structures, and algorithms.
-
-**Enhanced Interoperability**: Stylus contracts can interact seamlessly with the broader Ethereum ecosystem, including DeFi protocols, bridges, and tooling.
-
-**Simplified Architecture**: The EVM account model reduces complexity compared to Solana's account model in state management and cross-contract interactions.
+- **Shared Language**: Both Solana and Stylus support Rust, reducing the learning curve and enabling code reuse of business logic, data structures, and algorithms.
+- **Enhanced Interoperability**: Stylus contracts can interact seamlessly with the broader Ethereum ecosystem, including DeFi protocols, bridges, and tooling.
+- **Simplified Architecture**: The EVM account model reduces complexity compared to Solana's account model in state management and cross-contract interactions.
 
 ### Business benefits
 
-**Market Access**: Tap into Ethereum's large user base and liquidity pools
-**Tooling Ecosystem**: Leverage mature development tools and infrastructure
-**EVM Compatibility**: Easy integration with existing Ethereum protocols and services
+- **Market Access**: Tap into Ethereum's large user base and liquidity pools
+- **Tooling Ecosystem**: Leverage mature development tools and infrastructure
+- **EVM Compatibility**: Easy integration with existing Ethereum protocols and services
 
 ## Key differences overview
 

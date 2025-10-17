@@ -33,6 +33,16 @@ pub struct ExternalCaller {
 impl ExternalCaller {
     #[constructor]
     pub fn constructor(&mut self, adder_address: Address) {
+        assert_ne!(
+            adder_address,
+            Address::ZERO,
+            "adder_address cannot be a zero-address"
+        );
+        assert!(
+            self.vm().code_size(adder_address) > 0,
+            "adder_address must be a contract"
+        );
+
         self.last_result.set(I256::MINUS_ONE);
         self.adder_address.set(adder_address);
     }
@@ -77,6 +87,8 @@ mod test {
 
         let adder_address = Address::from([0x05; 20]);
 
+        // ensure some code is set to satisfy constructor checks
+        vm.set_code(adder_address, vec![1, 2, 3, 4]);
         vm.mock_static_call(adder_address, add_calldata(5, 10), Ok(abi::encode(&15u128)));
 
         let mut c = ExternalCaller::from(&vm);

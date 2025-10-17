@@ -4,7 +4,7 @@ One of the most significant differences between Solana and Stylus involves how s
 
 ## Solana account model
 
-Solana stores each piece of state in a separate, dedicated account with predetermined size allocation. Accounts must maintain a rent-exempt balance proportional to their size to avoid automatic deallocation, though closing accounts refunds the Lamports. Programs can only access the accounts provided in the instruction, which is fully client-controlled. Extreme care must be take to validate the accounts received when processing the instruction in order to prevent exploits.
+Solana stores each piece of state in a separate, dedicated account with predetermined size allocation. Accounts must maintain a rent-exempt balance proportional to their size to avoid automatic deallocation, though closing accounts refunds the Lamports. Programs can only access the accounts provided in the instruction, which is fully client-controlled. Extreme care must be taken to validate the accounts received when processing the instruction in order to prevent exploits.
 
 ### Native
 

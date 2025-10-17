@@ -209,7 +209,7 @@ impl std::fmt::Display for ErrorCode {
 
 Note that `anchor_lang::error::ERROR_CODE_OFFSET` is used to reserve space for Anchor's own custom errors.
 
-Each instruction handler returns `Result<T, anchor_lang::error::Error>`. If a handler returns `Err(anchor_lang::error::Error)`, it is converted first to a `solana_program::error::ProgramError` before ultimately being returned as an integer, as show in the macro expansion below:
+Each instruction handler returns `Result<T, anchor_lang::error::Error>`. If a handler returns `Err(anchor_lang::error::Error)`, it is converted first to a `solana_program::error::ProgramError` before ultimately being returned as an integer, as shown in the macro expansion below:
 
 ```rust
 #[no_mangle]
@@ -249,7 +249,7 @@ fn try_entry<'info>(
 
 ### Stylus
 
-In contrast to Solana programs, a Stylus contract entrypoint always returns either zero or one, where zero denotes a successful call and one signifies an error occured. For a contract function with returns, `Result<T, E>`, the error type `E` is converted to a byte array and written to the return data buffer:
+In contrast to Solana programs, a Stylus contract entrypoint always returns either zero or one, where zero denotes a successful call and one signifies an error occurred. For a contract function with returns, `Result<T, E>`, the error type `E` is converted to a byte array and written to the return data buffer:
 
 ```rust
 #[no_mangle]
@@ -560,9 +560,8 @@ In addition to the logging facilities provided by `solana_program::log`, Anchor 
 
 ```rust
 #[event]
-pub struct OwnerChanged {
-    previous_owner: Pubkey,
-    current_owner: Pubkey,
+pub struct TaggedEvent {
+    you_are_it: Pubkey,
 }
 
 #[program]
@@ -572,9 +571,8 @@ pub mod errors_events {
     // ...
 
     pub fn emit_event(ctx: Context<EmitEvent>) -> Result<()> {
-        emit!(OwnerChanged {
-            previous_owner: *ctx.accounts.signer.key,
-            current_owner: ID
+        emit!(TaggedEvent {
+            you_are_it: *ctx.accounts.signer.key
         });
 
         Ok(())
@@ -594,8 +592,8 @@ Executing the `EmitEvent` instruction results in the following program log:
 ```
 Program JEKNVnkbo3jma5nREBBJCDoXFVeKkD56V3xKrvRmWxFG invoke [1]
 Program log: Instruction: EmitEvent
-Program data: It9n4e/nMzUAAAABkHB7w+8lvcmO11y3DWHIsQbcJI2O9h4dHbHKQP//////////////////////////////////////////
-Program JEKNVnkbo3jma5nREBBJCDoXFVeKkD56V3xKrvRmWxFG consumed 1074 of 1400000 compute units
+Program data: hwVrfRWeHl0AAAABkHB7w+8lvcmO11y3DWHIsQbcJI2O9h4dHbHKQA==
+Program JEKNVnkbo3jma5nREBBJCDoXFVeKkD56V3xKrvRmWxFG consumed 1038 of 1400000 compute units
 Program JEKNVnkbo3jma5nREBBJCDoXFVeKkD56V3xKrvRmWxFG success
 ```
 
@@ -607,29 +605,30 @@ For Stylus contracts, emitting structured events is considered best practice whe
 
 ```rust
 sol! {
-    event OwnerChanged(address previous_owner, address current_owner);
+    event ItChanged(address previous_it, address current_it);
 }
 
 #[storage]
 #[entrypoint]
 pub struct ErrorsEvents {
-    owner: StorageAddress,
+    it: StorageAddress,
 }
 
 #[public]
 impl ErrorsEvents {
-    pub fn take_ownership(&mut self) {
+    /// Tags the caller as "it", emitting an event for the state change
+    pub fn tag(&mut self) {
         let msg_sender = self.vm().msg_sender();
 
-        let previous_owner = self.owner.get();
+        let previous_it = self.it.get();
 
-        self.owner.set(msg_sender);
+        self.it.set(msg_sender);
 
         log(
             self.vm(),
-            OwnerChanged {
-                previous_owner,
-                current_owner: msg_sender,
+            ItChanged {
+                previous_it,
+                current_it: msg_sender,
             },
         );
     }

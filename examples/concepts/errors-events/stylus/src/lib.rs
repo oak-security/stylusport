@@ -8,13 +8,13 @@ sol! {
     error InvalidAmount(uint256 expected, uint256 received);
     error Unauthorized(address account);
 
-    event OwnerChanged(address previous_owner, address current_owner);
+    event ItChanged(address previous_it, address current_it);
 }
 
 #[storage]
 #[entrypoint]
 pub struct ErrorsEvents {
-    owner: StorageAddress,
+    it: StorageAddress,
 }
 
 #[derive(SolidityError)]
@@ -36,18 +36,19 @@ impl ErrorsEvents {
         .into())
     }
 
-    pub fn take_ownership(&mut self) {
+    /// Tags the caller as "it", emitting an event for the state change
+    pub fn tag(&mut self) {
         let msg_sender = self.vm().msg_sender();
 
-        let previous_owner = self.owner.get();
+        let previous_it = self.it.get();
 
-        self.owner.set(msg_sender);
+        self.it.set(msg_sender);
 
         log(
             self.vm(),
-            OwnerChanged {
-                previous_owner,
-                current_owner: msg_sender,
+            ItChanged {
+                previous_it,
+                current_it: msg_sender,
             },
         );
     }

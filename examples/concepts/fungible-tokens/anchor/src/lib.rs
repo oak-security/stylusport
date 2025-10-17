@@ -62,9 +62,13 @@ pub mod fungible_tokens {
                     from: ctx.accounts.stake_account.to_account_info(),
                     mint: ctx.accounts.mint.to_account_info(),
                     to: ctx.accounts.unstake_to_account.to_account_info(),
-                    authority: ctx.accounts.signer.to_account_info(),
+                    authority: ctx.accounts.stake_account.to_account_info(),
                 },
-                &[&[STAKE_PDA_SEED, &[ctx.bumps.stake_account]]],
+                &[&[
+                    STAKE_PDA_SEED,
+                    ctx.accounts.signer.key.as_ref(),
+                    &[ctx.bumps.stake_account],
+                ]],
             ),
             amount,
             DECIMALS,
@@ -130,7 +134,7 @@ pub struct Unstake<'info> {
         bump
     )]
     pub stake_account: InterfaceAccount<'info, TokenAccount>,
-    #[account(mut)]
+    #[account(mut, token::authority = signer)]
     pub unstake_to_account: InterfaceAccount<'info, TokenAccount>,
     #[account(mut)]
     pub signer: Signer<'info>,
