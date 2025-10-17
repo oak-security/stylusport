@@ -1,9 +1,10 @@
 use std::collections::VecDeque;
 use std::io::{self, BufRead, BufReader, BufWriter, Write};
-use std::sync::{mpsc, Arc, Condvar, Mutex};
+use std::sync::{Arc, Condvar, Mutex, mpsc};
 use std::thread;
 
-const NUM_WORKERS: usize = 4;
+const DEFAULT_NUM_WORKERS: usize = 4;
+const MAX_WORKERS: usize = 256;
 
 pub struct OutputSink(mpsc::Sender<String>);
 
@@ -90,13 +91,23 @@ pub fn start<Msg>(
 where
     Msg: Send + 'static,
 {
-    let work_queue = Arc::new(WorkQueue::new(NUM_WORKERS * 2));
+    let num_workers = std::env::var("STYLUSPORT_N_WORKERS")
+        .ok()
+        .and_then(|s| {
+            s.parse()
+                .inspect_err(|e| eprintln!("invalid STYLUSPORT_N_WORKERS value: {s} - {e}"))
+                .ok()
+        })
+        .unwrap_or(DEFAULT_NUM_WORKERS)
+        .min(MAX_WORKERS);
+
+    let work_queue = Arc::new(WorkQueue::new(num_workers * 2));
     let (result_tx, result_rx) = mpsc::channel();
     let work_fn = Arc::new(work_fn);
 
     let mut worker_handles = vec![];
 
-    for _ in 0..NUM_WORKERS {
+    for _ in 0..num_workers {
         let work_queue = Arc::clone(&work_queue);
         let result_tx = result_tx.clone();
         let work_fn = Arc::clone(&work_fn);
@@ -147,7 +158,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::sync::{mpsc, Arc, Barrier};
+    use std::sync::{Arc, Barrier, mpsc};
     use std::thread;
     use std::time::Duration;
 
