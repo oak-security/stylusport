@@ -560,9 +560,8 @@ In addition to the logging facilities provided by `solana_program::log`, Anchor 
 
 ```rust
 #[event]
-pub struct OwnerChanged {
-    previous_owner: Pubkey,
-    current_owner: Pubkey,
+pub struct TaggedEvent {
+    you_are_it: Pubkey,
 }
 
 #[program]
@@ -572,9 +571,8 @@ pub mod errors_events {
     // ...
 
     pub fn emit_event(ctx: Context<EmitEvent>) -> Result<()> {
-        emit!(OwnerChanged {
-            previous_owner: *ctx.accounts.signer.key,
-            current_owner: ID
+        emit!(TaggedEvent {
+            you_are_it: *ctx.accounts.signer.key
         });
 
         Ok(())
@@ -594,8 +592,8 @@ Executing the `EmitEvent` instruction results in the following program log:
 ```
 Program JEKNVnkbo3jma5nREBBJCDoXFVeKkD56V3xKrvRmWxFG invoke [1]
 Program log: Instruction: EmitEvent
-Program data: It9n4e/nMzUAAAABkHB7w+8lvcmO11y3DWHIsQbcJI2O9h4dHbHKQP//////////////////////////////////////////
-Program JEKNVnkbo3jma5nREBBJCDoXFVeKkD56V3xKrvRmWxFG consumed 1074 of 1400000 compute units
+Program data: hwVrfRWeHl0AAAABkHB7w+8lvcmO11y3DWHIsQbcJI2O9h4dHbHKQA==
+Program JEKNVnkbo3jma5nREBBJCDoXFVeKkD56V3xKrvRmWxFG consumed 1038 of 1400000 compute units
 Program JEKNVnkbo3jma5nREBBJCDoXFVeKkD56V3xKrvRmWxFG success
 ```
 
