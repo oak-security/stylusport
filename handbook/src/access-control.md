@@ -446,7 +446,7 @@ sol! {
 #[derive(SolidityError, Debug)]
 // In order to generate an ABI for the contract you need to manually wire
 // up OpenZeppelin's error types defined with `sol!` rather than the their
-// `ownable::Error` type which implements `SolidityError` but not `SolError`
+// `ownable::Error` type which does not implement `SolError`
 pub enum ContractError {
     InvalidOwner(ownable::OwnableInvalidOwner),
     Unauthorized(ownable::OwnableUnauthorizedAccount),

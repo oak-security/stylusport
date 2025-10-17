@@ -209,7 +209,7 @@ impl std::fmt::Display for ErrorCode {
 
 Note that `anchor_lang::error::ERROR_CODE_OFFSET` is used to reserve space for Anchor's own custom errors.
 
-Each instruction handler returns `Result<T, anchor_lang::error::Error>`. If a handler returns `Err(anchor_lang::error::Error)`, it is converted first to a `solana_program::error::ProgramError` before ultimately being returned as an integer, as show in the macro expansion below:
+Each instruction handler returns `Result<T, anchor_lang::error::Error>`. If a handler returns `Err(anchor_lang::error::Error)`, it is converted first to a `solana_program::error::ProgramError` before ultimately being returned as an integer, as shown in the macro expansion below:
 
 ```rust
 #[no_mangle]
@@ -249,7 +249,7 @@ fn try_entry<'info>(
 
 ### Stylus
 
-In contrast to Solana programs, a Stylus contract entrypoint always returns either zero or one, where zero denotes a successful call and one signifies an error occured. For a contract function with returns, `Result<T, E>`, the error type `E` is converted to a byte array and written to the return data buffer:
+In contrast to Solana programs, a Stylus contract entrypoint always returns either zero or one, where zero denotes a successful call and one signifies an error occurred. For a contract function with returns, `Result<T, E>`, the error type `E` is converted to a byte array and written to the return data buffer:
 
 ```rust
 #[no_mangle]
