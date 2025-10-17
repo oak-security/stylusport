@@ -9,11 +9,11 @@ A comprehensive handbook and AI-augmented CLI tool for developers transitioning 
 ## Project Structure
 
 - **`handbook/`** - mdbook source files containing the complete guide for porting Solana Programs to Stylus Contracts
-- **`cli/`** - AI-augmented tool that ingests the handbook content and provides users with contextual insights and assistance
+- **[`mcp/`](./mcp/README.md)** - an MCP server that serves the handbook as resources as well as utility tools and prompts
 
-## Prerequisites
+## Development
 
-### Recommended: Nix Package Manager
+### With Nix (Recommended)
 
 The easiest way to get started is with the Nix package manager. If you don't have Nix installed:
 
@@ -23,14 +23,21 @@ curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix 
 
 For more installation options, visit the [Determinate Systems Nix Installer](https://github.com/DeterminateSystems/nix-installer).
 
+Clone the repository and enter the development shell:
+
+```bash
+git clone <repository-url>
+cd stylusport
+nix develop
+```
+
 ### Alternative: Docker with Nix
 
 If you prefer not to install Nix directly:
 
 ```bash
-docker run -it --rm -v $(pwd):/workspace nixos/nix:latest
-cd /workspace
-nix develop
+docker run -v $(pwd):/workspace -w /workspace -p 3000:3000 --entrypoint /bin/sh -ti ghcr.io/nixos/nix -c \
+   "git config --global --add safe.directory /workspace && nix develop --extra-experimental-features 'nix-command flakes'"
 ```
 
 ### Manual Installation
@@ -40,53 +47,37 @@ If you prefer to install dependencies manually, you'll need:
 - **Rust** (latest stable) - Install via [rustup](https://rustup.rs/)
 - **mdbook** - `cargo install mdbook`
 
-## Getting Started
+> NOTE: You may require other transient dependencies to be installed on your system. 
+> Only issues relating to the Nix configuration or the docker alternative are considered.
 
-### With Nix (Recommended)
+### Useful Commands
 
-1. Clone the repository and enter the development shell:
+1. Build the handbook:
    ```bash
-   git clone <repository-url>
-   cd stylusport
-   nix develop
+   mdbook build handbook/
    ```
 
-2. Build the project:
+1. Serve the handbook locally:
    ```bash
-   make build
-   ```
+   mdbook serve handbook/
 
-3. Serve the handbook locally:
-   ```bash
-   make serve-book
+   # if running in the Nix Docker container
+   mdbook serve --hostname 0.0.0.0 handbook/
    ```
 
 The handbook will be available at `http://localhost:3000`.
 
-### Manual Setup
-
-1. Ensure you have Rust and mdbook installed
-2. Build the handbook:
-   ```bash
-   mdbook build handbook/
+1. Run tests for all stylus examples
    ```
-3. Build the CLI tool:
-   ```bash
-   cargo build --release --package stylus-port-cli
+   cargo test --package *-stylus
    ```
 
-## Available Commands
-
-- `make build` - Build both the handbook and CLI tool
-- `make build-book` - Build only the handbook
-- `make build-cli` - Build only the CLI tool
-- `make serve-book` - Serve the handbook locally for development
-
-## Development
+> NOTE: There is not official Nix support for the custom Solana Rust tools and toolchain.
+> If you need to run the Solana example tests, check the [Solana toolchain install instructions](https://solana.com/docs/intro/installation).
 
 The project uses pre-commit hooks for code quality:
 
-- **clippy** - Rust linting with warnings treated as errors
+- **clippy** - Rust code linting
 - **rustfmt** - Rust code formatting
 - **vale** - Spelling and prose linting
 
