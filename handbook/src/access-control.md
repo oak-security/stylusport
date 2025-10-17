@@ -475,9 +475,10 @@ pub struct OwnableContract {
 #[implements(IOwnable2Step<Error = ownable::Error>)]
 impl OwnableContract {
     #[constructor]
-    pub fn constructor(&mut self) -> Result<(), ContractError> {
-        // You must ensure the nested implementation constructor is called correctly
-        self.ownable.constructor(self.vm().msg_sender())?;
+    pub fn constructor(&mut self, owner: Address) -> Result<(), ContractError> {
+        assert_ne!(owner, Address::ZERO, "owner cannot be a zero-address");
+
+        self.ownable.constructor(owner)?;
 
         self.is_paused.set(true);
 

@@ -45,8 +45,10 @@ pub struct OwnableContract {
 #[implements(IOwnable2Step<Error = ownable::Error>)]
 impl OwnableContract {
     #[constructor]
-    pub fn constructor(&mut self) -> Result<(), ContractError> {
-        self.ownable.constructor(self.vm().tx_origin())?;
+    pub fn constructor(&mut self, owner: Address) -> Result<(), ContractError> {
+        assert_ne!(owner, Address::ZERO, "owner cannot be a zero-address");
+
+        self.ownable.constructor(owner)?;
 
         self.is_paused.set(true);
 
@@ -120,16 +122,16 @@ mod tests {
         charlie: Address,
     ) {
         // Initialize the contract - alice becomes the owner
-        contract.sender(alice).constructor().motsu_unwrap();
+        contract.sender(alice).constructor(alice).motsu_unwrap();
 
         // Verify initial state
         assert_eq!(contract.sender(alice).owner(), alice);
         assert_eq!(contract.sender(alice).pending_owner(), Address::ZERO);
-        assert_eq!(contract.sender(alice).is_paused(), true);
+        assert!(contract.sender(alice).is_paused());
 
         // Owner can unpause the contract
         contract.sender(alice).unpause_contract().motsu_unwrap();
-        assert_eq!(contract.sender(alice).is_paused(), false);
+        assert!(!contract.sender(alice).is_paused());
 
         // Attempting to unpause when already unpaused should fail
         let err = contract.sender(alice).unpause_contract().motsu_unwrap_err();
@@ -137,7 +139,7 @@ mod tests {
 
         // Owner can pause the contract
         contract.sender(alice).pause_contract().motsu_unwrap();
-        assert_eq!(contract.sender(alice).is_paused(), true);
+        assert!(contract.sender(alice).is_paused());
 
         // Attempting to pause when already paused should fail
         let err = contract.sender(alice).pause_contract().motsu_unwrap_err();
@@ -168,7 +170,7 @@ mod tests {
 
         // Alice is still the owner and can perform owner actions
         contract.sender(alice).unpause_contract().motsu_unwrap();
-        assert_eq!(contract.sender(alice).is_paused(), false);
+        assert!(!contract.sender(alice).is_paused());
 
         // Bob (pending owner) accepts ownership
         contract.sender(bob).accept_ownership().motsu_unwrap();
@@ -181,7 +183,7 @@ mod tests {
 
         // Bob (new owner) can perform owner actions
         contract.sender(bob).pause_contract().motsu_unwrap();
-        assert_eq!(contract.sender(bob).is_paused(), true);
+        assert!(contract.sender(bob).is_paused());
 
         // Bob initiates transfer to charlie
         contract
@@ -219,6 +221,6 @@ mod tests {
         assert!(matches!(err, ContractError::Unauthorized(_)));
 
         // Contract remains in its last state (paused)
-        assert_eq!(contract.sender(alice).is_paused(), true);
+        assert!(contract.sender(alice).is_paused());
     }
 }

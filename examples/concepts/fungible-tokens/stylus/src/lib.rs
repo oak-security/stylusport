@@ -28,9 +28,10 @@ pub struct FungibleTokenContract {
 #[implements(IErc20<Error = Erc20Error>)]
 impl FungibleTokenContract {
     #[constructor]
-    pub fn constructor(&mut self) -> Result<(), Erc20Error> {
-        self.erc20
-            ._mint(self.vm().tx_origin(), U256::from(TOTAL_SUPPLY))?;
+    pub fn constructor(&mut self, mint_to: Address) -> Result<(), Erc20Error> {
+        assert_ne!(mint_to, Address::ZERO, "mint_to cannot be a zero-address");
+
+        self.erc20._mint(mint_to, U256::from(TOTAL_SUPPLY))?;
 
         Ok(())
     }
@@ -129,7 +130,7 @@ mod tests {
     #[motsu::test]
     fn test_contract(contract: Contract<FungibleTokenContract>, alice: Address) {
         // Initialize the contract - mints total supply to the deployer (alice)
-        contract.sender(alice).constructor().motsu_unwrap();
+        contract.sender(alice).constructor(alice).motsu_unwrap();
 
         // Verify initial state
         assert_eq!(
