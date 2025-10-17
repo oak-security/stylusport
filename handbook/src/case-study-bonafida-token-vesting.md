@@ -531,6 +531,9 @@ Looking past the Solana-specific account validation and deserialization logic, t
 1. Check that a non-zero amount of tokens needs to be transferred to the destination.
 1. Transfer the unlocked amount from the escrow account to the current destination account. 
 
+Additionally, the handler needs to take care that a user is not locked out of claiming their tokens due to gas exhaustion when looping over the schedule.
+Pagination parameters should be added to allow the caller to limit the iterations. 
+
 Invariant: The escrow account **MUST** have enough tokens to complete the transfer.
 
 Implemented in Stylus, it can look like this:
@@ -555,12 +558,17 @@ pub enum ContractError {
 impl TokenVestingContract {
     // ...
 
-    /// Unlock any vested tokens associated with the `schedule_id` and transfers them to the set `destination`
+    /// Unlock any vested tokens in tranches `start_idx` up to and including `end_idx` associated with the `schedule_id` and transfers them to the set `destination`
     ///
     /// # Errors
     /// - ScheduleNotFound: if the provided `schedule_id` is not associated with a schedule
     /// - NoUnlocksAvailable: if there a zero unlocked tokens to transfer
-    pub fn unlock(&mut self, schedule_id: U256) -> Result<(), ContractError> {
+    pub fn unlock(
+        &mut self,
+        schedule_id: U256,
+        start_idx: u32,
+        end_idx: u32,
+    ) -> Result<(), ContractError> {
         // Step 1: Check that the schedule exits
         let token = self.token.get(schedule_id);
 
@@ -568,14 +576,13 @@ impl TokenVestingContract {
             return Err(ScheduleNotFound {}.into());
         }
 
-        // Step 2: Determine unlocked token amount & zero newly unlocked amounts
+        // Step 2: Determine unlocked token amount & zero newly unlocked amounts, respecting the iteration limits
         let now = U64::from(self.vm().block_timestamp());
 
         let mut schedule = self.schedule.setter(schedule_id);
-        let mut idx = 0;
+        let mut idx = start_idx;
         let mut unlocked_token_amount = U256::ZERO;
-
-        loop {
+        while idx <= end_idx {
             let Some(mut schedule_item) = schedule.setter(idx) else {
                 break;
             };
@@ -603,8 +610,18 @@ impl TokenVestingContract {
             return Err(NoUnlocksAvailable {}.into());
         }
 
-        // Step 4: Transfer the unlocked amount to the current destination account
         let destination = self.destination.get(schedule_id);
+
+        log(
+            self.vm(),
+            TokensUnlocked {
+                schedule_id,
+                destination,
+                unlocked_token_amount,
+            },
+        );
+
+        // Step 4: Transfer the unlocked amount to the current destination account
         Erc20Interface::new(token)
             .transfer(self, destination, unlocked_token_amount)
             .expect("Invariant: the contract always has sufficient balance to satisfy unlocks");
@@ -1203,7 +1220,10 @@ mod tests {
             .motsu_unwrap();
 
         // Test 1: Unlock at timestamp 1 (immediate unlock for first tranche)
-        vesting.sender(source).unlock(schedule_id).motsu_unwrap();
+        vesting
+            .sender(source)
+            .unlock(schedule_id, 0, 2)
+            .motsu_unwrap();
 
         assert_eq!(
             token.sender(source).balance_of(destination),
@@ -1221,13 +1241,16 @@ mod tests {
         // Test 2: Try to unlock again at same timestamp (should fail - no unlocks available)
         let err = vesting
             .sender(source)
-            .unlock(schedule_id)
+            .unlock(schedule_id, 0, 2)
             .motsu_unwrap_err();
         assert!(matches!(err, ContractError::NoUnlocksAvailable(_)));
 
         // Test 3: Unlock at timestamp 150 (should unlock second tranche)
         VM::context().set_block_timestamp(150);
-        vesting.sender(source).unlock(schedule_id).motsu_unwrap();
+        vesting
+            .sender(source)
+            .unlock(schedule_id, 0, 2)
+            .motsu_unwrap();
 
         assert_eq!(
             token.sender(source).balance_of(destination),
@@ -1240,7 +1263,10 @@ mod tests {
 
         // Test 4: Unlock at timestamp 250 (should unlock final tranche)
         VM::context().set_block_timestamp(250);
-        vesting.sender(source).unlock(schedule_id).motsu_unwrap();
+        vesting
+            .sender(source)
+            .unlock(schedule_id, 0, 2)
+            .motsu_unwrap();
 
         assert_eq!(
             token.sender(source).balance_of(destination),
@@ -1285,7 +1311,10 @@ mod tests {
 
         // Jump to timestamp 120 - should unlock first two tranches at once
         VM::context().set_block_timestamp(120);
-        vesting.sender(source).unlock(schedule_id).motsu_unwrap();
+        vesting
+            .sender(source)
+            .unlock(schedule_id, 0, 2)
+            .motsu_unwrap();
 
         assert_eq!(
             token.sender(source).balance_of(destination),
@@ -1294,6 +1323,68 @@ mod tests {
         assert_eq!(
             token.sender(source).balance_of(vesting.address()),
             U256::from(20u64)
+        );
+    }
+
+    #[motsu::test]
+    fn test_unlock_multiple_out_of_order(
+        token: Contract<Erc20>,
+        vesting: Contract<TokenVestingContract>,
+        owner: Address,
+        source: Address,
+        destination: Address,
+    ) {
+        setup_env(&token, source);
+
+        let vesting_amount = U256::from(80u64);
+        token
+            .sender(source)
+            .approve(vesting.address(), vesting_amount)
+            .motsu_unwrap();
+
+        let schedule = vec![
+            (50u64, U256::from(20u64)),
+            (100u64, U256::from(20u64)),
+            (150u64, U256::from(20u64)),
+            (200u64, U256::from(20u64)),
+        ];
+
+        let schedule_id = vesting
+            .sender(source)
+            .create(token.address(), owner, destination, schedule)
+            .motsu_unwrap();
+
+        // Jump to timestamp 250 - all tranches unlocked
+        VM::context().set_block_timestamp(250);
+
+        // unlock middle tranches
+        vesting
+            .sender(source)
+            .unlock(schedule_id, 1, 2)
+            .motsu_unwrap();
+
+        assert_eq!(
+            token.sender(source).balance_of(destination),
+            U256::from(40u64)
+        );
+        assert_eq!(
+            token.sender(source).balance_of(vesting.address()),
+            U256::from(40u64)
+        );
+
+        // unlock rest of tranches
+        vesting
+            .sender(source)
+            .unlock(schedule_id, 0, 3)
+            .motsu_unwrap();
+
+        assert_eq!(
+            token.sender(source).balance_of(destination),
+            U256::from(80u64)
+        );
+        assert_eq!(
+            token.sender(source).balance_of(vesting.address()),
+            U256::ZERO
         );
     }
 }
@@ -1350,7 +1441,10 @@ mod tests {
 
         // Test 3: Unlock tokens to new destination
         VM::context().set_block_timestamp(150);
-        vesting.sender(owner).unlock(schedule_id).motsu_unwrap();
+        vesting
+            .sender(owner)
+            .unlock(schedule_id, 0, 1)
+            .motsu_unwrap();
 
         assert_eq!(
             token.sender(source).balance_of(new_destination),
@@ -1568,7 +1662,10 @@ mod tests {
 
         // Unlock first schedule
         VM::context().set_block_timestamp(150);
-        vesting.sender(source).unlock(schedule_id1).motsu_unwrap();
+        vesting
+            .sender(source)
+            .unlock(schedule_id1, 0, 1)
+            .motsu_unwrap();
         assert_eq!(
             token.sender(source).balance_of(destination1),
             U256::from(30u64)
@@ -1577,7 +1674,10 @@ mod tests {
 
         // Unlock second schedule
         VM::context().set_block_timestamp(200);
-        vesting.sender(source).unlock(schedule_id2).motsu_unwrap();
+        vesting
+            .sender(source)
+            .unlock(schedule_id2, 0, 1)
+            .motsu_unwrap();
         assert_eq!(
             token.sender(source).balance_of(destination1),
             U256::from(30u64)
@@ -1600,7 +1700,7 @@ mod tests {
         // Test unlock on nonexistent schedule
         let err = vesting
             .sender(caller)
-            .unlock(nonexistent_id)
+            .unlock(nonexistent_id, 0, 1)
             .motsu_unwrap_err();
         assert!(matches!(err, ContractError::ScheduleNotFound(_)));
 
