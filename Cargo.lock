@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "access-control-solana-anchor"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "anchor-lang",
  "mollusk-svm",
@@ -15,7 +15,7 @@ dependencies = [
 
 [[package]]
 name = "access-control-solana-native"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "borsh 1.5.7",
  "borsh-derive 1.5.7",
@@ -29,7 +29,7 @@ dependencies = [
 
 [[package]]
 name = "access-control-stylus"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "alloy-primitives",
  "alloy-sol-types",
@@ -38,7 +38,7 @@ dependencies = [
 
 [[package]]
 name = "accounts-to-storage-solana-anchor"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "anchor-lang",
  "mollusk-svm",
@@ -49,7 +49,7 @@ dependencies = [
 
 [[package]]
 name = "accounts-to-storage-solana-native"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "borsh 1.5.7",
  "borsh-derive 1.5.7",
@@ -63,7 +63,7 @@ dependencies = [
 
 [[package]]
 name = "accounts-to-storage-stylus"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "alloy-primitives",
  "stylus-sdk",
@@ -1699,7 +1699,7 @@ checksum = "773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b"
 
 [[package]]
 name = "cpi-to-external-call-solana-adder"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "borsh 1.5.7",
  "borsh-derive 1.5.7",
@@ -1713,7 +1713,7 @@ dependencies = [
 
 [[package]]
 name = "cpi-to-external-call-solana-anchor"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "anchor-lang",
  "borsh 1.5.7",
@@ -1726,7 +1726,7 @@ dependencies = [
 
 [[package]]
 name = "cpi-to-external-call-solana-native"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "borsh 1.5.7",
  "borsh-derive 1.5.7",
@@ -1741,7 +1741,7 @@ dependencies = [
 
 [[package]]
 name = "cpi-to-external-call-stylus"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "alloy-primitives",
  "stylus-sdk",
@@ -2122,7 +2122,7 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
 name = "erc20-allowance-stylus"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "alloy-primitives",
  "alloy-sol-types",
@@ -2144,7 +2144,7 @@ dependencies = [
 
 [[package]]
 name = "errors-events-solana-anchor"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "anchor-lang",
  "mollusk-svm",
@@ -2155,7 +2155,7 @@ dependencies = [
 
 [[package]]
 name = "errors-events-solana-native"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "borsh 1.5.7",
  "borsh-derive 1.5.7",
@@ -2168,7 +2168,7 @@ dependencies = [
 
 [[package]]
 name = "errors-events-stylus"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "alloy-primitives",
  "alloy-sol-types",
@@ -2309,7 +2309,7 @@ dependencies = [
 
 [[package]]
 name = "fungible-tokens-solana-anchor"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
@@ -2323,7 +2323,7 @@ dependencies = [
 
 [[package]]
 name = "fungible-tokens-solana-native"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "borsh 1.5.7",
  "borsh-derive 1.5.7",
@@ -2341,7 +2341,7 @@ dependencies = [
 
 [[package]]
 name = "fungible-tokens-stylus"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "alloy-primitives",
  "alloy-sol-types",
@@ -3350,7 +3350,7 @@ dependencies = [
 
 [[package]]
 name = "native-token-handling-solana-anchor"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "anchor-lang",
  "mollusk-svm",
@@ -3362,7 +3362,7 @@ dependencies = [
 
 [[package]]
 name = "native-token-handling-solana-native"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "borsh 1.5.7",
  "borsh-derive 1.5.7",
@@ -3376,7 +3376,7 @@ dependencies = [
 
 [[package]]
 name = "native-token-handling-stylus"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "alloy-primitives",
  "alloy-sol-types",
@@ -3385,7 +3385,7 @@ dependencies = [
 
 [[package]]
 name = "nested-mapping-stylus"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "alloy-primitives",
  "alloy-sol-types",
@@ -3394,7 +3394,7 @@ dependencies = [
 
 [[package]]
 name = "non-fungible-tokens-solana-anchor"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
@@ -3408,7 +3408,7 @@ dependencies = [
 
 [[package]]
 name = "non-fungible-tokens-solana-native"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "borsh 1.5.7",
  "borsh-derive 1.5.7",
@@ -3427,7 +3427,7 @@ dependencies = [
 
 [[package]]
 name = "non-fungible-tokens-stylus"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "alloy-primitives",
  "alloy-sol-types",
@@ -3734,7 +3734,7 @@ dependencies = [
 
 [[package]]
 name = "ownable-stylus"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "alloy-primitives",
  "alloy-sol-types",
@@ -3812,7 +3812,7 @@ dependencies = [
 
 [[package]]
 name = "pdas-to-mappings-solana-anchor"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "anchor-lang",
  "mollusk-svm",
@@ -3823,7 +3823,7 @@ dependencies = [
 
 [[package]]
 name = "pdas-to-mappings-solana-native"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "borsh 1.5.7",
  "borsh-derive 1.5.7",
@@ -3837,7 +3837,7 @@ dependencies = [
 
 [[package]]
 name = "pdas-to-mappings-stylus"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "alloy-primitives",
  "alloy-sol-types",
@@ -4034,7 +4034,7 @@ dependencies = [
 
 [[package]]
 name = "program-structure-solana-anchor"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "anchor-lang",
  "mollusk-svm",
@@ -4045,7 +4045,7 @@ dependencies = [
 
 [[package]]
 name = "program-structure-solana-native"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "borsh 1.5.7",
  "borsh-derive 1.5.7",
@@ -4059,7 +4059,7 @@ dependencies = [
 
 [[package]]
 name = "program-structure-stylus"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "alloy-primitives",
  "alloy-sol-types",
@@ -6971,7 +6971,7 @@ dependencies = [
 
 [[package]]
 name = "stylus-gas-optimization"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "alloy-primitives",
  "alloy-sol-types",
@@ -7227,7 +7227,7 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "token-vesting-case-study-stylus"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "alloy-primitives",
  "alloy-sol-types",
