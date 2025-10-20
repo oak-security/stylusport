@@ -345,11 +345,14 @@ pub struct AccessControl {
 
 sol! {
     #[derive(Debug, PartialEq, Eq)]
+    error InvalidAddress(address address);
+    #[derive(Debug, PartialEq, Eq)]
     error Unauthorized();
 }
 
 #[derive(SolidityError, Debug, PartialEq, Eq)]
 pub enum AccessControlError {
+    InvalidAddress(InvalidAddress),
     Unauthorized(Unauthorized),
 }
 
@@ -357,6 +360,17 @@ pub enum AccessControlError {
 impl AccessControl {
     #[constructor]
     pub fn constructor(&mut self, authority: Address, publisher: Address) {
+        assert_ne!(
+            authority,
+            Address::ZERO,
+            "authority cannot be a zero-address"
+        );
+        assert_ne!(
+            publisher,
+            Address::ZERO,
+            "publisher cannot be a zero-address"
+        );
+
         self.config.authority.set(authority);
         self.config.publisher.set(publisher);
     }
@@ -366,6 +380,12 @@ impl AccessControl {
 
         if sender != self.config.authority.get() {
             return Err(AccessControlError::Unauthorized(Unauthorized {}));
+        }
+
+        if publisher == Address::ZERO {
+            return Err(AccessControlError::InvalidAddress(InvalidAddress {
+                address: publisher,
+            }));
         }
 
         self.config.publisher.set(publisher);
@@ -426,7 +446,7 @@ sol! {
 #[derive(SolidityError, Debug)]
 // In order to generate an ABI for the contract you need to manually wire
 // up OpenZeppelin's error types defined with `sol!` rather than the their
-// `ownable::Error` type which implements `SolidityError` but not `SolError`
+// `ownable::Error` type which does not implement `SolError`
 pub enum ContractError {
     InvalidOwner(ownable::OwnableInvalidOwner),
     Unauthorized(ownable::OwnableUnauthorizedAccount),
@@ -455,9 +475,10 @@ pub struct OwnableContract {
 #[implements(IOwnable2Step<Error = ownable::Error>)]
 impl OwnableContract {
     #[constructor]
-    pub fn constructor(&mut self) -> Result<(), ContractError> {
-        // You must ensure the nested implementation constructor is called correctly
-        self.ownable.constructor(self.vm().msg_sender())?;
+    pub fn constructor(&mut self, owner: Address) -> Result<(), ContractError> {
+        assert_ne!(owner, Address::ZERO, "owner cannot be a zero-address");
+
+        self.ownable.constructor(owner)?;
 
         self.is_paused.set(true);
 

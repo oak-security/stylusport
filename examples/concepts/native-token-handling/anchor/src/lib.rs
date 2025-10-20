@@ -40,6 +40,7 @@ pub struct WithdrawAllLamports<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
     #[account(
+        mut,
         seeds = [DEPOSIT_PDA_ACCOUNT_SEED, SEED_SEPARATOR, payer.key().as_ref()],
         bump,
     )]

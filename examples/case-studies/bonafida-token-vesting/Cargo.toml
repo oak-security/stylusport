@@ -1,5 +1,5 @@
 [package]
-name = "token-vesting-case-study"
+name = "token-vesting-case-study-stylus"
 version = "0.1.0"
 edition = "2021"
 doc_test = false

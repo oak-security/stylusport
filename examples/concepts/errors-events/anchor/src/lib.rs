@@ -5,9 +5,8 @@ use anchor_lang::prelude::*;
 declare_id!("JEKNVnkbo3jma5nREBBJCDoXFVeKkD56V3xKrvRmWxFG");
 
 #[event]
-pub struct OwnerChanged {
-    previous_owner: Pubkey,
-    current_owner: Pubkey,
+pub struct TaggedEvent {
+    you_are_it: Pubkey,
 }
 
 #[program]
@@ -23,9 +22,8 @@ pub mod errors_events {
     }
 
     pub fn emit_event(ctx: Context<EmitEvent>) -> Result<()> {
-        emit!(OwnerChanged {
-            previous_owner: *ctx.accounts.signer.key,
-            current_owner: ID
+        emit!(TaggedEvent {
+            you_are_it: *ctx.accounts.signer.key
         });
 
         Ok(())
