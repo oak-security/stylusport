@@ -15,7 +15,7 @@ Once the token escrow is established, it cannot be cancelled. Additionally, any 
 ## Migration Strategy
 
 We will migrate the program to Stylus phases:
-1. **Program Structure**: Convert neccesary instructions to `#[public]` functions.
+1. **Program Structure**: Convert necessary instructions to `#[public]` functions.
 1. **State Storage**: Assess the data structures stored in accounts and the use of PDAs, then convert to idiomatic Stylus state management.
 1. **Business Logic**: Once state and token operations are setup, port the platform-agnostic business logic from instruction handlers to the equivalent functions.
 1. **View Functions**: Unlike Solana, view functions need to be added to allow users and clients to easily read the contract storage. 
@@ -214,7 +214,7 @@ pub struct TokenVestingContract {
 
 ### Create token vesting schedule
 
-The [`Create` instruction handler](https://github.com/Bonfida/token-vesting/blob/6234f98229196d1c785dfd2198bb58afc60bca10/program/src/processor.rs#L72-L183) from the native solana program is as follows:
+The [`Create` instruction handler](https://github.com/Bonfida/token-vesting/blob/6234f98229196d1c785dfd2198bb58afc60bca10/program/src/processor.rs#L72-L183) from the native Solana program is as follows:
 
 ```rust
 pub fn process_create(
@@ -696,7 +696,7 @@ This boils down to:
 1. Check the caller is the owner
 1. Overwrite the existing destination
 
-As mentioned in Phase 1, as the owner is determined by checking the owner of the destination associated token account, the `ChangeDestination` instruction also potentially changes the owner. In order to have feature parity, a seperate `change_owner` function is added to the Stylus implememtation.
+As mentioned in Phase 1, as the owner is determined by checking the owner of the destination associated token account, the `ChangeDestination` instruction also potentially changes the owner. In order to have feature parity, a separate `change_owner` function is added to the Stylus implementation.
 
 ```rust
 #[public]
@@ -1104,7 +1104,7 @@ Changes where future unlocked tokens will be sent, requiring authorization from 
 
 Note that the test only ever executes the instructions and checks that no errors are returned. It does not verify that token balances or other account data has been updated correctly.
 
-Using the [motsu](https://docs.rs/motsu/latest/motsu/index.html) test harness library developed by OpenZeppelin, we can create a series of unit tests that verify the contract business logic and interactions with the provided ERC20 token.
+Using the [`motsu`](https://docs.rs/motsu/latest/motsu/index.html) test harness library developed by OpenZeppelin, we can create a series of unit tests that verify the contract business logic and interactions with the provided ERC20 token.
 
 For the first test, verify that creating a schedule works as expected:
 

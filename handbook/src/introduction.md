@@ -4,7 +4,7 @@ This handbook provides a comprehensive guide for migrating Solana programs to Ar
 
 ## What Arbitrum Stylus offers
 
-Arbitrum Stylus provides a smart contract platform that supports developers writing contracts in Rust, C, and C++. The platform maintains full Ethereum Virtual Machine (EVM) compatibility. Unlike most EVM chains that require contracts to be written in DSLs like Solidity or Vyper, Stylus enables the use of languages that compile to WebAssembly (WASM), offering:
+Arbitrum Stylus provides a smart contract platform that supports developers writing contracts in Rust, C, and C++. The platform maintains full Ethereum Virtual Machine (EVM) compatibility. Unlike most EVM chains that require programming contracts with DSLs like Solidity or Vyper, Stylus enables the use of languages that compile to WebAssembly (WASM), offering:
 
 - **Performance**: 10-100x faster execution than Solidity
 - **Memory efficiency**: More efficient memory usage and lower gas costs
@@ -94,11 +94,11 @@ This handbook follows a systematic approach:
 1. [Access Control Migration](./access-control.md): Migrate signer checks and PDA patterns
 1. [External Program Calls](./external-calls.md): Convert CPIs to contract interactions
 1. [Native Token Operations](./native-tokens.md): Handle receiving, holdings and transferring native tokens
-1. [Fungible Token Handling](./fungible-tokens.md): Convert SPL tokens usage to ERC20 contracts, extenstions and interfaces
+1. [Fungible Token Handling](./fungible-tokens.md): Convert SPL tokens usage to ERC20 contracts, extensions and interfaces
 1. [Non-Fungible Token Handling](./non-fungible-tokens.md): Convert Metaplex NFT metadata to the ERC721 standard
 1. [Errors and Events](./errors-events.md): Map program errors to EVM reverts and events
 
-Each chapter includes working examples that you can run, test, and modify.
+Each chapter includes working examples that you can run, test, and build on.
 
 *This handbook assumes familiarity with Rust and basic blockchain concepts. If you are new to Solana or Arbitrum, review their respective documentation first.*
 

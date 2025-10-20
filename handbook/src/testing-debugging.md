@@ -2,7 +2,7 @@
 
 ## Unit Testing
 
-Test harnesses for Solana programs, such as [LiteSVM](https://github.com/LiteSVM/litesvm) or [Mollusk](https://github.com/anza-xyz/mollusk), require loading the target program binary, as well any dependency program binaries, into a cutdown implementation of the Solana Virtual Machine (SVM).
+Test harnesses for Solana programs, such as [LiteSVM](https://github.com/LiteSVM/litesvm) or [Mollusk](https://github.com/anza-xyz/mollusk), require loading the target program binary, as well any dependency program binaries, into a cut down implementation of the Solana Virtual Machine (SVM).
 
 In contrast, Stylus contracts can be tested by instantiating the contract with a mock [`Host`](https://docs.rs/stylus-sdk/0.9.2/stylus_sdk/prelude/trait.Host.html) trait implementation without needing to first build the WASM binary. 
 
@@ -14,7 +14,7 @@ In order for the contract to be instantiated from a test `Host` implementation, 
 
 While the [`TestVM`](https://docs.rs/stylus-test/0.9.2/stylus_test/vm/struct.TestVM.html) provided in the `stylys_sdk::testing` module is sufficient for simple contracts, versions up to `0.9.0` do not support the use of interfaces to call external contracts.
 
-The [motsu](https://docs.rs/motsu/latest/motsu/index.html) test harness library, developed by OpenZeppelin, allows for the use of interfaces and the testing of the interaction between multiple contracts, as well as improved test setup ergonomics. This is particularly useful if the contract under test uses ERC20 or ERC721 tokens.
+The [`motsu`](https://docs.rs/motsu/latest/motsu/index.html) test harness library, developed by OpenZeppelin, allows for the use of interfaces and the testing of the interaction between multiple contracts, as well as improved test setup ergonomics. This is particularly useful if the contract under test uses ERC20 or ERC721 tokens.
 
 ```toml
 [package]
@@ -168,17 +168,17 @@ mod tests {
 
 ## Debugging Techniques
 
-### Using the dbg! macro
+### Using the `dbg!` macro
 
-As Stylus contracts are unit tested in the same fashion as conventional Rust code, i.e. not within a specialized VM like Solana programs, the standard library's [`dbg!` macro](https://doc.rust-lang.org/stable/std/macro.dbg.html) can be inserted into the code under test to aid in debugging. 
+As Stylus contracts are unit tested in the same fashion as conventional Rust code, not within a specialized VM like Solana programs, the standard library's [`dbg!` macro](https://doc.rust-lang.org/stable/std/macro.dbg.html) can be inserted into the code under test to aid in debugging. 
 
 In Rust development, it is best practice to remove `dbg!` macro usage before committing code in version control.
 
 ### Using the console! macro
 
-Similar to the `msg!` logging macro in Solana programs, the [`console!` macro](https://docs.rs/stylus-sdk/latest/stylus_sdk/macro.console.html) can be used to add log messages within function execution. Messages emitted with `console` will be readable in the testing node logs during integration testing.
+Similar to the `msg!` logging macro in Solana programs, the [`console!` macro](https://docs.rs/stylus-sdk/latest/stylus_sdk/macro.console.html) can be used to add log messages within function execution. Messages emitted with `console!` will be readable in the testing node logs during integration testing.
 
-The `console!` macro implememtation is [elided](https://github.com/OffchainLabs/stylus-sdk-rs/blob/975c8349598d2bdb3a12d91455315bd12305d132/stylus-sdk/src/debug.rs#L22-L36) unless the `debug` feature is enabled in `stylus-sdk`. This means it is safe to commit code containing `console!` usage.
+The `console!` macro implementation is [elided](https://github.com/OffchainLabs/stylus-sdk-rs/blob/975c8349598d2bdb3a12d91455315bd12305d132/stylus-sdk/src/debug.rs#L22-L36) unless the `debug` feature is enabled in `stylus-sdk`. This means it is safe to commit code containing `console!` usage.
 
 The following is an example of how to conditionally enable the `debug` feature:
 

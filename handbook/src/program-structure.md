@@ -215,7 +215,7 @@ Any fields associated with the instruction `enum` variants convert to ABI-encoda
 
 ### Coming from Anchor
 
-Each `#[program]` function that takes a different `Context<T>` maps to a `#[public] &mut self` function in Stylus. Any parameters coming after `ctx` would also be required.
+Each `#[program]` function that takes a different `Context<T>` maps to a `#[public] &mut self` function in Stylus. Any parameters coming after `ctx` are also required.
 
 ### Stylus idioms
 

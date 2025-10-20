@@ -419,7 +419,7 @@ pub struct Unstake<'info> {
 
 ## Stylus
 
-Stylus tokens follow the ERC-20 standard: each token is a self-contained contract storing balances in mappings and implementing transfer logic directly. Token operations are direct method calls to the contract. The standard interface - transfer, approve, transferFrom - enables application composability, while contracts extend functionality through inheritance. OpenZeppelin's Stylus implementations provide components for minting caps, pausability, and access control. Before implementing custom token functionality, it is best practice to check if an existing [standard](https://docs.rs/openzeppelin-stylus/latest/openzeppelin_stylus/token/index.html) or their [extensions](https://docs.rs/openzeppelin-stylus/latest/openzeppelin_stylus/token/erc20/extensions/index.html) fits the use case.
+Stylus tokens follow the ERC-20 standard: each token is a self-contained contract storing balances in mappings and implementing transfer logic directly. Token operations are direct method calls to the contract. The standard interface - `transfer`, `approve`, `transferFrom` - enables application composability, while contracts extend functionality through inheritance. OpenZeppelin's Stylus implementations provide components for minting caps, contract pausing, and access control. Before implementing custom token functionality, it is best practice to check if an existing [standard](https://docs.rs/openzeppelin-stylus/latest/openzeppelin_stylus/token/index.html) or their [extensions](https://docs.rs/openzeppelin-stylus/latest/openzeppelin_stylus/token/erc20/extensions/index.html) fits the use case.
 
 ```rust
 use openzeppelin_stylus::token::erc20::{Erc20, Error as Erc20Error, IErc20};

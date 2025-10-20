@@ -6,7 +6,7 @@ This chapter demonstrates how to translate Solana CPIs into Stylus external call
 
 Solana’s Cross-Program Invocation (CPI) model relies on instruction-based communication. Programs build instructions with the target program ID, required accounts, and instruction data. Unlike systems that allow direct state queries, Solana programs must receive all state through accounts passed in the transaction. CPIs are therefore used when a program needs to modify state owned by another program, with the caller explicitly providing all accounts the callee requires.
 
-When a program controls a PDA that must sign for another program’s operation, it uses invoke_signed with the PDA’s seeds. The runtime verifies the seeds and grants signing authority.
+When a program controls a PDA that must sign for another program’s operation, it uses `invoke_signed` with the PDA’s seeds. The runtime verifies the seeds and grants signing authority.
 
 ### Native 
 

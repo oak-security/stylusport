@@ -311,7 +311,7 @@ impl From<ContractError> for alloc::vec::Vec<u8> {
 }
 ```
 
-The derive macro expects an enum consisting on one or more unit variants containing a single type implementing the [`stylus_sdk::call::MethodError`](https://docs.rs/stylus-sdk/latest/stylus_sdk/call/trait.MethodError.html) trait. There is a [blanket implementation](https://docs.rs/stylus-sdk/latest/stylus_sdk/call/trait.MethodError.html#impl-MethodError-for-T) of `stylus_sdk::call::MethodError` for any type which also implements [`alloy_sol_types::SolError`](https://docs.rs/alloy-sol-types/0.8.20/alloy_sol_types/trait.SolError.html). The [`sol!`](https://docs.rs/alloy-sol-macro/0.8.20/alloy_sol_macro/macro.sol.html) macro is the easiest way to define types that implement `SolError`.
+The derive macro expects an enum consisting on one or more unit variants containing a single type implementing the [`stylus_sdk::call::MethodError`](https://docs.rs/stylus-sdk/latest/stylus_sdk/call/trait.MethodError.html) trait. The `stylus_sdk::call::MethodError` has a [blanket implementation](https://docs.rs/stylus-sdk/latest/stylus_sdk/call/trait.MethodError.html#impl-MethodError-for-T) for any type which also implements [`alloy_sol_types::SolError`](https://docs.rs/alloy-sol-types/0.8.20/alloy_sol_types/trait.SolError.html). The [`sol!`](https://docs.rs/alloy-sol-macro/0.8.20/alloy_sol_macro/macro.sol.html) macro is the easiest way to define types that implement `SolError`.
 
 The above mechanisms can be combined to allow Stylus contracts to return structured custom errors:
 
@@ -352,7 +352,7 @@ impl ErrorsEvents {
 
 [Logging](https://docs.rs/solana-program/latest/solana_program/log/index.html) in Solana is in the form of lines of free text. Due to the lack of standardized ABI for function selection and all errors being reduced to integers, Solana program logs are an important part of instruction execution auditing and tracking. Additionally, they are frequently used for debugging programs during the development process.
 
-The following excerpt from the [spl-token-2022](https://github.com/solana-program/token-2022/blob/57b3bcbd3c15de22db47ae2024fc73b43dafdd8a/program/src/processor.rs#L1637-L1945) illustrates the convention of logging the name of the instruction being executed:
+The following excerpt from the [`spl-token-2022`](https://github.com/solana-program/token-2022/blob/57b3bcbd3c15de22db47ae2024fc73b43dafdd8a/program/src/processor.rs#L1637-L1945) illustrates the convention of logging the name of the instruction being executed:
 
 ```rust
  pub fn process(program_id: &Pubkey, accounts: &[AccountInfo], input: &[u8]) -> ProgramResult {
@@ -401,7 +401,7 @@ The following excerpt from the [spl-token-2022](https://github.com/solana-progra
 }
 ```
 
-Another common use is to provide additional context before returning errors, as can be seen in the [metaplex-token-metadata program](https://github.com/metaplex-foundation/mpl-token-metadata/blob/a7ee5e17ed60feaafeaa5582a4f46d9317c1b412/programs/token-metadata/program/src/utils/token.rs#L145-L202):
+Another common use is to provide additional context before returning errors, as can be seen in the [`metaplex-token-metadata` program](https://github.com/metaplex-foundation/mpl-token-metadata/blob/a7ee5e17ed60feaafeaa5582a4f46d9317c1b412/programs/token-metadata/program/src/utils/token.rs#L145-L202):
 
 ```rust
 pub(crate) fn validate_mint(
@@ -556,7 +556,7 @@ Program log: 0x0, 0x0, 0x0, 0xf, 0x65
 Program log: 0x0, 0x0, 0x0, 0x10, 0x78
 ```
 
-In addition to the logging facilities provided by `solana_program::log`, Anchor provides macros to reduce the boilerplate in emiting structured events via the underlying `sol_log_data` function:
+In addition to the logging facilities provided by `solana_program::log`, Anchor provides macros to reduce the boilerplate in emitting structured events via the underlying `sol_log_data` function:
 
 ```rust
 #[event]

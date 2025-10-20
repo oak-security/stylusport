@@ -1,10 +1,10 @@
 # Native Token Handling
 
-This chapter maps handling native SOL to ETH in Stylus: payable functions, internal balance accounting, safe withdrawals, and the key behavioral differences between lamports and wei.
+This chapter maps handling native SOL to ETH in Stylus: payable functions, internal balance accounting, safe withdrawals, and the key behavioral differences between Lamports and Wei.
 
 ## Solana
 
-Solana's native token SOL is handled through the System Program. Programs transfer lamports via CPIs, check balances through account fields, and receive SOL by accepting transfers to program-owned accounts. Each account maintains a lamports field that tracks its SOL balance, and rent requirements mean accounts must maintain minimum balances. Programs use PDAs to escrow SOL and manage program-owned funds separately from user accounts.
+Solana's native token SOL is handled through the System Program. Programs transfer Lamports via CPIs, check balances through account fields, and receive SOL by accepting transfers to program-owned accounts. Each account maintains a `lamports` field that tracks its SOL balance, and rent requirements mean accounts must maintain minimum balances. Programs use PDAs to escrow SOL and manage program-owned funds separately from user accounts.
 
 #### Native
 

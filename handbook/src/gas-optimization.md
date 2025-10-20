@@ -9,7 +9,7 @@ The fundamental difference between Solana and Ethereum/Stylus fee models:
 | Aspect | Solana | Stylus/Ethereum |
 |--------|---------|-----------------|
 | **Unit** | Compute Units (CU) | Gas (and ink in Stylus VM) |
-| **Pricing** | Fixed: 5,000 lamports (0.000005 SOL) per signature | Variable: Gas price fluctuates with network demand |
+| **Pricing** | Fixed: 5,000 Lamports (0.000005 SOL) per signature | Variable: Gas price fluctuates with network demand |
 | **Limits** | Per-transaction: 1.4M CU max | Per-block gas limit: ~30M gas |
 | **Measurement** | Instruction-based (each instruction deducts from CU budget) | Operation-based (WASM opcodes measured in ink) |
 | **State Access** | Rent-exempt deposits (one-time, refundable) | Per-operation gas cost (with SDK caching optimization) |
@@ -41,14 +41,14 @@ This caching strategy means repeatedly accessing the same storage slots within a
 **Cost Comparison:**
 
 **Solana:**
-- Base transaction fee: 5,000 lamports (0.000005 SOL) per signature
+- Base transaction fee: 5,000 Lamports (0.000005 SOL) per signature
 - Simple transfer: ~300 CU (when optimized with `SetComputeUnitLimit`)
 - System program CPI: ~2,215 CU
 - Token transfer (direct): ~3,000 CU
 - Token transfer via CPI: ~4,100 CU (adds ~1,000 CU overhead)
 - Account creation requires rent-exempt deposit based on data size:
-  - Empty account: ~890,880 lamports (~0.00089 SOL)
-  - 32-byte account: ~1,113,600 lamports (~0.0011 SOL)
+  - Empty account: ~890,880 Lamports (~0.00089 SOL)
+  - 32-byte account: ~1,113,600 Lamports (~0.0011 SOL)
   - Deposits are fully refundable when accounts are closed
 
 > Note: Unlike EVM/Stylus the amount of compute units used does not affect the overall transaction fee but it does affect the block inclusion latency. The lower the compute unit usage, the higher the reward ratio for validators to include the transaction in a block based on the fixed base fee plus any proposed priority fee.

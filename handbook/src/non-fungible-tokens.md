@@ -816,7 +816,7 @@ pub struct MintNameNFT<'info> {
 
 ## Stylus
 
-Stylus NFTs follow the ERC-721 standard: each collection is a single contract managing all tokens through internal mappings. Token ownership, approvals, and metadata are stored directly in contract storage. The standard interface - ownerOf, approve, transferFrom - ensures marketplace compatibility. Contracts extend base functionality through modular patterns. OpenZeppelin's Stylus implementations provide components for enumeration, metadata URIs, and royalties. The single-contract model simplifies collection management compared to Solana's multi-account approach.
+Stylus NFTs follow the ERC-721 standard: each collection is a single contract managing all tokens through internal mappings. Token ownership, approvals, and metadata are stored directly in contract storage. The standard interface - `ownerOf`, `approve`, `transferFrom` - ensures marketplace compatibility. Contracts extend base functionality through modular patterns. OpenZeppelin's Stylus implementations provide components for enumeration, metadata URIs, and royalties. The single-contract model simplifies collection management compared to Solana's multi-account approach.
 
 ```rust
 sol! {

@@ -201,7 +201,7 @@ pub mod data_storage {
 }
 ```
 
-The Anchor framework abstracts the boilerplate required to manually create PDA accounts and automatically checks for intialization as well as correct seeds.
+The Anchor framework abstracts the boilerplate required to manually create PDA accounts and automatically checks for initialization as well as correct seeds.
 
 ```rust
 #[derive(InitSpace)]
@@ -437,7 +437,7 @@ impl Mappings {
 | Solana Pattern | Stylus Storage Pattern |
 |----------------|------------------------|
 | Several PDAs with fixed seeds | Multiple structs tagged with `#[storage]` nested under the struct marked `#[entrypoint]` |
-| PDAs with dynamic seeds, e.g. a user `Pubkey` | Use `StorageMap<K, V>` where `K` consists of the dynamic seed component and `V` implements `StorageType` |
+| PDAs with dynamic seeds, like a user `Pubkey` | Use `StorageMap<K, V>` where `K` consists of the dynamic seed component and `V` implements `StorageType` |
 
 
 ### Nested mappings
