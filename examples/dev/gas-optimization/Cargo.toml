@@ -3,7 +3,9 @@ name = "stylus-gas-optimization"
 version = "0.0.1"
 publish = false
 edition = "2021"
-doc_test = false
+
+[lib]
+doctest = false
 
 [dependencies]
 alloy-primitives.workspace = true

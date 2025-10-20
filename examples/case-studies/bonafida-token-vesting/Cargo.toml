@@ -3,7 +3,9 @@ name = "token-vesting-case-study-stylus"
 version = "0.0.1"
 publish = false
 edition = "2021"
-doc_test = false
+
+[lib]
+doctest = false
 
 [features]
 export-abi = ["stylus-sdk/export-abi", "openzeppelin-stylus/export-abi"]

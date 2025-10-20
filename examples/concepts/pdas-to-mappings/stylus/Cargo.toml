@@ -4,6 +4,9 @@ version = "0.0.1"
 publish = false
 edition = "2021"
 
+[lib]
+doctest = false
+
 [dependencies]
 alloy-primitives = { workspace = true, features = [ "tiny-keccak" ] }
 alloy-sol-types.workspace = true

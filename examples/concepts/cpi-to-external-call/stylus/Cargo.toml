@@ -5,6 +5,7 @@ publish = false
 edition = "2021"
 
 [lib]
+doctest = false
 crate-type = ["lib", "cdylib"]
 
 [dependencies]
