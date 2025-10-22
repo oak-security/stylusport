@@ -1,0 +1,725 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>State Storage Patterns - StylusPort::Solana</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">StylusPort::Solana</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="state-storage"><a class="header" href="#state-storage">State storage</a></h1>
+<p>One of the most significant differences between Solana and Stylus involves how state storage and access work. This chapter covers the transformation from Solana's account-based storage model to Stylus's contract storage variables, including type mappings, access patterns, and cost considerations.</p>
+<h2 id="solana-account-model"><a class="header" href="#solana-account-model">Solana account model</a></h2>
+<p>Solana stores each piece of state in a separate, dedicated account with predetermined size allocation. Accounts must maintain a rent-exempt balance proportional to their size to avoid automatic deallocation, though closing accounts refunds the Lamports. Programs can only access the accounts provided in the instruction, which is fully client-controlled. Extreme care must be taken to validate the accounts received when processing the instruction in order to prevent exploits.</p>
+<h3 id="native"><a class="header" href="#native">Native</a></h3>
+<p>Solana programs can group related state together to be stored in accounts owned by the program. Native programs are required to explicitly create and initialize those accounts.</p>
+<pre><code class="language-rust">#[derive(BorshSerialize, BorshDeserialize, Debug, PartialEq, Eq)]
+pub struct Data {
+    pub bool: bool,
+    pub uint8: u8,
+    pub uint16: u16,
+    pub uint32: u32,
+    pub uint64: u64,
+    pub uint128: u128,
+    pub int8: i8,
+    pub int16: i16,
+    pub int32: i32,
+    pub int64: i64,
+    pub int128: i128,
+    pub string: String,
+    pub bytes: Vec&lt;u8&gt;,
+    pub address: Pubkey,
+}
+
+pub fn process_instruction(
+    program_id: &amp;Pubkey,
+    accounts: &amp;[AccountInfo],
+    instruction_data: &amp;[u8],
+) -&gt; ProgramResult {
+    if !check_id(program_id) {
+        return Err(ProgramError::IncorrectProgramId);
+    }
+
+    if Data::try_from_slice(instruction_data).is_err() {
+        return Err(ProgramError::InvalidInstructionData);
+    };
+
+    let [payer, data_account, system_program] = accounts else {
+        return Err(ProgramError::InvalidAccountData);
+    };
+
+    let lamports_required = Rent::get()?.minimum_balance(instruction_data.len());
+
+    invoke(
+        &amp;system_instruction::create_account(
+            payer.key,
+            data_account.key,
+            lamports_required,
+            instruction_data.len() as u64,
+            program_id,
+        ),
+        &amp;[payer.clone(), data_account.clone(), system_program.clone()],
+    )?;
+
+    let mut data_account_buffer = data_account.try_borrow_mut_data()?;
+
+    data_account_buffer.copy_from_slice(instruction_data);
+
+    Ok(())
+}</code></pre>
+<p>State that is to be maintained against other accounts such as user EOAs or other programs stored in accounts associated with Program Derived Addresses (PDAs). Each PDA is derived from a set of seeds, which can be viewed as a prefixed key and a 'bump' byte. In native Solana programs, the program owning the PDA must be careful to create and verify those accounts against the canonical bump seed, as well as protect against re-initialization attacks.</p>
+<pre><code class="language-rust">pub static SEED_SEPARATOR: &amp;[u8] = b"-";
+pub static PLAYER_PDA_ACCOUNT_SEED: &amp;[u8] = b"player";
+
+pub const STARTING_LIVES: u8 = 10;
+
+#[derive(BorshSerialize, BorshDeserialize)]
+pub struct PlayerAccountState {
+    pub lives: u8,
+}
+
+pub fn process_instruction(
+    program_id: &amp;Pubkey,
+    accounts: &amp;[AccountInfo],
+    instruction_data: &amp;[u8],
+) -&gt; ProgramResult {
+    if !check_id(program_id) {
+        return Err(ProgramError::IncorrectProgramId);
+    }
+
+    let Ok(args) = PlayerAccountState::try_from_slice(instruction_data) else {
+        return Err(ProgramError::InvalidInstructionData);
+    };
+
+    // ensure correct initial player state is provided
+    if args.lives != STARTING_LIVES {
+        return Err(ProgramError::InvalidInstructionData);
+    }
+
+    let [payer, player_pda_account, system_program] = accounts else {
+        return Err(ProgramError::InvalidAccountData);
+    };
+
+    // ensure PDA has not already been initialized
+    if !player_pda_account.data_is_empty()
+        || player_pda_account.lamports() &gt; 0
+        || *player_pda_account.owner == ID
+    {
+        return Err(ProgramError::AccountAlreadyInitialized);
+    }
+
+    let (player_pda_account_key, bump) = Pubkey::find_program_address(
+        &amp;[PLAYER_PDA_ACCOUNT_SEED, SEED_SEPARATOR, payer.key.as_ref()],
+        &amp;ID,
+    );
+
+    if player_pda_account_key != *player_pda_account.key {
+        return Err(ProgramError::InvalidSeeds);
+    }
+
+    let lamports_required = Rent::get()?.minimum_balance(instruction_data.len());
+
+    invoke_signed(
+        &amp;system_instruction::create_account(
+            payer.key,
+            player_pda_account.key,
+            lamports_required,
+            instruction_data.len() as u64,
+            program_id,
+        ),
+        &amp;[
+            payer.clone(),
+            player_pda_account.clone(),
+            system_program.clone(),
+        ],
+        &amp;[&amp;[
+            PLAYER_PDA_ACCOUNT_SEED,
+            SEED_SEPARATOR,
+            payer.key.as_ref(),
+            &amp;[bump],
+        ]],
+    )?;
+
+    let mut data_account_buffer = player_pda_account.try_borrow_mut_data()?;
+
+    data_account_buffer.copy_from_slice(instruction_data);
+
+    Ok(())
+}</code></pre>
+<h3 id="anchor"><a class="header" href="#anchor">Anchor</a></h3>
+<p>When defining Solana program instructions using the Anchor framework, program-owned accounts can be created automatically using the <code>#[account(init, ...)]</code> attribute. This also implicitly adds checks for already initialized accounts and always uses the canonical bump seed unless otherwise specified.</p>
+<pre><code class="language-rust">#[derive(InitSpace)]
+#[account]
+pub struct Data {
+    pub bool: bool,
+    pub uint8: u8,
+    pub uint16: u16,
+    pub uint32: u32,
+    pub uint64: u64,
+    pub uint128: u128,
+    pub int8: i8,
+    pub int16: i16,
+    pub int32: i32,
+    pub int64: i64,
+    pub int128: i128,
+    #[max_len(200)]
+    pub string: String,
+    #[max_len(200)]
+    pub bytes: Vec&lt;u8&gt;,
+    pub address: Pubkey,
+}
+
+#[derive(Accounts)]
+#[instruction(data: Data)]
+pub struct Initialize&lt;'info&gt; {
+    #[account(mut)]
+    pub payer: Signer&lt;'info&gt;,
+    #[account(
+        init,
+        payer = payer,
+        space = 8 + Data::INIT_SPACE
+    )]
+    pub data_account: Account&lt;'info, Data&gt;,
+    pub system_program: Program&lt;'info, System&gt;,
+}
+
+#[program]
+pub mod data_storage {
+    use super::*;
+
+    pub fn initialize(ctx: Context&lt;Initialize&gt;, data: Data) -&gt; Result&lt;()&gt; {
+        *ctx.accounts.data_account = data;
+        Ok(())
+    }
+}</code></pre>
+<p>The Anchor framework abstracts the boilerplate required to manually create PDA accounts and automatically checks for initialization as well as correct seeds.</p>
+<pre><code class="language-rust">#[derive(InitSpace)]
+#[account]
+pub struct PlayerAccountState {
+    pub lives: u8,
+}
+
+#[derive(Accounts)]
+#[instruction()]
+pub struct CreatePlayerAccount&lt;'info&gt; {
+    #[account(mut)]
+    pub payer: Signer&lt;'info&gt;,
+    #[account(
+        init,
+        payer = payer,
+        space = 8 + PlayerAccountState::INIT_SPACE,
+        seeds = [PLAYER_PDA_ACCOUNT_SEED, SEED_SEPARATOR, payer.key().as_ref()],
+        bump,
+    )]
+    pub player_account: Account&lt;'info, PlayerAccountState&gt;,
+    pub system_program: Program&lt;'info, System&gt;,
+}
+
+#[program]
+pub mod data_storage {
+    use super::*;
+
+    pub fn create_player_account(ctx: Context&lt;CreatePlayerAccount&gt;) -&gt; Result&lt;()&gt; {
+        ctx.accounts.player_account.lives = STARTING_LIVES;
+        Ok(())
+    }
+}</code></pre>
+<h2 id="stylus-storage-model"><a class="header" href="#stylus-storage-model">Stylus storage model</a></h2>
+<p>Stylus stores all state within the contract's storage slots, allowing dynamic growth as needed within gas limits. Storage operations cost gas that users pay during transaction execution, with the smart contract execution VM automatically handling storage accessibility. State persists without ongoing rent requirements, as users only pay costs when writing data and for transaction calldata.</p>
+<p>The <code>#[storage]</code> attribute macro can be used to implement <a href="https://docs.rs/stylus-sdk/latest/stylus_sdk/storage/trait.StorageType.html"><code>StorageType</code></a> for user-defined types, allowing state to be logically grouped together.</p>
+<pre><code class="language-rust">#[storage]
+pub struct IntegerStore {
+    uint8: StorageU8,
+    uint16: StorageU16,
+    uint32: StorageU32,
+    uint64: StorageU64,
+    uint128: StorageU128,
+    uint256: StorageU256,
+    int8: StorageI8,
+    int16: StorageI16,
+    int32: StorageI32,
+    int64: StorageI64,
+    int128: StorageI128,
+    int256: StorageI256,
+}
+
+#[storage]
+#[entrypoint]
+pub struct DataStorage {
+    // Types that implement `StorageType` can be nested
+    // in order to namespace and organize related storage items
+    integers: IntegerStore,
+    bool: StorageBool,
+    string: StorageString,
+    bytes: StorageBytes,
+    fixed_bytes: StorageFixedBytes&lt;4&gt;,
+    vec: StorageVec&lt;StorageU64&gt;,
+    address: StorageAddress,
+}
+
+#[public]
+impl DataStorage {
+    #[constructor]
+    // for example purposes only, avoid using this many parameters to functions
+    #[allow(clippy::too_many_arguments)]
+    pub fn constructor(
+        &amp;mut self,
+        bool: bool,
+        uint8: U8,
+        uint16: U16,
+        uint32: U32,
+        uint64: U64,
+        uint128: U128,
+        uint256: U256,
+        int8: I8,
+        int16: I16,
+        int32: I32,
+        int64: I64,
+        int128: I128,
+        int256: I256,
+        string: String,
+        bytes: Vec&lt;u8&gt;,
+        fixed_bytes: FixedBytes&lt;4&gt;,
+        vec: Vec&lt;U64&gt;,
+        address: Address,
+    ) {
+        // unless explicitly set, all storage is initialized to the types respective zero-value
+        self.bool.set(bool);
+        self.integers.uint8.set(uint8);
+        self.integers.uint16.set(uint16);
+        self.integers.uint32.set(uint32);
+        self.integers.uint64.set(uint64);
+        self.integers.uint128.set(uint128);
+        self.integers.uint256.set(uint256);
+        self.integers.int8.set(int8);
+        self.integers.int16.set(int16);
+        self.integers.int32.set(int32);
+        self.integers.int64.set(int64);
+        self.integers.int128.set(int128);
+        self.integers.int256.set(int256);
+        self.string.set_str(string);
+        self.bytes.set_bytes(bytes);
+        self.fixed_bytes.set(fixed_bytes);
+
+        for x in vec {
+            self.vec.push(x);
+        }
+
+        self.address.set(address);
+    }
+
+    fn get_bool(&amp;self) -&gt; bool { self.bool.get() }
+    fn get_uint8(&amp;self) -&gt; U8 { self.integers.uint8.get() }
+    fn get_uint16(&amp;self) -&gt; U16 { self.integers.uint16.get() }
+    fn get_uint32(&amp;self) -&gt; U32 { self.integers.uint32.get() }
+    fn get_uint64(&amp;self) -&gt; U64 { self.integers.uint64.get() }
+    fn get_uint128(&amp;self) -&gt; U128 { self.integers.uint128.get() }
+    fn get_uint256(&amp;self) -&gt; U256 { self.integers.uint256.get() }
+    fn get_int8(&amp;self) -&gt; I8 { self.integers.int8.get() }
+    fn get_int16(&amp;self) -&gt; I16 { self.integers.int16.get() }
+    fn get_int32(&amp;self) -&gt; I32 { self.integers.int32.get() }
+    fn get_int64(&amp;self) -&gt; I64 { self.integers.int64.get() }
+    fn get_int128(&amp;self) -&gt; I128 { self.integers.int128.get() }
+    fn get_int256(&amp;self) -&gt; I256 { self.integers.int256.get() }
+    fn get_string(&amp;self) -&gt; String { self.string.get_string() }
+    fn get_bytes(&amp;self) -&gt; Vec&lt;u8&gt; { self.bytes.get_bytes() }
+    fn get_fixed_bytes(&amp;self) -&gt; FixedBytes&lt;4&gt; { self.fixed_bytes.get() }
+    fn get_address(&amp;self) -&gt; Address { self.address.get() }
+
+    // Option&lt;T&gt; is not available as a return or a public function parameter type
+    // as `None` cannot be EVM ABI-encoded, hence the use of (bool, T)
+    fn get_vec_item(&amp;self, idx: u32) -&gt; (bool, U64) {
+        self.vec.get(idx).map_or((false, U64::ZERO), |x| (true, x))
+    }
+}</code></pre>
+<p>The <code>StorageMap</code> type can be used to store state using keys that are calculated at runtime, for example the <code>Address</code> of the caller. Care needs to be taken as the mapped type's zero value will be returned if an entry does not exist for the provided key. For some data this is fine and expected, such as token balances or allowances.</p>
+<pre><code class="language-rust">#[storage]
+#[entrypoint]
+pub struct Mappings {
+    player_lives: StorageMap&lt;Address, StorageU8&gt;,
+    player_is_dead: StorageMap&lt;Address, StorageBool&gt;,
+}
+
+sol! {
+    #[derive(Debug, PartialEq, Eq)]
+    error PlayerAlreadyExists(address player);
+
+    #[derive(Debug, PartialEq, Eq)]
+    error PlayerNotFound(address player);
+}
+
+#[derive(SolidityError, Debug, PartialEq, Eq)]
+pub enum ContractError {
+    PlayerAlreadyExists(PlayerAlreadyExists),
+    PlayerNotFound(PlayerNotFound),
+}
+
+impl Mappings {
+    fn player_exists(&amp;self, player: Address) -&gt; bool {
+        self.player_lives.get(player) &gt; U8::ZERO || self.player_is_dead.get(player)
+    }
+}
+
+#[public]
+impl Mappings {
+    pub fn create_player_account(&amp;mut self) -&gt; Result&lt;(), ContractError&gt; {
+        let msg_sender = self.vm().msg_sender();
+
+        if self.player_exists(msg_sender) {
+            return Err(PlayerAlreadyExists { player: msg_sender }.into());
+        }
+
+        self.player_lives
+            .insert(self.vm().msg_sender(), U8::from(STARTING_LIVES));
+
+        Ok(())
+    }
+
+    pub fn get_is_dead(&amp;self, player: Address) -&gt; Result&lt;bool, ContractError&gt; {
+        if !self.player_exists(player) {
+            return Err(PlayerNotFound { player }.into());
+        }
+
+        Ok(self.player_is_dead.get(player))
+    }
+
+    pub fn get_lives(&amp;self, player: Address) -&gt; Result&lt;U8, ContractError&gt; {
+        if !self.player_exists(player) {
+            return Err(PlayerNotFound { player }.into());
+        }
+
+        Ok(self.player_lives.get(player))
+    }
+}</code></pre>
+<h2 id="solana-to-stylus-type-mappings"><a class="header" href="#solana-to-stylus-type-mappings">Solana to Stylus type mappings</a></h2>
+<h3 id="primitive-types"><a class="header" href="#primitive-types">Primitive types</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Solana Type</th><th>Stylus Storage Type</th><th>Rust Parameter/Return Type</th><th>Notes</th></tr></thead><tbody>
+<tr><td><code>u8</code></td><td><code>StorageU8</code></td><td><code>U8</code></td><td>Direct mapping</td></tr>
+<tr><td><code>u16</code></td><td><code>StorageU16</code></td><td><code>U16</code></td><td>Direct mapping</td></tr>
+<tr><td><code>u32</code></td><td><code>StorageU32</code></td><td><code>U32</code></td><td>Direct mapping</td></tr>
+<tr><td><code>u64</code></td><td><code>StorageU64</code> or <code>StorageU256</code></td><td><code>U64</code> or <code>U256</code></td><td>Use U256 where ERC standards expect it</td></tr>
+<tr><td><code>u128</code></td><td><code>StorageU128</code> or <code>StorageU256</code></td><td><code>U128</code> or <code>U256</code></td><td>Prefer U256 for interoperability</td></tr>
+<tr><td><code>bool</code></td><td><code>StorageBool</code></td><td><code>bool</code></td><td>Direct mapping</td></tr>
+<tr><td><code>Pubkey</code></td><td><code>StorageAddress</code></td><td><code>Address</code></td><td>Use <code>Address</code> for EOAs and other contracts</td></tr>
+<tr><td><code>String</code></td><td><code>StorageString</code></td><td><code>String</code></td><td>Direct mapping</td></tr>
+<tr><td><code>Vec&lt;u8&gt;</code></td><td><code>StorageBytes</code></td><td><code>Vec&lt;u8&gt;</code> or <code>Bytes</code></td><td>Direct mapping</td></tr>
+<tr><td><code>[u8; N]</code></td><td><code>StorageFixedBytes&lt;N&gt;</code></td><td><code>[u8; N]</code> or <code>FixedBytes&lt;N&gt;</code></td><td>Direct mapping</td></tr>
+</tbody></table>
+</div>
+<h3 id="more-complex-schemas"><a class="header" href="#more-complex-schemas">More complex schemas</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Solana Pattern</th><th>Stylus Storage Pattern</th></tr></thead><tbody>
+<tr><td>Several PDAs with fixed seeds</td><td>Multiple structs tagged with <code>#[storage]</code> nested under the struct marked <code>#[entrypoint]</code></td></tr>
+<tr><td>PDAs with dynamic seeds, like a user <code>Pubkey</code></td><td>Use <code>StorageMap&lt;K, V&gt;</code> where <code>K</code> consists of the dynamic seed component and <code>V</code> implements <code>StorageType</code></td></tr>
+</tbody></table>
+</div>
+<h3 id="nested-mappings"><a class="header" href="#nested-mappings">Nested mappings</a></h3>
+<p>In cases where there are multiple dynamic components of a key, a nested <code>StorageMap</code> can be used.</p>
+<pre><code class="language-rust">use stylus_sdk::storage::{StorageMap, StorageU256, StorageBool};
+
+#[storage]
+pub struct Transaction {
+    amount: StorageU256,
+    timestamp: StorageU256,
+    completed: StorageBool,
+}
+
+#[storage]
+#[entrypoint]
+pub struct TokenContract {
+    allowances: StorageMap&lt;Address, StorageMap&lt;Address, StorageU256&gt;&gt;,
+    user_transactions: StorageMap&lt;Address, StorageMap&lt;U256, Transaction&gt;&gt;,
+}
+
+#[public]
+impl TokenContract {
+    pub fn approve(&amp;mut self, spender: Address, amount: U256) {
+        self.allowances
+            .setter(self.vm().msg_sender())
+            .insert(spender, amount);
+    }
+
+    pub fn record_transaction(&amp;mut self, tx_id: U256, amount: U256) {
+        let block_time = self.vm().block_timestamp();
+
+        // a nested `setter` cannot be called in a single expression
+        let mut txs = self.user_transactions.setter(self.vm().msg_sender());
+        let mut tx = txs.setter(tx_id);
+
+        tx.amount.set(amount);
+        tx.timestamp.set(U256::from(block_time));
+        tx.completed.set(true);
+    }
+
+    pub fn allowance(&amp;self, owner: Address, spender: Address) -&gt; U256 {
+        self.allowances.getter(owner).get(spender)
+    }
+
+    pub fn transaction(&amp;self, address: Address, tx_id: U256) -&gt; (U256, U256, bool) {
+        let txs = self.user_transactions.getter(address);
+        let tx = txs.get(tx_id);
+
+        (tx.amount.get(), tx.timestamp.get(), tx.completed.get())
+    }
+}</code></pre>
+<h2 id="cost-considerations"><a class="header" href="#cost-considerations">Cost considerations</a></h2>
+<h3 id="solana-costs"><a class="header" href="#solana-costs">Solana costs</a></h3>
+<ul>
+<li><strong>Account Creation</strong>: Rent-exempt balance amount (approximately 0.002 SOL per account)</li>
+<li><strong>Storage Rent</strong>: Ongoing cost for keeping accounts alive</li>
+<li><strong>No Cost for Reads</strong>: Reading account data requires no fee</li>
+</ul>
+<h3 id="stylus-costs"><a class="header" href="#stylus-costs">Stylus costs</a></h3>
+<ul>
+<li><strong>Storage Writes</strong>: Gas cost for storing data (approximately 20,000 gas per 32-byte slot)</li>
+<li><strong>Storage Reads</strong>: Much cheaper than writes (approximately 200 gas per read)</li>
+<li><strong>One-time Cost</strong>: Pay when writing, no ongoing costs</li>
+</ul>
+<h3 id="optimization-strategies"><a class="header" href="#optimization-strategies">Optimization strategies</a></h3>
+<p><strong>Pack Related Data:</strong></p>
+<pre><code class="language-rust">// Instead of separate mappings
+#[storage]
+pub struct Inefficient {
+    usernames: StorageMap&lt;Address, StorageString&gt;,
+    emails: StorageMap&lt;Address, StorageString&gt;,
+    created_at: StorageMap&lt;Address, StorageU256&gt;,
+}
+
+// Use a single struct
+#[storage]
+pub struct Efficient {
+    profiles: StorageMap&lt;Address, UserProfile&gt;,
+}
+
+#[storage]
+pub struct UserProfile {
+    username: StorageString,
+    email: StorageString,
+    created_at: StorageU256,
+}</code></pre>
+<p><strong>Use Appropriate Types:</strong></p>
+<pre><code class="language-rust">#[storage]
+pub struct OptimizedStorage {
+    // Don't waste space with oversized types
+    small_counter: StorageU8,    // for values 0-255
+    timestamp: StorageU32,       // sufficient for timestamps
+    large_value: StorageU256,    // when needed
+    
+    // Pack booleans together
+    flag1: StorageBool,
+    flag2: StorageBool,
+    flag3: StorageBool,
+    // These will be packed into a single storage slot
+}</code></pre>
+<h2 id="next-steps"><a class="header" href="#next-steps">Next steps</a></h2>
+<p>With storage patterns understood, the next chapter covers <a href="./access-control.html">Access Control</a> - transforming Solana's signer checks and PDA patterns to Stylus access control mechanisms.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="program-structure.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="access-control.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="program-structure.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="access-control.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,828 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Fungible Token Handling - StylusPort::Solana</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">StylusPort::Solana</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="fungible-token-handling"><a class="header" href="#fungible-token-handling">Fungible Token Handling</a></h1>
+<p>SPL Tokens provide fundamental standardized fungible token functionality for Solana applications. This chapter covers migrating SPL Token operations to ERC-20 patterns in Stylus, including instantiating, minting, transfers, and allowance mechanisms.</p>
+<p>To illustrate a range of token operations in a concise example, we will implement a contract that creates a stakeable token with a capped supply.</p>
+<h2 id="solana"><a class="header" href="#solana">Solana</a></h2>
+<p>Solana separates token logic from user programs: the SPL Token program owns all mint and token accounts, requiring programs to use CPIs for any token operations. Each token needs a mint account (storing decimals, supply, authorities) and separate token accounts per holder. Programs manage PDAs for both their own state and any token accounts they control, never directly manipulating token balances. The mint authority controls token creation, while freeze authorities handle compliance. Token-2022 adds extensions like transfer fees and metadata while maintaining the same architectural model.</p>
+<h4 id="native"><a class="header" href="#native">Native</a></h4>
+<pre><code class="language-rust">#[derive(BorshSerialize, BorshDeserialize)]
+pub enum Instruction {
+    Initialize,
+    Stake { amount: u64 },
+    Unstake { amount: u64 },
+}
+
+pub fn process_instruction(
+    program_id: &amp;Pubkey,
+    accounts: &amp;[AccountInfo],
+    instruction_data: &amp;[u8],
+) -&gt; ProgramResult {
+    if !check_id(program_id) {
+        return Err(ProgramError::IncorrectProgramId);
+    }
+
+    let instruction = Instruction::try_from_slice(instruction_data)
+        .map_err(|_| ProgramError::InvalidInstructionData)?;
+
+    match instruction {
+        Instruction::Initialize =&gt; process_initialize(program_id, accounts),
+        Instruction::Stake { amount } =&gt; process_stake(program_id, accounts, amount),
+        Instruction::Unstake { amount } =&gt; process_unstake(program_id, accounts, amount),
+    }
+}
+
+fn process_initialize(program_id: &amp;Pubkey, accounts: &amp;[AccountInfo]) -&gt; ProgramResult {
+    let [mint_account, mint_supply_to_account, signer_account, token_program, associated_token_program, system_program, rent_sysvar] =
+        accounts
+    else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    if !signer_account.is_signer {
+        return Err(ProgramError::MissingRequiredSignature);
+    }
+
+    if *token_program.key != spl_token_2022::id()
+        || *associated_token_program.key != spl_associated_token_account::id()
+        || *system_program.key != system_program::id()
+        || *rent_sysvar.key != rent::sysvar::id()
+    {
+        return Err(ProgramError::IncorrectProgramId);
+    }
+
+    let (mint_pda_key, mint_bump) = Pubkey::find_program_address(&amp;[MINT_PDA_SEED], program_id);
+
+    if mint_pda_key != *mint_account.key {
+        return Err(ProgramError::InvalidSeeds);
+    }
+
+    if !mint_account.data_is_empty()
+        || mint_account.lamports() &gt; 0
+        || *mint_account.owner == spl_token_2022::id()
+    {
+        return Err(ProgramError::AccountAlreadyInitialized);
+    }
+
+    if !mint_supply_to_account.data_is_empty()
+        || mint_supply_to_account.lamports() &gt; 0
+        || *mint_supply_to_account.owner == spl_token_2022::id()
+    {
+        return Err(ProgramError::AccountAlreadyInitialized);
+    }
+
+    // Derive the expected associated token account address
+    let expected_ata = spl_associated_token_account::get_associated_token_address_with_program_id(
+        signer_account.key,
+        &amp;mint_pda_key,
+        &amp;spl_token_2022::id(),
+    );
+
+    if expected_ata != *mint_supply_to_account.key {
+        return Err(ProgramError::InvalidAccountData);
+    }
+
+    // Create mint account
+    let space_required = Mint::get_packed_len();
+    let lamports_required = Rent::get()?.minimum_balance(space_required);
+
+    invoke_signed(
+        &amp;system_instruction::create_account(
+            signer_account.key,
+            mint_account.key,
+            lamports_required,
+            space_required as u64,
+            &amp;spl_token_2022::id(),
+        ),
+        &amp;[
+            signer_account.clone(),
+            mint_account.clone(),
+            system_program.clone(),
+        ],
+        &amp;[&amp;[MINT_PDA_SEED, &amp;[mint_bump]]],
+    )?;
+
+    // Initialize mint
+    invoke_signed(
+        &amp;token_instruction::initialize_mint(
+            &amp;spl_token_2022::id(),
+            mint_account.key,
+            mint_account.key,
+            Some(mint_account.key),
+            DECIMALS,
+        )?,
+        &amp;[mint_account.clone(), rent_sysvar.clone()],
+        &amp;[&amp;[MINT_PDA_SEED, &amp;[mint_bump]]],
+    )?;
+
+    // Create associated token account
+    invoke_signed(
+        &amp;associated_token_instruction::create_associated_token_account(
+            signer_account.key,
+            signer_account.key,
+            mint_account.key,
+            &amp;spl_token_2022::id(),
+        ),
+        &amp;[
+            signer_account.clone(),
+            mint_supply_to_account.clone(),
+            signer_account.clone(),
+            mint_account.clone(),
+            system_program.clone(),
+            token_program.clone(),
+            associated_token_program.clone(),
+        ],
+        &amp;[&amp;[MINT_PDA_SEED, &amp;[mint_bump]]],
+    )?;
+
+    // Mint total supply to the associated token account
+    invoke_signed(
+        &amp;token_instruction::mint_to(
+            &amp;spl_token_2022::id(),
+            mint_account.key,
+            mint_supply_to_account.key,
+            mint_account.key,
+            &amp;[],
+            TOTAL_SUPPLY,
+        )?,
+        &amp;[
+            mint_account.clone(),
+            mint_supply_to_account.clone(),
+            mint_account.clone(),
+        ],
+        &amp;[&amp;[MINT_PDA_SEED, &amp;[mint_bump]]],
+    )?;
+
+    Ok(())
+}
+
+fn process_stake(program_id: &amp;Pubkey, accounts: &amp;[AccountInfo], amount: u64) -&gt; ProgramResult {
+    let [stake_account, from_account, signer_account, mint_account, token_program, system_program] =
+        accounts
+    else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    if !signer_account.is_signer {
+        return Err(ProgramError::MissingRequiredSignature);
+    }
+
+    if *token_program.key != spl_token_2022::id() || *system_program.key != system_program::id() {
+        return Err(ProgramError::IncorrectProgramId);
+    }
+
+    // Verify stake PDA
+    let (stake_pda_key, stake_bump) =
+        Pubkey::find_program_address(&amp;[STAKE_PDA_SEED, signer_account.key.as_ref()], program_id);
+
+    if stake_pda_key != *stake_account.key {
+        return Err(ProgramError::InvalidSeeds);
+    }
+
+    // Create stake account if it doesn't exist
+    if stake_account.data_is_empty() || *stake_account.owner != spl_token_2022::id() {
+        let space_required = TokenAccount::get_packed_len();
+        let lamports_required = Rent::get()?.minimum_balance(space_required);
+
+        invoke_signed(
+            &amp;system_instruction::create_account(
+                signer_account.key,
+                stake_account.key,
+                lamports_required,
+                space_required as u64,
+                &amp;spl_token_2022::id(),
+            ),
+            &amp;[
+                signer_account.clone(),
+                stake_account.clone(),
+                system_program.clone(),
+            ],
+            &amp;[&amp;[STAKE_PDA_SEED, signer_account.key.as_ref(), &amp;[stake_bump]]],
+        )?;
+
+        // Initialize the stake token account
+        invoke_signed(
+            &amp;token_instruction::initialize_account3(
+                &amp;spl_token_2022::id(),
+                stake_account.key,
+                mint_account.key,
+                stake_account.key,
+            )?,
+            &amp;[stake_account.clone(), mint_account.clone()],
+            &amp;[&amp;[STAKE_PDA_SEED, signer_account.key.as_ref(), &amp;[stake_bump]]],
+        )?;
+    }
+
+    // Transfer tokens from user's account to stake account
+    invoke(
+        &amp;token_instruction::transfer_checked(
+            &amp;spl_token_2022::id(),
+            from_account.key,
+            mint_account.key,
+            stake_account.key,
+            signer_account.key,
+            &amp;[],
+            amount,
+            DECIMALS,
+        )?,
+        &amp;[
+            from_account.clone(),
+            mint_account.clone(),
+            stake_account.clone(),
+            signer_account.clone(),
+        ],
+    )?;
+
+    Ok(())
+}
+
+fn process_unstake(program_id: &amp;Pubkey, accounts: &amp;[AccountInfo], amount: u64) -&gt; ProgramResult {
+    let [stake_account, unstake_to_account, signer_account, mint_account, token_program, system_program] =
+        accounts
+    else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    if !signer_account.is_signer {
+        return Err(ProgramError::MissingRequiredSignature);
+    }
+
+    if *token_program.key != spl_token_2022::id() || *system_program.key != system_program::id() {
+        return Err(ProgramError::IncorrectProgramId);
+    }
+
+    // Verify stake PDA
+    let (stake_pda_key, stake_bump) =
+        Pubkey::find_program_address(&amp;[STAKE_PDA_SEED, signer_account.key.as_ref()], program_id);
+
+    if stake_pda_key != *stake_account.key {
+        return Err(ProgramError::InvalidSeeds);
+    }
+
+    // Transfer tokens from stake account to user's account
+    invoke_signed(
+        &amp;token_instruction::transfer_checked(
+            &amp;spl_token_2022::id(),
+            stake_account.key,
+            mint_account.key,
+            unstake_to_account.key,
+            stake_account.key,
+            &amp;[],
+            amount,
+            DECIMALS,
+        )?,
+        &amp;[
+            stake_account.clone(),
+            mint_account.clone(),
+            unstake_to_account.clone(),
+            stake_account.clone(),
+        ],
+        &amp;[&amp;[STAKE_PDA_SEED, signer_account.key.as_ref(), &amp;[stake_bump]]],
+    )?;
+
+    Ok(())
+}</code></pre>
+<h4 id="anchor"><a class="header" href="#anchor">Anchor</a></h4>
+<pre><code class="language-rust">#[program]
+pub mod fungible_tokens {
+    use super::*;
+
+    pub fn initialize(ctx: Context&lt;Initialize&gt;) -&gt; Result&lt;()&gt; {
+        mint_to(
+            CpiContext::new_with_signer(
+                ctx.accounts.token_program.to_account_info(),
+                MintTo {
+                    mint: ctx.accounts.mint.to_account_info(),
+                    to: ctx.accounts.mint_supply_to.to_account_info(),
+                    authority: ctx.accounts.mint.to_account_info(),
+                },
+                &amp;[&amp;[MINT_PDA_SEED, &amp;[ctx.bumps.mint]]],
+            ),
+            TOTAL_SUPPLY,
+        )?;
+
+        Ok(())
+    }
+
+    pub fn stake(ctx: Context&lt;Stake&gt;, amount: u64) -&gt; Result&lt;()&gt; {
+        transfer_checked(
+            CpiContext::new(
+                ctx.accounts.token_program.to_account_info(),
+                TransferChecked {
+                    from: ctx.accounts.from_account.to_account_info(),
+                    mint: ctx.accounts.mint.to_account_info(),
+                    to: ctx.accounts.stake_account.to_account_info(),
+                    authority: ctx.accounts.signer.to_account_info(),
+                },
+            ),
+            amount,
+            DECIMALS,
+        )?;
+
+        Ok(())
+    }
+
+    pub fn unstake(ctx: Context&lt;Unstake&gt;, amount: u64) -&gt; Result&lt;()&gt; {
+        transfer_checked(
+            CpiContext::new_with_signer(
+                ctx.accounts.token_program.to_account_info(),
+                TransferChecked {
+                    from: ctx.accounts.stake_account.to_account_info(),
+                    mint: ctx.accounts.mint.to_account_info(),
+                    to: ctx.accounts.unstake_to_account.to_account_info(),
+                    authority: ctx.accounts.signer.to_account_info(),
+                },
+                &amp;[&amp;[STAKE_PDA_SEED, &amp;[ctx.bumps.stake_account]]],
+            ),
+            amount,
+            DECIMALS,
+        )?;
+
+        Ok(())
+    }
+}
+
+#[derive(Accounts)]
+pub struct Initialize&lt;'info&gt; {
+    #[account(
+        init,
+        payer = signer,
+        mint::decimals = DECIMALS,
+        mint::authority = mint.key(),
+        mint::freeze_authority = mint.key(),
+        seeds = [MINT_PDA_SEED],
+        bump
+    )]
+    pub mint: InterfaceAccount&lt;'info, Mint&gt;,
+    #[account(
+        init,
+        payer = signer,
+        associated_token::mint = mint,
+        associated_token::authority = signer,
+        associated_token::token_program = token_program,
+    )]
+    pub mint_supply_to: InterfaceAccount&lt;'info, TokenAccount&gt;,
+    #[account(mut)]
+    pub signer: Signer&lt;'info&gt;,
+    pub token_program: Interface&lt;'info, TokenInterface&gt;,
+    pub associated_token_program: Program&lt;'info, AssociatedToken&gt;,
+    pub system_program: Program&lt;'info, System&gt;,
+}
+
+#[derive(Accounts)]
+pub struct Stake&lt;'info&gt; {
+    #[account(
+        init_if_needed,
+        payer = signer,
+        token::mint = mint,
+        token::authority = stake_account,
+        token::token_program = token_program,
+        seeds = [b"stake", signer.key.as_ref()],
+        bump
+    )]
+    pub stake_account: InterfaceAccount&lt;'info, TokenAccount&gt;,
+    #[account(mut)]
+    pub from_account: InterfaceAccount&lt;'info, TokenAccount&gt;,
+    #[account(mut)]
+    pub signer: Signer&lt;'info&gt;,
+    pub mint: InterfaceAccount&lt;'info, Mint&gt;,
+    pub token_program: Interface&lt;'info, TokenInterface&gt;,
+    pub system_program: Program&lt;'info, System&gt;,
+}
+
+#[derive(Accounts)]
+pub struct Unstake&lt;'info&gt; {
+    #[account(
+        mut,
+        seeds = [b"stake", signer.key.as_ref()],
+        bump
+    )]
+    pub stake_account: InterfaceAccount&lt;'info, TokenAccount&gt;,
+    #[account(mut)]
+    pub unstake_to_account: InterfaceAccount&lt;'info, TokenAccount&gt;,
+    #[account(mut)]
+    pub signer: Signer&lt;'info&gt;,
+    pub mint: InterfaceAccount&lt;'info, Mint&gt;,
+    pub token_program: Interface&lt;'info, TokenInterface&gt;,
+    pub system_program: Program&lt;'info, System&gt;,
+}</code></pre>
+<h2 id="stylus"><a class="header" href="#stylus">Stylus</a></h2>
+<p>Stylus tokens follow the ERC-20 standard: each token is a self-contained contract storing balances in mappings and implementing transfer logic directly. Token operations are direct method calls to the contract. The standard interface - <code>transfer</code>, <code>approve</code>, <code>transferFrom</code> - enables application composability, while contracts extend functionality through inheritance. OpenZeppelin's Stylus implementations provide components for minting caps, contract pausing, and access control. Before implementing custom token functionality, it is best practice to check if an existing <a href="https://docs.rs/openzeppelin-stylus/latest/openzeppelin_stylus/token/index.html">standard</a> or their <a href="https://docs.rs/openzeppelin-stylus/latest/openzeppelin_stylus/token/erc20/extensions/index.html">extensions</a> fits the use case.</p>
+<pre><code class="language-rust">use openzeppelin_stylus::token::erc20::{Erc20, Error as Erc20Error, IErc20};
+
+sol! {
+    #[derive(Debug)]
+    error InsufficientStakedBalance(address account, uint256 staked_balance);
+}
+
+#[derive(SolidityError, Debug)]
+pub enum ContractError {
+    InsufficientStakedBalance(InsufficientStakedBalance),
+}
+
+#[storage]
+#[entrypoint]
+pub struct FungibleTokenContract {
+    erc20: Erc20,
+    staked_balance: StorageMap&lt;Address, StorageU256&gt;,
+}
+
+#[public]
+#[implements(IErc20&lt;Error = Erc20Error&gt;)]
+impl FungibleTokenContract {
+    #[constructor]
+    pub fn constructor(&amp;mut self, mint_to: Address) -&gt; Result&lt;(), Erc20Error&gt; {
+        assert_ne!(mint_to, Address::ZERO, "mint_to cannot be a zero-address");
+
+        self.erc20._mint(mint_to, U256::from(TOTAL_SUPPLY))?;
+
+        Ok(())
+    }
+
+    pub fn stake(&amp;mut self, amount: U256) -&gt; Result&lt;(), Erc20Error&gt; {
+        let msg_sender = self.vm().msg_sender();
+
+        let staked_balance = self.staked_balance_of(msg_sender);
+
+        // Overflow not possible:
+        // `amount` + `staked_balance` &lt;= `total_supply` &lt; `U256::MAX`
+        self.staked_balance
+            .setter(msg_sender)
+            .set(staked_balance + amount);
+
+        // Returns `ERC20InsufficientBalance` if `from_balance` &lt; `amount`
+        self.erc20
+            ._update(msg_sender, self.vm().contract_address(), amount)
+    }
+
+    pub fn unstake(&amp;mut self, amount: U256) -&gt; Result&lt;(), ContractError&gt; {
+        let msg_sender = self.vm().msg_sender();
+
+        let staked_balance = self.staked_balance_of(msg_sender);
+
+        if staked_balance &lt; amount {
+            return Err(InsufficientStakedBalance {
+                account: msg_sender,
+                staked_balance,
+            }
+            .into());
+        }
+
+        // Overflow not possible:
+        // `amount` &lt;= `staked_balance`
+        self.staked_balance
+            .setter(msg_sender)
+            .set(staked_balance - amount);
+
+        self.erc20
+            ._update(self.vm().contract_address(), msg_sender, amount)
+            .expect("amount &lt;= staked_balance");
+
+        Ok(())
+    }
+
+    pub fn staked_balance_of(&amp;self, account: Address) -&gt; U256 {
+        self.staked_balance.get(account)
+    }
+
+    pub fn decimals(&amp;self) -&gt; U8 {
+        U8::from(DECIMALS)
+    }
+}
+
+#[public]
+impl IErc20 for FungibleTokenContract {
+    type Error = Erc20Error;
+
+    fn total_supply(&amp;self) -&gt; U256 {
+        self.erc20.total_supply()
+    }
+
+    fn balance_of(&amp;self, account: Address) -&gt; U256 {
+        self.erc20.balance_of(account)
+    }
+
+    fn transfer(&amp;mut self, to: Address, value: U256) -&gt; Result&lt;bool, Self::Error&gt; {
+        self.erc20.transfer(to, value)
+    }
+
+    fn allowance(&amp;self, owner: Address, spender: Address) -&gt; U256 {
+        self.erc20.allowance(owner, spender)
+    }
+
+    fn approve(&amp;mut self, spender: Address, value: U256) -&gt; Result&lt;bool, Self::Error&gt; {
+        self.erc20.approve(spender, value)
+    }
+
+    fn transfer_from(
+        &amp;mut self,
+        from: Address,
+        to: Address,
+        value: U256,
+    ) -&gt; Result&lt;bool, Self::Error&gt; {
+        self.erc20.transfer_from(from, to, value)
+    }
+}</code></pre>
+<h3 id="allowance-system"><a class="header" href="#allowance-system">Allowance system</a></h3>
+<p>The allowance mechanism is central to ERC-20: users approve contracts to spend tokens on their behalf, then contracts pull tokens using <a href="https://docs.rs/openzeppelin-stylus/latest/openzeppelin_stylus/token/erc20/trait.IErc20.html#tymethod.transfer_from"><code>IERC20::transfer_from</code></a>. This pull-based model is fundamental to DeFi composability on EVM chains.</p>
+<p>In order for Stylus contracts to receive ERC20 tokens from a user, the user must first grant them an allowance to transfer a pre-determined maximum amount of tokens.</p>
+<pre><code class="language-rust">sol! {
+    #[derive(Debug)]
+    error InsufficientStakedBalance(address account, uint256 staked_balance);
+}
+
+#[derive(SolidityError, Debug)]
+pub enum ContractError {
+    InsufficientStakedBalance(InsufficientStakedBalance),
+}
+
+#[storage]
+#[entrypoint]
+pub struct StakeErc20Contract {
+    stake_token: StorageAddress,
+    staked_balance: StorageMap&lt;Address, StorageU256&gt;,
+}
+
+impl StakeErc20Contract {
+    fn stake_token(&amp;self) -&gt; Erc20Interface {
+        Erc20Interface::new(self.stake_token.get())
+    }
+}
+
+#[public]
+impl StakeErc20Contract {
+    #[constructor]
+    pub fn constructor(&amp;mut self, stake_token: Address) {
+        self.stake_token.set(stake_token);
+    }
+
+    pub fn stake(&amp;mut self, amount: U256) -&gt; Result&lt;(), Vec&lt;u8&gt;&gt; {
+        let msg_sender = self.vm().msg_sender();
+
+        let staked_balance = self.staked_balance_of(msg_sender);
+
+        // Overflow not possible:
+        // `amount` + `staked_balance` &lt;= `total_supply` &lt; `U256::MAX`
+        self.staked_balance
+            .setter(msg_sender)
+            .set(staked_balance + amount);
+
+        // Reverts with `ERC20InsufficientBalance` if `from_balance` &lt; `amount` or
+        // `ERC20InsufficientAllowance` if `contract_allowance` &lt; `amount`
+        let contract_addr = self.vm().contract_address();
+        self.stake_token()
+            .transfer_from(self, msg_sender, contract_addr, amount)?;
+
+        Ok(())
+    }
+
+    pub fn unstake(&amp;mut self, amount: U256) -&gt; Result&lt;(), ContractError&gt; {
+        let msg_sender = self.vm().msg_sender();
+
+        let staked_balance = self.staked_balance_of(msg_sender);
+
+        if staked_balance &lt; amount {
+            return Err(InsufficientStakedBalance {
+                account: msg_sender,
+                staked_balance,
+            }
+            .into());
+        }
+
+        // Overflow not possible:
+        // `amount` &lt;= `staked_balance`
+        self.staked_balance
+            .setter(msg_sender)
+            .set(staked_balance - amount);
+
+        self.stake_token()
+            .transfer(self, msg_sender, amount)
+            .expect("amount &lt;= staked_balance");
+
+        Ok(())
+    }
+
+    pub fn staked_balance_of(&amp;self, account: Address) -&gt; U256 {
+        self.staked_balance.get(account)
+    }
+}</code></pre>
+<h2 id="next-steps"><a class="header" href="#next-steps">Next Steps</a></h2>
+<p>With fungible tokens covered, the next chapter explores <a href="./non-fungible-tokens.html">Non-Fungible Token Handling</a> - migrating from Metaplex NFTs to ERC-721 patterns in Stylus.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="native-tokens.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="non-fungible-tokens.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="native-tokens.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="non-fungible-tokens.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,781 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Errors and Events - StylusPort::Solana</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">StylusPort::Solana</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="chapter-8-errors-and-events"><a class="header" href="#chapter-8-errors-and-events">Chapter 8: Errors and Events</a></h1>
+<p>Proper error reporting and event emission are crucial for robust smart contracts and user experience. This chapter covers migrating from Solana's <code>msg!()</code> logging and <code>ProgramError</code> type to Stylus's structured events and custom error types.</p>
+<h2 id="errors"><a class="header" href="#errors">Errors</a></h2>
+<h3 id="solana"><a class="header" href="#solana">Solana</a></h3>
+<p>The error type used for all Solana programs is <a href="https://docs.rs/solana-program/latest/solana_program/program_error/enum.ProgramError.html"><code>solana_program::program_error::ProgramError</code></a> which is defined as:</p>
+<pre><code class="language-rust">pub enum ProgramError {
+    /// Allows on-chain programs to implement program-specific error types and see them returned
+    /// by the Solana runtime. A program-specific error may be any type that is represented as
+    /// or serialized to a u32 integer.
+    Custom(u32),
+    InvalidArgument,
+    InvalidInstructionData,
+    InvalidAccountData,
+    AccountDataTooSmall,
+    InsufficientFunds,
+    IncorrectProgramId,
+    MissingRequiredSignature,
+    AccountAlreadyInitialized,
+    UninitializedAccount,
+    NotEnoughAccountKeys,
+    AccountBorrowFailed,
+    MaxSeedLengthExceeded,
+    InvalidSeeds,
+    BorshIoError(String),
+    AccountNotRentExempt,
+    UnsupportedSysvar,
+    IllegalOwner,
+    MaxAccountsDataAllocationsExceeded,
+    InvalidRealloc,
+    MaxInstructionTraceLengthExceeded,
+    BuiltinProgramsMustConsumeComputeUnits,
+    InvalidAccountOwner,
+    ArithmeticOverflow,
+    Immutable,
+    IncorrectAuthority,
+}</code></pre>
+<p>Many of these generic variants can be returned during account and instruction validation. The <code>Custom</code> variant can be used to return program-specific errors such as those arising from business logic. The user simply needs to be able to convert their custom error to a <code>u32</code> integer.</p>
+<p>In native Solana programs, this is done like so:</p>
+<pre><code class="language-rust">#[derive(BorshSerialize, BorshDeserialize)]
+pub enum Instruction {
+    InvalidAmount {},
+    Unauthorized {},
+}
+
+#[derive(Debug, Clone, Copy)]
+// allows casting to u32 for value enums (no associated data)
+#[repr(u32)]
+pub enum ErrorCode {
+    InvalidAmount,
+    Unauthorized,
+}
+
+impl From&lt;ErrorCode&gt; for ProgramError {
+    fn from(value: ErrorCode) -&gt; Self {
+        Self::Custom(value as _)
+    }
+}
+
+pub fn process_instruction(
+    program_id: &amp;Pubkey,
+    accounts: &amp;[AccountInfo],
+    instruction_data: &amp;[u8],
+) -&gt; ProgramResult {
+    if !check_id(program_id) {
+        return Err(ProgramError::IncorrectProgramId);
+    }
+
+    let Ok(ix) = Instruction::try_from_slice(instruction_data) else {
+        return Err(ProgramError::InvalidInstructionData);
+    };
+
+    match ix {
+        Instruction::InvalidAmount {} =&gt; process_invalid_value(accounts),
+        Instruction::Unauthorized {} =&gt; process_unauthorized(accounts),
+    }
+}
+
+fn process_invalid_value(_accounts: &amp;[AccountInfo]) -&gt; ProgramResult {
+    Err(ErrorCode::InvalidAmount.into())
+}
+
+fn process_unauthorized(_accounts: &amp;[AccountInfo]) -&gt; ProgramResult {
+    Err(ErrorCode::Unauthorized.into())
+}</code></pre>
+<p>If we expand the <code>entrypoint!</code> macro, we can see that ultimately the program returns a <code>u64</code> integer after processing an instruction:</p>
+<pre><code class="language-rust">#[no_mangle]
+pub unsafe extern "C" fn entrypoint(input: *mut u8) -&gt; u64 {
+    let (program_id, accounts, instruction_data) = unsafe {
+        ::solana_program_entrypoint::deserialize(input)
+    };
+    match process_instruction(program_id, &amp;accounts, instruction_data) {
+        // returns 0 for success
+        Ok(()) =&gt; ::solana_program_entrypoint::SUCCESS,
+        // returns solana_program::program_error::ProgramError converted to u64
+        // Every variant apart from Custom(_) is mapped to a value &gt; u32::MAX + 1
+        // Custom(0) is converted to 1 &lt;&lt; 32, ensuring that every custom error: 0 &lt; error_code &lt;= u32::MAX + 1
+        Err(error) =&gt; error.into(),
+    }
+}</code></pre>
+<p>Anchor provides the <code>#[error_code]</code> macro to reduce the boilerplate required to setup custom errors. Custom errors can also be specified within constraint rules:</p>
+<pre><code class="language-rust">#[program]
+pub mod errors_events {
+    use super::*;
+
+    pub fn invalid_amount(_ctx: Context&lt;InvalidAmount&gt;) -&gt; Result&lt;()&gt; {
+        Err(ErrorCode::InvalidAmount.into())
+    }
+
+    pub fn unauthorized(_ctx: Context&lt;Unauthorized&gt;) -&gt; Result&lt;()&gt; {
+        Ok(())
+    }
+}
+
+#[derive(Accounts)]
+pub struct InvalidAmount&lt;'info&gt; {
+    #[account(mut)]
+    pub signer: Signer&lt;'info&gt;,
+    pub system_program: Program&lt;'info, System&gt;,
+}
+
+#[derive(Accounts)]
+pub struct Unauthorized&lt;'info&gt; {
+    #[account(mut, constraint = false @ ErrorCode::Unauthorized)]
+    pub signer: Signer&lt;'info&gt;,
+    pub system_program: Program&lt;'info, System&gt;,
+}
+
+#[error_code]
+pub enum ErrorCode {
+    #[msg("Invalid amount: amount must be greater than 0")]
+    InvalidAmount,
+    #[msg("Unauthorized")]
+    Unauthorized,
+}</code></pre>
+<p>The <code>#[error_code]</code> macro expands to:</p>
+<pre><code class="language-rust">#[repr(u32)]
+pub enum ErrorCode {
+    InvalidAmount,
+    Unauthorized,
+}
+
+impl ErrorCode {
+    /// Gets the name of this [#enum_name].
+    pub fn name(&amp;self) -&gt; String {
+        match self {
+            ErrorCode::InvalidAmount =&gt; "InvalidAmount".to_string(),
+            ErrorCode::Unauthorized =&gt; "Unauthorized".to_string(),
+        }
+    }
+}
+
+impl From&lt;ErrorCode&gt; for u32 {
+    fn from(e: ErrorCode) -&gt; u32 {
+        e as u32 + anchor_lang::error::ERROR_CODE_OFFSET
+    }
+}
+
+impl From&lt;ErrorCode&gt; for anchor_lang::error::Error {
+    fn from(error_code: ErrorCode) -&gt; anchor_lang::error::Error {
+        anchor_lang::error::Error::from(anchor_lang::error::AnchorError {
+            error_name: error_code.name(),
+            error_code_number: error_code.into(),
+            error_msg: error_code.to_string(),
+            error_origin: None,
+            compared_values: None,
+        })
+    }
+}
+
+impl std::fmt::Display for ErrorCode {
+    fn fmt(
+        &amp;self,
+        fmt: &amp;mut std::fmt::Formatter&lt;'_&gt;,
+    ) -&gt; std::result::Result&lt;(), std::fmt::Error&gt; {
+        match self {
+            ErrorCode::InvalidAmount =&gt; {
+                fmt.write_fmt(
+                    format_args!("Invalid amount: amount must be greater than 0"),
+                )
+            }
+            ErrorCode::Unauthorized =&gt; fmt.write_fmt(format_args!("Unauthorized")),
+        }
+    }
+}</code></pre>
+<p>Note that <code>anchor_lang::error::ERROR_CODE_OFFSET</code> is used to reserve space for Anchor's own custom errors.</p>
+<p>Each instruction handler returns <code>Result&lt;T, anchor_lang::error::Error&gt;</code>. If a handler returns <code>Err(anchor_lang::error::Error)</code>, it is converted first to a <code>solana_program::error::ProgramError</code> before ultimately being returned as an integer, as shown in the macro expansion below:</p>
+<pre><code class="language-rust">#[no_mangle]
+pub unsafe extern "C" fn entrypoint(input: *mut u8) -&gt; u64 {
+    let (program_id, accounts, instruction_data) = unsafe {
+        ::solana_program_entrypoint::deserialize(input)
+    };
+    match entry(program_id, &amp;accounts, instruction_data) {
+        Ok(()) =&gt; ::solana_program_entrypoint::SUCCESS,
+        Err(error) =&gt; error.into(),
+    }
+}
+
+pub fn entry&lt;'info&gt;(
+    program_id: &amp;Pubkey,
+    accounts: &amp;'info [AccountInfo&lt;'info&gt;],
+    data: &amp;[u8],
+) -&gt; anchor_lang::solana_program::entrypoint::ProgramResult {
+    try_entry(program_id, accounts, data)
+        .map_err(|e| {
+            e.log();
+            e.into()
+        })
+}
+
+fn try_entry&lt;'info&gt;(
+    program_id: &amp;Pubkey,
+    accounts: &amp;'info [AccountInfo&lt;'info&gt;],
+    data: &amp;[u8],
+) -&gt; Result&lt;(), &gt; {
+    if *program_id != ID {
+        return Err(anchor_lang::error::ErrorCode::DeclaredProgramIdMismatch.into());
+    }
+    dispatch(program_id, accounts, data)
+}</code></pre>
+<h3 id="stylus"><a class="header" href="#stylus">Stylus</a></h3>
+<p>In contrast to Solana programs, a Stylus contract entrypoint always returns either zero or one, where zero denotes a successful call and one signifies an error occurred. For a contract function with returns, <code>Result&lt;T, E&gt;</code>, the error type <code>E</code> is converted to a byte array and written to the return data buffer:</p>
+<pre><code class="language-rust">#[no_mangle]
+pub extern "C" fn user_entrypoint(len: usize) -&gt; usize {
+    let host = stylus_sdk::host::VM(stylus_sdk::host::WasmVM {});
+    if host.msg_reentrant() {
+        return 1;
+    }
+    host.pay_for_memory_grow(0);
+    let input = host.read_args(len);
+    // Calls the stylus_sdk::abi::router_entrypoint function returning ArbResult aka Result&lt;Vec&lt;u8&gt;, Vec&lt;u8&gt;&gt;
+    let (data, status) = match __stylus_struct_entrypoint(input, host.clone()) {
+        Ok(data) =&gt; (data, 0),
+        Err(data) =&gt; (data, 1),
+    };
+    host.flush_cache(false);
+    host.write_result(&amp;data);
+    status
+}</code></pre>
+<p>The <code>SolidityError</code> derive macro can be used to implement <code>From&lt;E&gt;</code> for <code>Vec&lt;u8&gt;</code> for the contract defined error type <code>E</code>:</p>
+<pre><code class="language-rust">sol! {
+    error InvalidAmount(uint256 expected, uint256 received);
+    error Unauthorized(address account);
+}
+
+#[derive(SolidityError)]
+pub enum ContractError {
+    InvalidAmount(InvalidAmount),
+    Unauthorized(Unauthorized),
+}</code></pre>
+<p>Note that there is not also a trait with the name <code>SolidityError</code> like most Rust derive macros, instead it expands to the following:</p>
+<pre><code class="language-rust">impl From&lt;InvalidAmount&gt; for ContractError {
+    fn from(value: InvalidAmount) -&gt; Self {
+        ContractError::InvalidAmount(value)
+    }
+}
+
+impl From&lt;Unauthorized&gt; for ContractError {
+    fn from(value: Unauthorized) -&gt; Self {
+        ContractError::Unauthorized(value)
+    }
+}
+
+impl From&lt;ContractError&gt; for alloc::vec::Vec&lt;u8&gt; {
+    fn from(err: ContractError) -&gt; Self {
+        match err {
+            ContractError::InvalidAmount(e) =&gt; stylus_sdk::call::MethodError::encode(e),
+            ContractError::Unauthorized(e) =&gt; stylus_sdk::call::MethodError::encode(e),
+        }
+    }
+}</code></pre>
+<p>The derive macro expects an enum consisting on one or more unit variants containing a single type implementing the <a href="https://docs.rs/stylus-sdk/latest/stylus_sdk/call/trait.MethodError.html"><code>stylus_sdk::call::MethodError</code></a> trait. The <code>stylus_sdk::call::MethodError</code> has a <a href="https://docs.rs/stylus-sdk/latest/stylus_sdk/call/trait.MethodError.html#impl-MethodError-for-T">blanket implementation</a> for any type which also implements <a href="https://docs.rs/alloy-sol-types/0.8.20/alloy_sol_types/trait.SolError.html"><code>alloy_sol_types::SolError</code></a>. The <a href="https://docs.rs/alloy-sol-macro/0.8.20/alloy_sol_macro/macro.sol.html"><code>sol!</code></a> macro is the easiest way to define types that implement <code>SolError</code>.</p>
+<p>The above mechanisms can be combined to allow Stylus contracts to return structured custom errors:</p>
+<pre><code class="language-rust">#[storage]
+#[entrypoint]
+pub struct ErrorsEvents {}
+
+sol! {
+    error InvalidAmount(uint256 expected, uint256 received);
+    error Unauthorized(address account);
+}
+
+#[derive(SolidityError)]
+pub enum ContractError {
+    InvalidAmount(InvalidAmount),
+    Unauthorized(Unauthorized),
+}
+
+#[public]
+impl ErrorsEvents {
+    pub fn invalid_amount(&amp;mut self, expected: U256, received: U256) -&gt; Result&lt;(), ContractError&gt; {
+        Err(InvalidAmount { expected, received }.into())
+    }
+
+    pub fn unauthorized(&amp;mut self) -&gt; Result&lt;(), ContractError&gt; {
+        Err(Unauthorized {
+            account: self.vm().msg_sender(),
+        }
+        .into())
+    }
+}</code></pre>
+<h2 id="logging-and-events"><a class="header" href="#logging-and-events">Logging and events</a></h2>
+<h3 id="solana-1"><a class="header" href="#solana-1">Solana</a></h3>
+<p><a href="https://docs.rs/solana-program/latest/solana_program/log/index.html">Logging</a> in Solana is in the form of lines of free text. Due to the lack of standardized ABI for function selection and all errors being reduced to integers, Solana program logs are an important part of instruction execution auditing and tracking. Additionally, they are frequently used for debugging programs during the development process.</p>
+<p>The following excerpt from the <a href="https://github.com/solana-program/token-2022/blob/57b3bcbd3c15de22db47ae2024fc73b43dafdd8a/program/src/processor.rs#L1637-L1945"><code>spl-token-2022</code></a> illustrates the convention of logging the name of the instruction being executed:</p>
+<pre><code class="language-rust"> pub fn process(program_id: &amp;Pubkey, accounts: &amp;[AccountInfo], input: &amp;[u8]) -&gt; ProgramResult {
+        if let Ok(instruction_type) = decode_instruction_type(input) {
+            match instruction_type {
+                PodTokenInstruction::InitializeMint =&gt; {
+                    msg!("Instruction: InitializeMint");
+                    let (data, freeze_authority) =
+                        decode_instruction_data_with_coption_pubkey::&lt;InitializeMintData&gt;(input)?;
+                    Self::process_initialize_mint(
+                        accounts,
+                        data.decimals,
+                        &amp;data.mint_authority,
+                        freeze_authority,
+                    )
+                }
+                PodTokenInstruction::InitializeMint2 =&gt; {
+                    msg!("Instruction: InitializeMint2");
+                    let (data, freeze_authority) =
+                        decode_instruction_data_with_coption_pubkey::&lt;InitializeMintData&gt;(input)?;
+                    Self::process_initialize_mint2(
+                        accounts,
+                        data.decimals,
+                        &amp;data.mint_authority,
+                        freeze_authority,
+                    )
+                }
+                PodTokenInstruction::InitializeAccount =&gt; {
+                    msg!("Instruction: InitializeAccount");
+                    Self::process_initialize_account(accounts)
+                }
+                // ...
+                PodTokenInstruction::PausableExtension =&gt; {
+                    msg!("Instruction: PausableExtension");
+                    pausable::processor::process_instruction(program_id, accounts, &amp;input[1..])
+                }
+            }
+        } else if let Ok(instruction) = TokenMetadataInstruction::unpack(input) {
+            token_metadata::processor::process_instruction(program_id, accounts, instruction)
+        } else if let Ok(instruction) = TokenGroupInstruction::unpack(input) {
+            token_group::processor::process_instruction(program_id, accounts, instruction)
+        } else {
+            Err(TokenError::InvalidInstruction.into())
+        }
+    }
+}</code></pre>
+<p>Another common use is to provide additional context before returning errors, as can be seen in the <a href="https://github.com/metaplex-foundation/mpl-token-metadata/blob/a7ee5e17ed60feaafeaa5582a4f46d9317c1b412/programs/token-metadata/program/src/utils/token.rs#L145-L202"><code>metaplex-token-metadata</code> program</a>:</p>
+<pre><code class="language-rust">pub(crate) fn validate_mint(
+    mint: &amp;AccountInfo,
+    metadata: &amp;AccountInfo,
+    token_standard: TokenStandard,
+) -&gt; Result&lt;Mint, ProgramError&gt; {
+let mint_data = &amp;mint.data.borrow();
+    let mint = StateWithExtensions::&lt;Mint&gt;::unpack(mint_data)?;
+
+    if !mint.base.is_initialized() {
+        return Err(MetadataError::Uninitialized.into());
+    }
+
+    if matches!(
+        token_standard,
+        TokenStandard::NonFungible | TokenStandard::ProgrammableNonFungible
+    ) {
+        // validates the mint extensions
+        mint.get_extension_types()?
+            .iter()
+            .try_for_each(|extension_type| {
+                if !NON_FUNGIBLE_MINT_EXTENSIONS.contains(extension_type) {
+                    msg!("Invalid mint extension: {:?}", extension_type);
+                    return Err(MetadataError::InvalidMintExtensionType);
+                }
+                Ok(())
+            })?;
+    }
+
+    // For all token standards:
+    //
+    // 1) if the mint close authority extension is enabled, it must
+    //    be set to be the metadata account; and
+    if let Ok(extension) = mint.get_extension::&lt;MintCloseAuthority&gt;() {
+        let close_authority: Option&lt;Pubkey&gt; = extension.close_authority.into();
+        if close_authority.is_none() || close_authority != Some(*metadata.key) {
+            return Err(MetadataError::InvalidMintCloseAuthority.into());
+        }
+    }
+
+    // 2) if the metadata pointer extension is enabled, it must be set
+    //    to the metadata account address
+    if let Ok(extension) = mint.get_extension::&lt;MetadataPointer&gt;() {
+        let authority: Option&lt;Pubkey&gt; = extension.authority.into();
+        let metadata_address: Option&lt;Pubkey&gt; = extension.metadata_address.into();
+
+        if authority.is_some() {
+            msg!("Metadata pointer extension: authority must be None");
+            return Err(MetadataError::InvalidMetadataPointer.into());
+        }
+
+        if metadata_address != Some(*metadata.key) {
+            msg!("Metadata pointer extension: metadata address mismatch");
+            return Err(MetadataError::InvalidMetadataPointer.into());
+        }
+    }
+
+    Ok(mint.base)
+}</code></pre>
+<p>In addition to the <code>msg!</code> macro providing string logging with formatting, the <code>solana::log</code> module provides a number of other options:</p>
+<pre><code class="language-rust">fn process_log(accounts: &amp;[AccountInfo]) -&gt; ProgramResult {
+    log::sol_log("just a regular string");
+    log::sol_log_64(1, 2, 3, 4, 5);
+    log::sol_log_compute_units();
+    log::sol_log_data(&amp;[b"some", b"serialized", b"structures", b"as base64"]);
+    log::sol_log_params(accounts, &amp;[]);
+    log::sol_log_slice(b"some bytes as hex");
+    Ok(())
+}</code></pre>
+<p>The program log from executing the above instruction handler is:</p>
+<pre><code># sol_log:
+Program log: just a regular string
+
+# sol_log_u64:
+Program log: 0x1, 0x2, 0x3, 0x4, 0x5
+
+# sol_log_compute_units:
+Program consumption: 1399140 units remaining
+
+# sol_log_data:
+Program data: c29tZQ== c2VyaWFsaXplZA== c3RydWN0dXJlcw== YXMgYmFzZTY0
+
+# sol_log_params:
+Program log: AccountInfo
+Program log: 0x0, 0x0, 0x0, 0x0, 0x0
+Program log: - Is signer
+Program log: 0x0, 0x0, 0x0, 0x0, 0x1
+Program log: - Key
+Program log: 11157t3sqMV725NVRLrVQbAu98Jjfk1uCKehJnXXQs
+Program log: - Lamports
+Program log: 0x0, 0x0, 0x0, 0x0, 0x5f5e100
+Program log: - Account data length
+Program log: 0x0, 0x0, 0x0, 0x0, 0x0
+Program log: - Owner
+Program log: 11111111111111111111111111111111
+Program log: AccountInfo
+Program log: 0x0, 0x0, 0x0, 0x0, 0x1
+Program log: - Is signer
+Program log: 0x0, 0x0, 0x0, 0x0, 0x0
+Program log: - Key
+Program log: 11111111111111111111111111111111
+Program log: - Lamports
+Program log: 0x0, 0x0, 0x0, 0x0, 0xf14a0
+Program log: - Account data length
+Program log: 0x0, 0x0, 0x0, 0x0, 0xe
+Program log: - Owner
+Program log: NativeLoader1111111111111111111111111111111
+Program log: Instruction data
+Program log: 0x0, 0x0, 0x0, 0x0, 0x69
+Program log: 0x0, 0x0, 0x0, 0x1, 0x6e
+Program log: 0x0, 0x0, 0x0, 0x2, 0x73
+Program log: 0x0, 0x0, 0x0, 0x3, 0x74
+Program log: 0x0, 0x0, 0x0, 0x4, 0x72
+Program log: 0x0, 0x0, 0x0, 0x5, 0x75
+Program log: 0x0, 0x0, 0x0, 0x6, 0x63
+Program log: 0x0, 0x0, 0x0, 0x7, 0x74
+Program log: 0x0, 0x0, 0x0, 0x8, 0x69
+Program log: 0x0, 0x0, 0x0, 0x9, 0x6f
+Program log: 0x0, 0x0, 0x0, 0xa, 0x6e
+Program log: 0x0, 0x0, 0x0, 0xb, 0x20
+Program log: 0x0, 0x0, 0x0, 0xc, 0x64
+Program log: 0x0, 0x0, 0x0, 0xd, 0x61
+Program log: 0x0, 0x0, 0x0, 0xe, 0x74
+Program log: 0x0, 0x0, 0x0, 0xf, 0x61
+
+# sol_log_slice:
+Program log: 0x0, 0x0, 0x0, 0x0, 0x73
+Program log: 0x0, 0x0, 0x0, 0x1, 0x6f
+Program log: 0x0, 0x0, 0x0, 0x2, 0x6d
+Program log: 0x0, 0x0, 0x0, 0x3, 0x65
+Program log: 0x0, 0x0, 0x0, 0x4, 0x20
+Program log: 0x0, 0x0, 0x0, 0x5, 0x62
+Program log: 0x0, 0x0, 0x0, 0x6, 0x79
+Program log: 0x0, 0x0, 0x0, 0x7, 0x74
+Program log: 0x0, 0x0, 0x0, 0x8, 0x65
+Program log: 0x0, 0x0, 0x0, 0x9, 0x73
+Program log: 0x0, 0x0, 0x0, 0xa, 0x20
+Program log: 0x0, 0x0, 0x0, 0xb, 0x61
+Program log: 0x0, 0x0, 0x0, 0xc, 0x73
+Program log: 0x0, 0x0, 0x0, 0xd, 0x20
+Program log: 0x0, 0x0, 0x0, 0xe, 0x68
+Program log: 0x0, 0x0, 0x0, 0xf, 0x65
+Program log: 0x0, 0x0, 0x0, 0x10, 0x78
+</code></pre>
+<p>In addition to the logging facilities provided by <code>solana_program::log</code>, Anchor provides macros to reduce the boilerplate in emitting structured events via the underlying <code>sol_log_data</code> function:</p>
+<pre><code class="language-rust">#[event]
+pub struct TaggedEvent {
+    you_are_it: Pubkey,
+}
+
+#[program]
+pub mod errors_events {
+    use super::*;
+
+    // ...
+
+    pub fn emit_event(ctx: Context&lt;EmitEvent&gt;) -&gt; Result&lt;()&gt; {
+        emit!(TaggedEvent {
+            you_are_it: *ctx.accounts.signer.key
+        });
+
+        Ok(())
+    }
+}
+
+#[derive(Accounts)]
+pub struct EmitEvent&lt;'info&gt; {
+    #[account(mut)]
+    pub signer: Signer&lt;'info&gt;,
+    pub system_program: Program&lt;'info, System&gt;,
+}</code></pre>
+<p>Executing the <code>EmitEvent</code> instruction results in the following program log:</p>
+<pre><code>Program JEKNVnkbo3jma5nREBBJCDoXFVeKkD56V3xKrvRmWxFG invoke [1]
+Program log: Instruction: EmitEvent
+Program data: hwVrfRWeHl0AAAABkHB7w+8lvcmO11y3DWHIsQbcJI2O9h4dHbHKQA==
+Program JEKNVnkbo3jma5nREBBJCDoXFVeKkD56V3xKrvRmWxFG consumed 1038 of 1400000 compute units
+Program JEKNVnkbo3jma5nREBBJCDoXFVeKkD56V3xKrvRmWxFG success
+</code></pre>
+<p>Note how Anchor automatically inserts the <code>Instruction: EmitEvent</code> log message.</p>
+<h3 id="stylus-1"><a class="header" href="#stylus-1">Stylus</a></h3>
+<p>For Stylus contracts, emitting structured events is considered best practice whenever contract state changes. Similar to errors, events are defined using the <code>sol!</code> macro and then emitted using the <a href="https://docs.rs/stylus-sdk/latest/stylus_sdk/prelude/fn.log.html"><code>log</code></a> function:</p>
+<pre><code class="language-rust">sol! {
+    event ItChanged(address previous_it, address current_it);
+}
+
+#[storage]
+#[entrypoint]
+pub struct ErrorsEvents {
+    it: StorageAddress,
+}
+
+#[public]
+impl ErrorsEvents {
+    /// Tags the caller as "it", emitting an event for the state change
+    pub fn tag(&amp;mut self) {
+        let msg_sender = self.vm().msg_sender();
+
+        let previous_it = self.it.get();
+
+        self.it.set(msg_sender);
+
+        log(
+            self.vm(),
+            ItChanged {
+                previous_it,
+                current_it: msg_sender,
+            },
+        );
+    }
+}</code></pre>
+<h2 id="next-steps"><a class="header" href="#next-steps">Next Steps</a></h2>
+<p>With error handling and events covered, you've completed the core migration concepts.</p>
+<p>Continue to <a href="./case-study-bonafida-token-vesting.html">Case Study - Migrating Bonafida's Token Vesting to Stylus</a> to see these concepts applied in a complete program migration.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="non-fungible-tokens.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="case-study-bonafida-token-vesting.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="non-fungible-tokens.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="case-study-bonafida-token-vesting.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

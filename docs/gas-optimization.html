@@ -1,0 +1,518 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Gas Optimization - StylusPort::Solana</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">StylusPort::Solana</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="gas-optimization"><a class="header" href="#gas-optimization">Gas optimization</a></h1>
+<p>This chapter covers strategies to reduce gas consumption with specific focus on how gas usage differs from Solana's compute unit model.</p>
+<h2 id="compute-units-vs-gas--ink"><a class="header" href="#compute-units-vs-gas--ink">Compute Units vs Gas &amp; Ink</a></h2>
+<p>The fundamental difference between Solana and Ethereum/Stylus fee models:</p>
+<div class="table-wrapper"><table><thead><tr><th>Aspect</th><th>Solana</th><th>Stylus/Ethereum</th></tr></thead><tbody>
+<tr><td><strong>Unit</strong></td><td>Compute Units (CU)</td><td>Gas (and ink in Stylus VM)</td></tr>
+<tr><td><strong>Pricing</strong></td><td>Fixed: 5,000 Lamports (0.000005 SOL) per signature</td><td>Variable: Gas price fluctuates with network demand</td></tr>
+<tr><td><strong>Limits</strong></td><td>Per-transaction: 1.4M CU max</td><td>Per-block gas limit: ~30M gas</td></tr>
+<tr><td><strong>Measurement</strong></td><td>Instruction-based (each instruction deducts from CU budget)</td><td>Operation-based (WASM opcodes measured in ink)</td></tr>
+<tr><td><strong>State Access</strong></td><td>Rent-exempt deposits (one-time, refundable)</td><td>Per-operation gas cost (with SDK caching optimization)</td></tr>
+<tr><td><strong>Optimization Focus</strong></td><td>Reduce CU usage and account size</td><td>Reduce storage operations; leverage compute efficiency</td></tr>
+</tbody></table>
+</div>
+<h3 id="stylus-specific-concepts"><a class="header" href="#stylus-specific-concepts">Stylus-Specific Concepts</a></h3>
+<p>Stylus introduces <strong>ink</strong> as a sub-gas unit for measuring WASM execution:</p>
+<ul>
+<li><strong>1 gas = 10,000 ink</strong> (configurable exchange rate)</li>
+<li>WASM opcodes are orders of magnitude faster than EVM opcodes, thus requiring fractional gas in the form of ink.</li>
+</ul>
+<p><strong>Cost Advantages in Stylus vs EVM:</strong></p>
+<ul>
+<li><strong>Compute</strong>: 10-100x cheaper than EVM due to WASM efficiency and compiled Rust/C/C++ code quality</li>
+<li><strong>Memory</strong>: 100-500x cheaper with novel exponential pricing (vs. EVM's quadratic per-call model)</li>
+<li><strong>Storage</strong>: SLOAD/SSTORE cost the same as EVM, but Stylus SDK implements optimal caching to minimize operations</li>
+</ul>
+<p><strong>Stylus Storage Cache:</strong></p>
+<p>The Stylus VM implements an <a href="https://github.com/OffchainLabs/nitro/blob/master/arbitrator/arbutil/src/evm/storage.rs#L35-L61">storage cache</a> that dramatically reduces the cost of repeated storage access:</p>
+<ul>
+<li><strong>Storage reads</strong>: First 32 reads are free (0 gas), reads 33-128 cost 2 gas each, subsequent reads cost 10 gas each</li>
+<li><strong>Storage writes</strong>: First 8 writes are free (0 gas), writes 9-64 cost 7 gas each, subsequent writes cost 10 gas each</li>
+<li><strong>Cache mechanics</strong>: The <a href="https://github.com/OffchainLabs/nitro/blob/92445764cb0df9f22cf6861d7f7260903b72302b/arbitrator/arbutil/src/evm/req.rs#L103-L152"><code>StorageCache</code></a> is used to track the value of accessed slots, with dirty writes batched and flushed to the host EVM</li>
+<li><strong>Per-transaction scope</strong>: Cache persists for the duration of a single transaction/call, resetting between calls</li>
+</ul>
+<p>This caching strategy means repeatedly accessing the same storage slots within a transaction is nearly free after the initial access, unlike standard EVM where each warm SLOAD costs 100 gas.</p>
+<p><strong>Cost Comparison:</strong></p>
+<p><strong>Solana:</strong></p>
+<ul>
+<li>Base transaction fee: 5,000 Lamports (0.000005 SOL) per signature</li>
+<li>Simple transfer: ~300 CU (when optimized with <code>SetComputeUnitLimit</code>)</li>
+<li>System program CPI: ~2,215 CU</li>
+<li>Token transfer (direct): ~3,000 CU</li>
+<li>Token transfer via CPI: ~4,100 CU (adds ~1,000 CU overhead)</li>
+<li>Account creation requires rent-exempt deposit based on data size:
+<ul>
+<li>Empty account: ~890,880 Lamports (~0.00089 SOL)</li>
+<li>32-byte account: ~1,113,600 Lamports (~0.0011 SOL)</li>
+<li>Deposits are fully refundable when accounts are closed</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>Note: Unlike EVM/Stylus the amount of compute units used does not affect the overall transaction fee but it does affect the block inclusion latency. The lower the compute unit usage, the higher the reward ratio for validators to include the transaction in a block based on the fixed base fee plus any proposed priority fee.</p>
+</blockquote>
+<p><strong>Stylus:</strong></p>
+<ul>
+<li>Simple I32Add: 70 ink = 0.007 gas</li>
+<li>Simple I64Add: 100 ink = 0.01 gas</li>
+<li>Keccak hash: 121,800 + 21,000w ink (w = EVM words)</li>
+<li>Storage operations with SDK caching:
+<ul>
+<li>First 32 reads: 0 gas (cached)</li>
+<li>First 8 writes: 0 gas (cached)</li>
+<li>Subsequent cached reads: 2-10 gas</li>
+<li>Subsequent cached writes: 7-10 gas</li>
+<li>Cold SLOAD (first access, not in cache): ~2,100 gas (EVM standard)</li>
+<li>Cold SSTORE (first write): ~20,000 gas new slot, ~5,000 gas update (EVM standard)</li>
+</ul>
+</li>
+<li>Host I/O call overhead: ~0.84 gas per host function invocation</li>
+<li>External contract call: 128-2,048 gas base overhead</li>
+<li>WASM contract entry: 128-2,048 gas per Stylus contract call</li>
+</ul>
+<blockquote>
+<p>Note: due to the gas overhead of entering the WASM VM when calling a Stylus contract, it may be cheaper gas-wise to use Solidity for trivial contracts.</p>
+</blockquote>
+<h2 id="optimization-techniques"><a class="header" href="#optimization-techniques">Optimization Techniques</a></h2>
+<p>With industry-leading compiler technology compiling contracts to WASM, assembly-level gas optimizations common in Solidity/EVM development are not required.</p>
+<p>As a general principle, favor code readability and simplicity over premature optimization. However, <strong>field ordering matters</strong> when working with storage.</p>
+<h3 id="storage-slot-packing"><a class="header" href="#storage-slot-packing">Storage Slot Packing</a></h3>
+<p>The Stylus SDK's <code>#[storage]</code> macro automatically packs storage fields efficiently, but it can only pack <strong>adjacent fields</strong>. The macro processes fields sequentially and cannot reorder them, so the order you declare fields determines the storage layout.</p>
+<pre><code class="language-rust">#[storage]
+pub struct EfficientStorage {
+    flag1: StorageBool,  // Slot 0, byte 0
+    flag2: StorageBool,  // Slot 0, byte 1
+    x: StorageU256,      // Slot 1, bytes 0-31
+}
+
+#[storage]
+pub struct InefficientStorage {
+    flag1: StorageBool,  // Slot 0, byte 0
+    x: StorageU256,      // Slot 1, bytes 0-31
+    flag2: StorageBool,  // Slot 2, byte 0 (wasted slot!)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_slot_usage() {
+        assert_eq!(EfficientStorage::required_slots(), 2);
+        assert_eq!(InefficientStorage::required_slots(), 3);
+    }
+}</code></pre>
+<p><strong>Key insight:</strong> Group fields by size to fill 32-byte slots completely. When <code>flag1</code> and <code>flag2</code> are adjacent, they share a slot. When separated by <code>StorageU256</code>, each requires its own slot, wasting 31 bytes per slot.</p>
+<h3 id="understanding-the-macro-expansion"><a class="header" href="#understanding-the-macro-expansion">Understanding the Macro Expansion</a></h3>
+<p>The <code>#[storage]</code> macro uses a greedy packing algorithm that tracks two variables:</p>
+<ul>
+<li><code>space</code>: Remaining bytes in the current slot (starts at 32)</li>
+<li><code>slot</code>: Current slot index (starts at 0)</li>
+</ul>
+<p>For each field, the macro:</p>
+<ol>
+<li>Checks if the field fits in remaining space</li>
+<li>If not, moves to the next slot</li>
+<li>Allocates the field and updates tracking variables</li>
+</ol>
+<p><strong>Efficient Layout Expansion:</strong></p>
+<pre><code class="language-rust">impl stylus_sdk::storage::StorageType for EfficientStorage {
+    unsafe fn new(
+        mut root: stylus_sdk::alloy_primitives::U256,
+        offset: u8,
+        host: stylus_sdk::host::VM,
+    ) -&gt; Self {
+        let mut space: usize = 32;  // Available bytes in current slot
+        let mut slot: usize = 0;    // Current slot index
+        
+        let accessor = Self {
+            __stylus_host: host.clone(),
+            
+            flag1: {
+                let bytes = &lt;StorageBool as storage::StorageType&gt;::SLOT_BYTES;      // = 1 byte
+                let words = &lt;StorageBool as storage::StorageType&gt;::REQUIRED_SLOTS;  // = 0 (number of full slots required)
+                
+                if space &lt; bytes {  // 32 &lt; 1? → false, fits in current slot
+                    space = 32;
+                    slot += 1;
+                }
+                space -= bytes;  // 32 - 1 = 31 bytes remaining
+                
+                let root = root + alloy_primitives::U256::from(slot);  // slot = 0
+                let field = &lt;StorageBool as storage::StorageType&gt;::new(
+                    root,
+                    space as u8,  // offset = 31
+                    host.clone(),
+                );
+                
+                if words &gt; 0 {  // 0 &gt; 0? → false, no full slots consumed
+                    slot += words;
+                    space = 32;
+                }
+                field
+            },
+            
+            flag2: {
+                let bytes = &lt;StorageBool as storage::StorageType&gt;::SLOT_BYTES;      // = 1 byte
+                let words = &lt;StorageBool as storage::StorageType&gt;::REQUIRED_SLOTS;  // = 0
+                
+                if space &lt; bytes {  // 31 &lt; 1? → false, still fits
+                    space = 32;
+                    slot += 1;
+                }
+                space -= bytes;  // 31 - 1 = 30 bytes remaining
+                
+                let root = root + alloy_primitives::U256::from(slot);  // slot = 0
+                let field = &lt;StorageBool as storage::StorageType&gt;::new(
+                    root,
+                    space as u8,  // offset = 30
+                    host.clone(),
+                );
+                
+                if words &gt; 0 {  // 0 &gt; 0? → false
+                    slot += words;
+                    space = 32;
+                }
+                field
+            },
+            
+            x: {
+                let bytes = &lt;StorageU256 as storage::StorageType&gt;::SLOT_BYTES;      // = 32 bytes
+                let words = &lt;StorageU256 as storage::StorageType&gt;::REQUIRED_SLOTS;  // = 0
+                
+                if space &lt; bytes {  // 30 &lt; 32? → true, needs new slot
+                    space = 32;
+                    slot += 1;  // slot = 1
+                }
+                space -= bytes;  // 32 - 32 = 0 bytes remaining
+                
+                let root = root + alloy_primitives::U256::from(slot);  // slot = 1
+                let field = &lt;StorageU256 as storage::StorageType&gt;::new(
+                    root,
+                    space as u8,  // offset = 0
+                    host.clone(),
+                );
+                
+                if words &gt; 0 {  // 0 &gt; 0? → false
+                    slot += words;
+                    space = 32;
+                }
+                field
+            },
+        };
+        accessor
+    }
+}</code></pre>
+<p>Fields <code>flag1</code> and <code>flag2</code> both live in slot 0 at different byte offsets. <code>x</code> uses slot 1. Total: <strong>2 slots</strong>.</p>
+<p><strong>Inefficient Layout Expansion:</strong></p>
+<pre><code class="language-rust">impl stylus_sdk::storage::StorageType for InefficientStorage {
+    unsafe fn new(
+        mut root: stylus_sdk::alloy_primitives::U256,
+        offset: u8,
+        host: stylus_sdk::host::VM,
+    ) -&gt; Self {
+        let mut space: usize = 32;  // Available bytes in current slot
+        let mut slot: usize = 0;    // Current slot index
+
+        let accessor = Self {
+            __stylus_host: host.clone(),
+            
+            flag1: {
+                let bytes = &lt;StorageBool as storage::StorageType&gt;::SLOT_BYTES;      // = 1 byte
+                let words = &lt;StorageBool as storage::StorageType&gt;::REQUIRED_SLOTS;  // = 0
+                
+                if space &lt; bytes {  // 32 &lt; 1? → false, fits
+                    space = 32;
+                    slot += 1;
+                }
+                space -= bytes;  // 32 - 1 = 31 bytes remaining
+                
+                let root = root + alloy_primitives::U256::from(slot);  // slot = 0
+                let field = &lt;StorageBool as storage::StorageType&gt;::new(
+                    root,
+                    space as u8,  // offset = 31
+                    host.clone(),
+                );
+                
+                if words &gt; 0 {  // 0 &gt; 0? → false
+                    slot += words;
+                    space = 32;
+                }
+                field
+            },
+            
+            x: {
+                let bytes = &lt;StorageU256 as storage::StorageType&gt;::SLOT_BYTES;      // = 32 bytes
+                let words = &lt;StorageU256 as storage::StorageType&gt;::REQUIRED_SLOTS;  // = 0
+                
+                if space &lt; bytes {  // 31 &lt; 32? → true, needs new slot
+                    space = 32;
+                    slot += 1;  // slot = 1
+                }
+                space -= bytes;  // 32 - 32 = 0 bytes remaining
+                
+                let root = root + alloy_primitives::U256::from(slot);  // slot = 1
+                let field = &lt;StorageU256 as storage::StorageType&gt;::new(
+                    root,
+                    space as u8,  // offset = 0
+                    host.clone(),
+                );
+                
+                if words &gt; 0 {  // 0 &gt; 0? → false
+                    slot += words;
+                    space = 32;
+                }
+                field
+            },
+            
+            flag2: {
+                let bytes = &lt;StorageBool as storage::StorageType&gt;::SLOT_BYTES;      // = 1 byte
+                let words = &lt;StorageBool as storage::StorageType&gt;::REQUIRED_SLOTS;  // = 0
+                
+                if space &lt; bytes {  // 0 &lt; 1? → true, needs new slot
+                    space = 32;
+                    slot += 1;  // slot = 2
+                }
+                space -= bytes;  // 32 - 1 = 31 bytes remaining
+                
+                let root = root + alloy_primitives::U256::from(slot);  // slot = 2
+                let field = &lt;StorageBool as storage::StorageType&gt;::new(
+                    root,
+                    space as u8,  // offset = 31
+                    host.clone(),
+                );
+                
+                if words &gt; 0 {  // 0 &gt; 0? → false
+                    slot += words;
+                    space = 32;
+                }
+                field
+            },
+        };
+        accessor
+    }
+}</code></pre>
+<p>Field <code>flag1</code> uses slot 0, <code>x</code> uses slot 1, <code>flag2</code> uses slot 2. Total: <strong>3 slots</strong>, with 31 wasted bytes in slots 0 and 2.</p>
+<blockquote>
+<p>Best Practice: <strong>Group fields of similar sizes together to maximize slot utilization.</strong> The macro processes fields sequentially, so arrange them to minimize wasted space within each 32-byte slot. Small fields can appear before or after large fields, as long as they're grouped together to efficiently fill slots.</p>
+</blockquote>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="testing-debugging.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="security-considerations.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="testing-debugging.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="security-considerations.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
