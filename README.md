@@ -4,7 +4,7 @@ A comprehensive handbook and AI-augmented CLI tool for developers transitioning 
 
 ## ⚠️ Disclaimer
 
-**This handbook and its accompanying code examples have not yet been audited or peer reviewed.** The content is provided for educational and reference purposes only. Users should exercise caution and conduct their own thorough review and testing before implementing any concepts, patterns, or code from this repository in production systems.
+An internal code/security review has been completed — see [StylusPort Internal Review v1.0 (2025-10-22)](https://github.com/oak-security/audit-reports/blob/main/StylusPort/2025-10-22%20Audit%20Report%20-%20StylusPort%20Internal%20Review%20v1.0.pdf). This was **not** a third-party audit and does **not** eliminate risk. The handbook and accompanying code examples are provided for educational/reference use; the examples have **not** been extensively tested. Perform your own review, threat modeling, and rigorous testing before using any concepts or code in production. No warranties or guarantees are provided.
 
 ## Project Structure
 
