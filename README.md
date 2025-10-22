@@ -1,6 +1,6 @@
 # StylusPort: A guide to porting Solana Programs to Stylus Contracts
 
-A comprehensive handbook and AI-augmented CLI tool for developers transitioning from Solana Programs to Stylus Contracts.
+A comprehensive handbook and Model Context Protocol (MCP) server for developers transitioning from Solana Programs to Stylus Contracts.
 
 ## ⚠️ Disclaimer
 
