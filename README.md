@@ -28,7 +28,7 @@ For more installation options, visit the [Determinate Systems Nix Installer](htt
 Clone the repository and enter the development shell:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/oak-security/stylusport.git
 cd stylusport
 nix develop
 ```
