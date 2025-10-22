@@ -2,6 +2,8 @@
 
 A comprehensive handbook and Model Context Protocol (MCP) server for developers transitioning from Solana Programs to Stylus Contracts.
 
+[Get Started](https://oak-security.github.io/stylusport)
+
 ## ⚠️ Disclaimer
 
 An internal code/security review has been completed — see [StylusPort Internal Review v1.0 (2025-10-22)](https://github.com/oak-security/audit-reports/blob/main/StylusPort/2025-10-22%20Audit%20Report%20-%20StylusPort%20Internal%20Review%20v1.0.pdf). This was **not** a third-party audit and does **not** eliminate risk. The handbook and accompanying code examples are provided for educational/reference use; the examples have **not** been extensively tested. Perform your own review, threat modeling, and rigorous testing before using any concepts or code in production. No warranties or guarantees are provided.
