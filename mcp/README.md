@@ -17,7 +17,7 @@ This server exposes:
 
 Install from GitHub:
 ```bash
-cargo install stylusport-mcp-server --git https://github.com/oak-security/stylusport --tag v1.0.0 --locked
+cargo install stylusport-mcp-server --git https://github.com/oak-security/stylusport --tag v1.0.1 --locked
 ```
 
 ### Using with LLM Tools
