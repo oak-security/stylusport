@@ -1,14 +1,15 @@
 use rust_mcp_schema::{
     CallToolRequest, CallToolResult, GetPromptRequest, GetPromptResult, Implementation,
-    InitializeRequest, InitializeResult, LATEST_PROTOCOL_VERSION, ListPromptsRequest,
-    ListPromptsResult, ListResourceTemplatesRequest, ListResourceTemplatesResult,
-    ListResourcesRequest, ListResourcesResult, ListToolsRequest, ListToolsResult, PingRequest,
-    ReadResourceRequest, ReadResourceResult, Result as CustomResult, RpcError, ServerCapabilities,
+    InitializeRequest, InitializeResult, ListPromptsRequest, ListPromptsResult,
+    ListResourceTemplatesRequest, ListResourceTemplatesResult, ListResourcesRequest,
+    ListResourcesResult, ListToolsRequest, ListToolsResult, PingRequest, ReadResourceRequest,
+    ReadResourceResult, Result as CustomResult, RpcError, ServerCapabilities,
     ServerCapabilitiesPrompts, ServerCapabilitiesResources, ServerCapabilitiesTools,
+    LATEST_PROTOCOL_VERSION,
 };
 
 pub fn initialize_request(req: InitializeRequest) -> Result<InitializeResult, RpcError> {
-    if req.params.protocol_version.as_str() > LATEST_PROTOCOL_VERSION {
+    if req.params.protocol_version.as_str() < LATEST_PROTOCOL_VERSION {
         return Err(RpcError::internal_error().with_message(format!(
             "unsupported protocol version, requested: {}, supported: {LATEST_PROTOCOL_VERSION}",
             req.params.protocol_version
